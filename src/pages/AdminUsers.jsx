@@ -68,6 +68,7 @@ const AdminUsers = () => {
               key={index}
               className="bg-white rounded-2xl shadow-md p-6 flex justify-between items-center"
             >
+
               <div className="flex items-center space-x-2">
                 {/* Online/Offline Indicator */}
                 <h2 className="text-lg font-semibold text-[#333333]">
@@ -79,7 +80,6 @@ const AdminUsers = () => {
                   }`}
                 ></div>
               </div>
-
               <div className="flex space-x-2">
                 {/* Display email and phone */}
                 <div className="flex flex-col">
