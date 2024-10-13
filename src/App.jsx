@@ -17,7 +17,7 @@ function App() {
         
         {/* Admin Routes */}
         <Route path="/admin/login" element={<LoginPage role={"admin"}/>} />
-        <Route path="/admin/dashboard" element={<AdminDashboard role={"admin"}/>} />
+        <Route path="/admin/dashboard" element={<AdminDashboard role={"admin"}/>} />    { /*Awais:: Linking Done*/}   
         <Route path="/admin/applications" element={<AdminApplications role={"admin"}/>} />
         <Route path="/admin/users" element={<AdminUsers role={"admin"}/>} />        { /*Awais:: Linking Done*/}
         <Route path="/admin/adduser" element={<AddUser role={"admin"} />} />       { /*Awais:: Linking Done*/}
