@@ -29,7 +29,7 @@ const Sidebar = ({ role, children }) => {
       <div className="bg-base-100 w-20 h-full flex flex-col items-center justify-between py-4 shadow-md">
         {/* Logo */}
         <div className="mb-8">
-          <img src={logo} alt="Company Logo" className="w-10 h-10" />
+          <img src={logo} alt="Company Logo" className="w-10 h-10 grayscale" />
         </div>
 
         {/* Navigation Links */}
