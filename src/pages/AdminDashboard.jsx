@@ -42,7 +42,7 @@ const Dashboard = () => {
             <input
               type="text"
               placeholder="Search"
-              className="input input-bordered w-60 pl-10 rounded-2xl bg-[#FFFFFF] text-gray-500 border-none shadow-sm"
+              className="input input-bordered w-60 pl-10 rounded-2xl bg-[#ffffff] text-gray-500 border-none shadow-sm"
             />
           </div>
         </div>
@@ -52,8 +52,8 @@ const Dashboard = () => {
           <div className="bg-white rounded-2xl shadow-md p-6 flex items-center justify-between">
             <div>
               <div className="flex gap-1 items-center">
-                <Users className="text-purple-700" size={30} />
-                <h2 className="text-4xl font-bold text-purple-700">
+                <Users className="text-gray-700" size={30} />
+                <h2 className="text-4xl font-bold text-gray-700">
                   {totalUsers}
                 </h2>
               </div>
@@ -63,8 +63,8 @@ const Dashboard = () => {
           <div className="bg-white rounded-2xl shadow-md p-6 flex items-center justify-between">
             <div>
               <div className="flex gap-3 items-center">
-                <CheckSquare className="text-purple-700" size={30} />
-                <h2 className="text-4xl font-bold text-purple-700">
+                <CheckSquare className="text-gray-700" size={30} />
+                <h2 className="text-4xl font-bold text-gray-700">
                   {usersOnline}
                 </h2>
               </div>
@@ -74,8 +74,8 @@ const Dashboard = () => {
           <div className="bg-white rounded-2xl shadow-md p-6 flex items-center justify-between">
             <div>
               <div className="flex gap-3 items-center">
-                <Ticket className="text-purple-700" size={30} />
-                <h2 className="text-4xl font-bold text-purple-700">
+                <Ticket className="text-gray-700" size={30} />
+                <h2 className="text-4xl font-bold text-gray-700">
                   {pendingTickets}
                 </h2>
               </div>
@@ -97,7 +97,7 @@ const Dashboard = () => {
             {userActivity.map((activity, index) => (
               <div
                 key={index}
-                className="flex flex-col lg:flex-row justify-between items-center bg-[#ffffff] p-4 mb-3 rounded-2xl"
+                className="flex flex-col lg:flex-row justify-between items-center bg-[#ffffff2a] p-4 mb-3 rounded-2xl"
               >
                 <div className="font-semibold text-[#333333]">
                   {activity.fName} {activity.lName}
