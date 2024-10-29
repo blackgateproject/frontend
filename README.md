@@ -19,3 +19,15 @@ Commands Used
 - npm install react-router-dom
 - npm install react-router-dom lucide-react
 - npm run dev
+
+======= AWAIS =======
+
+NOTE:: DO NOT UPGRADE TO NODE 23, it breaks tailwind for some reason
+
+Supabase integration
+
+- updated package.json to include supabase
+- added .env file w the serv key, `get rid of this when done`
+- ~~Commands run~~
+  - ~~supabase init~~
+- Developing Edge functions to handle backend calls, clientside will not interact with the data in any way.
