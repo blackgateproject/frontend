@@ -8,14 +8,13 @@ const LoginPage = ({ requiredRole }) => {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
+    // Prevent Default Form Submission
     e.preventDefault();
 
-    const supaFunction = "verifyUser";
-    const URL = "http://127.0.0.1:54321/functions/v1/" + supaFunction;
-    const Key =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
+    // ConnectorServer URL
+    const URL = "http://127.0.0.1:8000/functions/v1/verifyUser";
 
-    const Token = "Bearer " + Key;
+    // User Object
     const user = {
       email: email,
       password: password,
@@ -32,9 +31,7 @@ const LoginPage = ({ requiredRole }) => {
       }
     }
 
-    console.log("Email: ", user.email);
-    console.log("PW: ", user.password);
-
+    // Log User Object
     console.log("USER: ", JSON.stringify(user));
 
     const response = await fetch(URL, {
@@ -42,14 +39,20 @@ const LoginPage = ({ requiredRole }) => {
       // mode: "no-cors",
       headers: {
         "content-type": "application/json",
-        Authorization: Token,
       },
       body: JSON.stringify(user),
     });
 
+    // Log response
+    // console.log("Response: ", response);
+
+    // Check if response is OK
     if (response.ok) {
+      // Log response data
       const data = await response.json();
       console.log(data);
+
+      // Check if user is authenticated and navigate to dashboard
       if (data["authenticated"] == true) {
         console.log(
           "Authenticated! Navigating to: ",
