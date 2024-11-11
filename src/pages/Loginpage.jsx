@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
+// NOTE:: Client from connector needs to pass the access_token(JWT) to the user who will then verify the JWT either directly
+//        from supabase or call a function in connector to verify the JWT
+//
+//        Honestly if the user has a JWT it might be faster to bypass the connector and directly verify the JWT with supabase
+//        but then we risk not logging the user's activity in the connector. However this might not be important? Or maybe it
+//        is
 
 const LoginPage = ({ requiredRole }) => {
   const [email, setEmail] = useState("");
@@ -53,19 +59,25 @@ const LoginPage = ({ requiredRole }) => {
       console.log(data);
 
       // Check if user is authenticated and navigate to dashboard
-      if (data["authenticated"] == true) {
+      if (data["authenticated"] === true) {
         console.log(
           "Authenticated! Navigating to: ",
           `/${data.role}/dashboard`
         );
         navigate(`/${data.role}/dashboard`);
       } else {
-        alert("Invalid email or password");
-        console.log("Response: ", response);
+        alert("Server Error: " + data["error"]);
+        console.log("Response: ", data["error"]);
       }
     } else {
-      // alert("Failed to authenticate user\n" + response.json);
-      console.log("Unable to authenticate user\n" + response.statusText);
+      const errorData = await response.json();
+      alert("Failed to authenticate user\n" + errorData.error);
+      console.log(
+        "Unable to authenticate user\n" +
+          response.statusText +
+          "\nServer Error: " +
+          errorData.error
+      );
     }
   };
 
