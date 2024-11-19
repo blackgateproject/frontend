@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search} from 'lucide-react';
-import Sidebar from '../components/Sidebar';
+import Sidebar from '../../components/Sidebar';
 
 const Help = () => {
   const [ticketTitle, setTicketTitle] = useState('');
@@ -67,7 +67,7 @@ const Help = () => {
              />
              <div className="flex justify-between items-center">
                <span className="text-gray-400 text-sm">{charCount}/{maxCharCount}</span>
-               <button type="submit" className="btn bg-purple-700 hover:bg-purple-800 text-white p-3 rounded-2xl px-4">
+               <button type="submit" className="btn bg-primary/75 hover:bg-primary text-base-100 p-3 rounded-2xl px-4">
                  Submit
                </button>
              </div>
