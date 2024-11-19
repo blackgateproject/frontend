@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import Sidebar from '../../components/Sidebar';
 
 const AddUser = () => {
+  // AWAIS:: Need to create func for this
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');

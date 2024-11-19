@@ -28,9 +28,9 @@ const Sidebar = ({ role, children }) => {
   ];
 
   const userLinks = [
-    { name: 'Home', path: '/home', icon: <Home /> },
-    { name: 'Help', path: '/help', icon: <HelpCircle /> },
-    { name: 'Profile', path: '/profile', icon: <User /> },
+    { name: 'Home', path: '/user/dashboard', icon: <Home /> },
+    { name: 'Help', path: '/user/help', icon: <HelpCircle /> },
+    { name: 'Profile', path: '/user/profile', icon: <User /> },
   ];
 
   const links = role === 'admin' ? adminLinks : userLinks;
