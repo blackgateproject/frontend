@@ -79,7 +79,12 @@ const LoginPage = ({ role }) => {
           "Authenticated! Navigating to: ",
           `/${data.role}/dashboard`
         );
+        // If user was already logged in, an error is also returned that can be shown as an alert
         navigate(`/${data.role}/dashboard`);
+        if (data["error"]) {
+          alert("Server Error: " + data["error"]);
+          console.log("Response: ", data["error"]);
+        }
       } else {
         alert("Server Error: " + data["error"]);
         console.log("Response: ", data["error"]);
@@ -173,11 +178,6 @@ const LoginPage = ({ role }) => {
         </div>
 
         <div className="mt-4 text-center">
-          <a href="/forgot-password" className="text-purple-600">
-            Forgot Password?
-          </a>
-        </div>
-        <div className="mt-4 text-center">
           {/* Create a button to login as admin with email a@admin.com and password: a */}
           <button
             onClick={() => {
@@ -198,6 +198,11 @@ const LoginPage = ({ role }) => {
           >
             Login as User
           </button>
+        </div>
+        <div className="mt-4 text-center">
+          <a href="/forgot-password" className="text-purple-600">
+            Forgot Password?
+          </a>
         </div>
       </div>
     </div>
