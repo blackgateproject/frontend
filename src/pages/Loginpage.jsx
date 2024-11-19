@@ -100,7 +100,7 @@ const LoginPage = ({ role }) => {
     // Dummy API call
     console.log(email);
     const user = {
-      email: 'johndoe@mail.com',
+      email: "johndoe@mail.com",
       enabled2fa: false, // Toggle this to test different flows
     };
     setEnabled2fa(user.enabled2fa);
@@ -176,6 +176,28 @@ const LoginPage = ({ role }) => {
           <a href="/forgot-password" className="text-purple-600">
             Forgot Password?
           </a>
+        </div>
+        <div className="mt-4 text-center">
+          {/* Create a button to login as admin with email a@admin.com and password: a */}
+          <button
+            onClick={() => {
+              setEmail("a@admin.com");
+              setPassword("a");
+            }}
+            className="btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl"
+          >
+            Login as Admin
+          </button>
+          {/* Create a button to login as user with email a@user.com and password: a */}
+          <button
+            onClick={() => {
+              setEmail("a@user.com");
+              setPassword("a");
+            }}
+            className="btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl"
+          >
+            Login as User
+          </button>
         </div>
       </div>
     </div>
