@@ -183,9 +183,11 @@ const LoginPage = ({ role }) => {
         <div className="mt-4 text-center">
           {/* Create a button to login as admin with email a@admin.com and password: a */}
           <button
-            onClick={() => {
+            onClick={async () => {
               setEmail("a@admin.com");
+              handleNextStep();
               setPassword("a");
+              handleLogin();
             }}
             className="btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl"
           >
@@ -193,9 +195,10 @@ const LoginPage = ({ role }) => {
           </button>
           {/* Create a button to login as user with email a@user.com and password: a */}
           <button
-            onClick={() => {
+            onClick={async () => {
               setEmail("a@user.com");
               setPassword("a");
+              await handleLogin();
             }}
             className="btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl"
           >
