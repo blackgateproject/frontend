@@ -85,6 +85,9 @@ const LoginPage = ({ role }) => {
           alert("Server Error: " + data["error"]);
           console.log("Response: ", data["error"]);
         }
+
+        // Server passes a UUID, store it in local storage
+        localStorage.setItem("uuid", data.uuid);
       } else {
         alert("Server Error: " + data["error"]);
         console.log("Response: ", data["error"]);
