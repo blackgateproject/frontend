@@ -16,7 +16,10 @@ function App() {
     <Router>
       <Routes>
         {/* Admin Routes */}
-        <Route path="/admin/login" element={<LoginPage role={"admin"} />} />
+        <Route
+          path="/admin/login"
+          element={<LoginPage role={"admin"} />}
+        />
         <Route
           path="/admin/dashboard"
           element={<AdminDashboard role={"admin"} />}
@@ -25,8 +28,14 @@ function App() {
           path="/admin/applications"
           element={<AdminApplications role={"admin"} />}
         />
-        <Route path="/admin/users" element={<AdminUsers role={"admin"} />} />
-        <Route path="/admin/adduser" element={<AddUser role={"admin"} />} />
+        <Route
+          path="/admin/users"
+          element={<AdminUsers role={"admin"} />}
+        />
+        <Route
+          path="/admin/adduser"
+          element={<AddUser role={"admin"} />}
+        />
         <Route
           path="/admin/tickets"
           element={<AdminTickets role={"admin"} />}
@@ -41,13 +50,22 @@ function App() {
         />
 
         {/* User Routes */}
-        <Route path="/" element={<LoginPage role={"user"} />} />
+        <Route
+          path="/"
+          element={<LoginPage role={"user"} />}
+        />
         <Route
           path="/user/dashboard"
           element={<UserDashboard role={"user"} />}
         />
-        <Route path="/user/help" element={<UserHelp role={"user"} />} />
-        <Route path="/user/profile" element={<UserProfile role={"user"} />} />
+        <Route
+          path="/user/help"
+          element={<UserHelp role={"user"} />}
+        />
+        <Route
+          path="/user/profile"
+          element={<UserProfile role={"user"} />}
+        />
       </Routes>
     </Router>
   );
