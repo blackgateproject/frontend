@@ -34,7 +34,7 @@ const Sidebar = ({ role, children }) => {
   ];
 
   const links = role === 'admin' ? adminLinks : userLinks;
-  const logoutPath = role === 'admin' ? '/admin/login' : '/';
+  const logoutPath = role === 'admin' ? '/' : '/';
 
   return (
     <>
