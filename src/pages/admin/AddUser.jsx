@@ -4,69 +4,65 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 
 const AddUser = () => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [autoConfirmEmail, setAutoConfirmEmail] = useState(false);
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
+    autoConfirmEmail: false,
+    role: "user", // Default role is user
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
 
-  const handleCreateUser = () => {
-    if (password !== confirmPassword) {
-      console.error("Passwords do not match");
+  const validateForm = () => {
+    const errors = {};
+    if (!form.firstName) errors.firstName = "First name is required";
+    if (!form.lastName) errors.lastName = "Last name is required";
+    if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+      errors.email = "Valid email is required";
+    if (!form.phoneNumber || !/^\+?[\d\s-]+$/.test(form.phoneNumber))
+      errors.phoneNumber = "Valid phone number is required";
+    if (!form.password || form.password.length < 8)
+      errors.password = "Password must be at least 8 characters";
+    if (form.password !== form.confirmPassword)
+      errors.confirmPassword = "Passwords do not match";
+    return errors;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
 
-    const newUser = {
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-      password,
-      autoConfirmEmail,
-    };
-
-    console.log(
-      "New User Created\n",
-      "firstName: ",
-      newUser.firstName,
-      "\nlastName: ",
-      newUser.lastName,
-      "\nemail: ",
-      newUser.email,
-      "\nphoneNumber: ",
-      newUser.phoneNumber,
-      "\npassword: ",
-      newUser.password,
-      "\nautoConfirmEmail: ",
-      newUser.autoConfirmEmail
-    );
-
-
-    // Post to the backend at http://localhost:8000/admin/v1/addUser
-    // with the newUser object
-    // If successful, navigate to the /admin/users page
-    // If unsuccessful console.error the error
-
-    fetch("http://localhost:8000/admin/v1/addUser", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newUser),
-    })
-      .then((response) => {
-        if (response.ok) {
-          console.log("User created successfully");
-          navigate("/admin/users");
-        } else {
-          console.error("Error creating user");
-        }
-      })
-      .catch((error) => console.error("Error creating user:", error));
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://localhost:8000/admin/v1/addUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+      if (response.ok) {
+        navigate("/admin/users");
+      } else {
+        const errorData = await response.json();
+        setErrors({ form: errorData.error });
+      }
+    } catch (error) {
+      console.error("Error adding user:", error);
+      setErrors({ form: "An error occurred while adding the user" });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -90,80 +86,135 @@ const AddUser = () => {
         </div>
 
         {/* Form Section */}
-        <div className="bg-[#F8F5F9] rounded-2xl shadow-md p-6 mb-6">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              First Name
+            </label>
             <input
               type="text"
-              placeholder="First Name"
-              className="input input-bordered w-full rounded-2xl bg-[#ffffff] text-gray-700 p-4"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              value={form.firstName}
+              onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+              className="input input-bordered w-full"
             />
+            {errors.firstName && (
+              <p className="text-red-500 text-sm">{errors.firstName}</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Last Name
+            </label>
             <input
               type="text"
-              placeholder="Last Name"
-              className="input input-bordered w-full rounded-2xl bg-[#ffffff] text-gray-700 p-4"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              value={form.lastName}
+              onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+              className="input input-bordered w-full"
             />
+            {errors.lastName && (
+              <p className="text-red-500 text-sm">{errors.lastName}</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
             <input
               type="email"
-              placeholder="Email"
-              className="input input-bordered w-full rounded-2xl bg-[#ffffff] text-gray-700 p-4"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className="input input-bordered w-full"
             />
-            <input
-              type="text"
-              placeholder="Phone Number"
-              className="input input-bordered w-full rounded-2xl bg-[#ffffff] text-gray-700 p-4"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              className="input input-bordered w-full rounded-2xl bg-[#ffffff] text-gray-700 p-4"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              className="input input-bordered w-full rounded-2xl bg-[#ffffff] text-gray-700 p-4"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-            <div className="col-span-2 flex items-center">
-              <input
-                type="checkbox"
-                id="autoConfirmEmail"
-                className="mr-2"
-                checked={autoConfirmEmail}
-                onChange={(e) => setAutoConfirmEmail(e.target.checked)}
-              />
-              <label htmlFor="autoConfirmEmail" className="text-gray-700">
-                Autoconfirm user email
-              </label>
-            </div>
+            {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )}
           </div>
-        </div>
-
-        {/* Button Section */}
-        <div className="flex justify-end space-x-4">
-          <button
-            className="btn bg-base-100 text-gray-600 hover:bg-gray-100 p-3 rounded-lg"
-            onClick={() => navigate("/admin/users")}
-          >
-            Cancel
-          </button>
-          <button
-            className="btn bg-primary/75 hover:bg-primary text-base-100 p-3 rounded-lg"
-            onClick={handleCreateUser}
-          >
-            Create User
-          </button>
-        </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              value={form.phoneNumber}
+              onChange={(e) =>
+                setForm({ ...form, phoneNumber: e.target.value })
+              }
+              className="input input-bordered w-full"
+            />
+            {errors.phoneNumber && (
+              <p className="text-red-500 text-sm">{errors.phoneNumber}</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <input
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              className="input input-bordered w-full"
+            />
+            {errors.password && (
+              <p className="text-red-500 text-sm">{errors.password}</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              value={form.confirmPassword}
+              onChange={(e) =>
+                setForm({ ...form, confirmPassword: e.target.value })
+              }
+              className="input input-bordered w-full"
+            />
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-sm">{errors.confirmPassword}</p>
+            )}
+          </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="autoConfirmEmail"
+              className="mr-2"
+              checked={form.autoConfirmEmail}
+              onChange={(e) =>
+                setForm({ ...form, autoConfirmEmail: e.target.checked })
+              }
+            />
+            <label htmlFor="autoConfirmEmail" className="text-gray-700">
+              Autoconfirm user email
+            </label>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Role
+            </label>
+            <select
+              value={form.role}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+              className="select select-bordered w-full"
+            >
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          {errors.form && (
+            <p className="text-red-500 text-sm">{errors.form}</p>
+          )}
+          <div>
+            <button
+              type="submit"
+              className={`btn btn-primary w-full ${isLoading && "loading"}`}
+              disabled={isLoading}
+            >
+              Add User
+            </button>
+          </div>
+        </form>
       </div>
     </Sidebar>
   );

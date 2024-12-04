@@ -10,12 +10,19 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(false); // State to control the loading status
   const [modalOpen, setModalOpen] = useState(false); // State to control Modal visibility
   const [selectedUser, setSelectedUser] = useState(null); // Store the selected user for editing
+  const [editForm, setEditForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: '',
+    password: ''
+  });
   const navigate = useNavigate();
 
   // Dummy data to display if no users are fetched
   const dummyData = [
-    { id: 1, firstName: "John", lastName: "Doe", online: true },
-    { id: 2, firstName: "Jane", lastName: "Smith", online: false },
+    { id: 1, firstName: "John", lastName: "Doe", email: "john.doe@example.com", role: "user", online: true },
+    { id: 2, firstName: "Jane", lastName: "Smith", email: "jane.smith@example.com", role: "admin", online: false },
   ];
 
   // Fetch users from the backend
@@ -63,13 +70,27 @@ const AdminUsers = () => {
   // Handle opening the edit modal
   const handleEditUser = (user) => {
     setSelectedUser(user);
+    setEditForm({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+      password: ''
+    });
     setModalOpen(true); // Open the modal
   };
 
   // Handle modal submit (edit user)
-  const handleModalSubmit = async (updatedUserData) => {
+  const handleModalSubmit = async () => {
+    const confirmed = window.confirm("Are you sure you want to save these changes?");
+    if (!confirmed) return;
+
     setLoading(true);
     try {
+      const updatedUserData = {
+        ...selectedUser,
+        ...editForm
+      };
       const response = await fetch("http://127.0.0.1:8000/admin/v1/editUser", {
         method: "PUT",
         headers: {
@@ -83,6 +104,7 @@ const AdminUsers = () => {
           user.id === updatedUser.id ? updatedUser : user
         )
       );
+      window.location.reload(); // Refresh the page
     } catch (error) {
       console.error("Error editing user:", error);
     } finally {
@@ -135,17 +157,19 @@ const AdminUsers = () => {
                 className="bg-base-100 rounded-2xl shadow-md p-6 flex justify-between items-center"
               >
                 <div className="flex items-center space-x-2">
-                  {/* Online/Offline Indicator */}
-                  <h2 className="text-lg font-semibold text-[#333333]">
-                    {user.firstName} {user.lastName}
-                  </h2>
+                  <div className="flex flex-col">
+                    <h2 className="text-lg font-semibold text-[#333333]">
+                      {user.firstName} {user.lastName}
+                    </h2>
+                    <p className="text-sm text-gray-500">{user.email}</p>
+                    <p className="text-sm text-gray-500">{user.role}</p>
+                  </div>
                   <div
                     className={`w-3 h-3 rounded-full ${
                       user.online ? "bg-green-300" : "bg-gray-400"
                     }`}
                   ></div>
                 </div>
-
                 <div className="flex space-x-2">
                   {/* Edit Button */}
                   <button
@@ -173,7 +197,46 @@ const AdminUsers = () => {
         <Modal
           id="edit-user-modal"
           titleText="Edit User"
-          contentText="Edit the user details"
+          contentText={
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder={selectedUser.firstName}
+                value={editForm.firstName}
+                onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                className="input input-bordered w-full"
+              />
+              <input
+                type="text"
+                placeholder={selectedUser.lastName}
+                value={editForm.lastName}
+                onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                className="input input-bordered w-full"
+              />
+              <input
+                type="email"
+                placeholder={selectedUser.email}
+                value={editForm.email}
+                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                className="input input-bordered w-full"
+              />
+              <select
+                value={editForm.role}
+                onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+                className="select select-bordered w-full"
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+              <input
+                type="password"
+                placeholder="Password"
+                value={editForm.password}
+                onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                className="input input-bordered w-full"
+              />
+            </div>
+          }
           onSubmit={handleModalSubmit}
           onClose={handleCloseModal} // Add onClose handler
           actionButtonText="Save Changes"

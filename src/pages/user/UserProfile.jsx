@@ -67,6 +67,7 @@ const UserProfile = () => {
       setProfile(updatedUser);
       setEditingPersonal(false);
       setErrors({});
+      window.location.reload(); // Refresh the page
     } catch (error) {
       console.error('Error editing user:', error);
     } finally {
