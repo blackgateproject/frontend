@@ -1,8 +1,17 @@
-import React from 'react';
+import React from "react";
 
-const Modal = ({ id, titleText, contentText, onSubmit, actionButtonText, icon, modalData }) => {
+const Modal = ({
+  id,
+  titleText,
+  contentText,
+  onSubmit,
+  onClose,
+  actionButtonText,
+  icon,
+  modalData,
+}) => {
   return (
-    <dialog id={id} className="modal">
+    <dialog id={id} className="modal" open>
       <div className="modal-box">
         <div className="flex gap-2 items-center mb-2">
           {icon}
@@ -10,14 +19,17 @@ const Modal = ({ id, titleText, contentText, onSubmit, actionButtonText, icon, m
         </div>
         <p className="py-4">{contentText}</p>
         <div className="modal-action">
-          <button 
-            className="btn" 
-            onClick={() => document.getElementById(id).close()}
+          <button
+            className="btn"
+            onClick={() => {
+              onClose();
+              document.getElementById(id).close();
+            }}
           >
             Cancel
           </button>
-          <button 
-            className="btn btn-primary" 
+          <button
+            className="btn btn-primary"
             onClick={() => {
               onSubmit(modalData);
               document.getElementById(id).close();

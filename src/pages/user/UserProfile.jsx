@@ -56,11 +56,19 @@ const UserProfile = () => {
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setProfile(editForm);
+      const response = await fetch('http://127.0.0.1:8000/api/auth/editUser', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editForm),
+      });
+      const updatedUser = await response.json();
+      setProfile(updatedUser);
       setEditingPersonal(false);
       setErrors({});
+    } catch (error) {
+      console.error('Error editing user:', error);
     } finally {
       setIsLoading(false);
     }
@@ -89,6 +97,27 @@ const UserProfile = () => {
         twoFactorAuth: authForm.twoFactorAuth,
       });
       setErrors({});
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEditUser = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/auth/editUser', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editForm),
+      });
+      const updatedUser = await response.json();
+      setProfile(updatedUser);
+      setEditingPersonal(false);
+      setErrors({});
+    } catch (error) {
+      console.error('Error editing user:', error);
     } finally {
       setIsLoading(false);
     }

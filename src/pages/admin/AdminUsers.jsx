@@ -41,11 +41,14 @@ const AdminUsers = () => {
     getUsers();
   }, []);
 
-  // Handle delete user
+  // Handle delete user with confirmation
   const handleDeleteUser = async (userId) => {
+    const confirmed = window.confirm("Are you sure you want to delete this user?");
+    if (!confirmed) return;
+
     setLoading(true);
     try {
-      await fetch(`http://127.0.0.1:8000/admin/v1/deleteUser/${userId}`, { // Updated URL
+      await fetch(`http://127.0.0.1:8000/admin/v1/deleteUser/${userId}`, {
         method: "DELETE",
       });
       // Remove the user from the state after successful deletion
@@ -67,7 +70,7 @@ const AdminUsers = () => {
   const handleModalSubmit = async (updatedUserData) => {
     setLoading(true);
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/auth/editUser", {
+      const response = await fetch("http://127.0.0.1:8000/admin/v1/editUser", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -86,6 +89,11 @@ const AdminUsers = () => {
       setLoading(false);
       setModalOpen(false); // Close the modal after editing
     }
+  };
+
+  // Handle closing the modal
+  const handleCloseModal = () => {
+    setModalOpen(false);
   };
 
   return (
@@ -167,6 +175,7 @@ const AdminUsers = () => {
           titleText="Edit User"
           contentText="Edit the user details"
           onSubmit={handleModalSubmit}
+          onClose={handleCloseModal} // Add onClose handler
           actionButtonText="Save Changes"
           icon={<Edit size={24} />}
           modalData={selectedUser} // Pass selected user data to the modal
