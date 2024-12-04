@@ -1,10 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActivityIcon, CheckSquare, Search, Ticket, Users } from 'lucide-react';
 import Sidebar from '../../components/Sidebar'
 import { Link } from 'react-router-dom';
 import UserActivity from '../../components/UserActivity';
 
 const Dashboard = () => {
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    onlineUsers: 0,
+    pendingTickets: 0
+  });
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/admin/v1/getUsers");
+        if (!response.ok) throw new Error('Failed to fetch users');
+        
+        const users = await response.json();
+        setStats({
+          totalUsers: users.length,
+          onlineUsers: users.filter(user => user.online).length,
+          pendingTickets: 6 // Hardcoded for now
+        });
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   // Placeholder data for user activity (Replace with backend data)
   const userActivities = [
     { name: 'Abdullah Abubaker', activity: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', date: '12/10/24 4:53 PM', type: 'Login' },
@@ -41,7 +70,7 @@ const Dashboard = () => {
             <div>
               <div className="flex gap-1 items-center">
                 <Users className='text-primary' size={30} />
-                <h2 className="text-4xl font-bold text-primary">15</h2>
+                <h2 className="text-4xl font-bold text-primary">{loading ? '...' : stats.totalUsers}</h2>
               </div>
               <p className="text-gray-500">Total Users</p>
             </div>
@@ -50,7 +79,7 @@ const Dashboard = () => {
             <div>
               <div className="flex gap-3 items-center">
                 <CheckSquare className='text-primary' size={30} />
-                <h2 className="text-4xl font-bold text-primary">6</h2>
+                <h2 className="text-4xl font-bold text-primary">{loading ? '...' : stats.onlineUsers}</h2>
               </div>
               <p className="text-gray-500">Users Online</p>
             </div>
