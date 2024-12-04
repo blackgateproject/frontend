@@ -159,7 +159,7 @@ const AdminUsers = () => {
                 <div className="flex items-center space-x-2">
                   <div className="flex flex-col">
                     <h2 className="text-lg font-semibold text-[#333333]">
-                      {user.firstName} {user.lastName}
+                      {user.firstName +" " +user.lastName}
                     </h2>
                     <p className="text-sm text-gray-500">{user.email}</p>
                     <p className="text-sm text-gray-500">{user.role}</p>
@@ -238,7 +238,7 @@ const AdminUsers = () => {
             </div>
           }
           onSubmit={handleModalSubmit}
-          onClose={handleCloseModal} // Add onClose handler
+          onClose={() => setModalOpen(false)} // Ensure modal closes on cancel
           actionButtonText="Save Changes"
           icon={<Edit size={24} />}
           modalData={selectedUser} // Pass selected user data to the modal

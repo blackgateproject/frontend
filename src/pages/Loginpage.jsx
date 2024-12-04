@@ -31,15 +31,15 @@ const LoginPage = ({ role }) => {
       password: password,
     };
 
-    if (email) {
-      const domain = email.split("@")[1];
-      if (domain !== "admin.com" && domain !== "user.com") {
-        alert(
-          "Invalid email domain, please use either @admin.com or @user.com"
-        );
-        return;
-      }
-    }
+    // if (email) {
+    //   const domain = email.split("@")[1];
+    //   if (domain !== "admin.com" && domain !== "user.com") {
+    //     alert(
+    //       "Invalid email domain, please use either @admin.com or @user.com"
+    //     );
+    //     return;
+    //   }
+    // }
 
     console.log("USER: ", JSON.stringify(user));
 
@@ -169,7 +169,7 @@ const LoginPage = ({ role }) => {
             onClick={async () => {
               setEmail("a@admin.com");
               handleNextStep();
-              setPassword("a");
+              setPassword("123456");
               handleLogin();
             }}
             className="btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl"
@@ -179,7 +179,7 @@ const LoginPage = ({ role }) => {
           <button
             onClick={async () => {
               setEmail("a@user.com");
-              setPassword("a");
+              setPassword("123456");
               await handleLogin();
             }}
             className="btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl"

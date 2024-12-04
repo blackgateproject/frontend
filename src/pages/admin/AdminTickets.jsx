@@ -20,6 +20,7 @@ const Tickets = () => {
   const [ticketsPerPage] = useState(5);
   const [loading, setLoading] = useState(false);
   const [modalTicketId, setModalTicketId] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false); // State to control Modal visibility
 
   useEffect(() => {
     fetchTickets();
@@ -71,10 +72,16 @@ const Tickets = () => {
     }
   };
 
+  const handleModalSubmit = async () => {
+    const confirmed = window.confirm("Are you sure you want to save these changes?");
+    if (!confirmed) return;
+    setModalOpen(false); // Close the modal after editing
+  };
+
   // Open modal
   const openModal = (ticketId) => {
     setModalTicketId(ticketId);
-    document.getElementById("confirm-modal").showModal();
+    setModalOpen(true);
   };
 
   // Filter and sort tickets
@@ -117,14 +124,17 @@ const Tickets = () => {
   return (
     <Sidebar role="admin">
       {/* Modal for confirmation */}
-      <Modal
-        id="confirm-modal"
-        icon={<TicketIcon className="size-8" />}
-        titleText="Confirm Completion"
-        contentText="Are you sure you want to mark this ticket as completed?"
-        actionButtonText="Confirm"
-        onSubmit={() => handleComplete(modalTicketId)}
-      />
+      {modalOpen && (
+        <Modal
+          id="confirm-modal"
+          icon={<TicketIcon className="size-8" />}
+          titleText="Confirm Completion"
+          contentText="Are you sure you want to mark this ticket as completed?"
+          actionButtonText="Confirm"
+          onSubmit={() => handleComplete(modalTicketId)}
+          onClose={() => setModalOpen(false)} // Ensure modal closes on cancel
+        />
+      )}
 
       {/* Main Content */}
       <div className="">

@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
-import { Edit, KeyRound, Search, SquareUserRound, X, Check, Loader2 } from 'lucide-react';
-import Sidebar from '../../components/Sidebar';
-import sampleQR from '../../assets/sample-QR.png';
+import {
+  Check,
+  Edit,
+  KeyRound,
+  Loader2,
+  Search,
+  SquareUserRound,
+  X,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import sampleQR from "../../assets/sample-QR.png";
+import Sidebar from "../../components/Sidebar";
 
 const AdminProfile = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -9,40 +17,56 @@ const AdminProfile = () => {
   const [editingAuth, setEditingAuth] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const [profile, setProfile] = useState({
-    firstName: 'Abdullah',
-    lastName: 'Abubaker',
-    email: 'abdullah.abubaker@blackgate.com',
-    phone: '+92-300-456-8910',
-    passwordSet: true,
-    twoFactorAuth: false,
-  });
+  const [profile, setProfile] = useState({});
+
+  useEffect(() => {
+    const fetchAdminProfile = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("http://127.0.0.1:8000/admin/v1/profile", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
+          },
+        });
+        const adminData = await response.json();
+        setProfile(adminData);
+      } catch (error) {
+        console.error("Error fetching admin profile:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAdminProfile();
+  }, []);
 
   const [editForm, setEditForm] = useState({ ...profile });
   const [authForm, setAuthForm] = useState({
-    newPassword: '',
-    confirmPassword: '',
+    newPassword: "",
+    confirmPassword: "",
     twoFactorAuth: profile.twoFactorAuth,
   });
 
   // Validation functions
   const validatePersonal = () => {
     const errors = {};
-    if (!editForm.firstName) errors.firstName = 'First name is required';
-    if (!editForm.lastName) errors.lastName = 'Last name is required';
+    if (!editForm.firstName) errors.firstName = "First name is required";
+    if (!editForm.lastName) errors.lastName = "Last name is required";
     if (!editForm.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editForm.email))
-      errors.email = 'Valid email is required';
+      errors.email = "Valid email is required";
     if (!editForm.phone || !/^\+?[\d\s-]+$/.test(editForm.phone))
-      errors.phone = 'Valid phone number is required';
+      errors.phone = "Valid phone number is required";
     return errors;
   };
 
   const validateAuth = () => {
     const errors = {};
     if (authForm.newPassword !== authForm.confirmPassword)
-      errors.password = 'Passwords do not match';
+      errors.password = "Passwords do not match";
     if (authForm.newPassword && authForm.newPassword.length < 8)
-      errors.password = 'Password must be at least 8 characters';
+      errors.password = "Password must be at least 8 characters";
     return errors;
   };
 
@@ -56,15 +80,18 @@ const AdminProfile = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/admin/v1/updateProfile", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(editForm),
-      });
+      const response = await fetch(
+        "http://localhost:8000/admin/v1/updateProfile",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(editForm),
+        }
+      );
 
-      if (!response.ok) throw new Error('Failed to update profile');
+      if (!response.ok) throw new Error("Failed to update profile");
 
       setProfile(editForm);
       setEditingPersonal(false);
@@ -86,15 +113,18 @@ const AdminProfile = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/admin/v1/updateAuth", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(authForm),
-      });
+      const response = await fetch(
+        "http://localhost:8000/admin/v1/updateAuth",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(authForm),
+        }
+      );
 
-      if (!response.ok) throw new Error('Failed to update authentication');
+      if (!response.ok) throw new Error("Failed to update authentication");
 
       setProfile((prev) => ({
         ...prev,
@@ -103,8 +133,8 @@ const AdminProfile = () => {
       }));
       setEditingAuth(false);
       setAuthForm({
-        newPassword: '',
-        confirmPassword: '',
+        newPassword: "",
+        confirmPassword: "",
         twoFactorAuth: authForm.twoFactorAuth,
       });
       setErrors({});
@@ -117,15 +147,22 @@ const AdminProfile = () => {
   };
 
   return (
-    <Sidebar role={'admin'}>
-
+    <Sidebar role={"admin"}>
       <dialog id="qr-modal" className="modal">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Connect with your mobile app</h3>
-          <p className="py-4">Scan this code with the BlackGate mobile app on your phone to enable 2-Factor Authentication.</p>
+          <p className="py-4">
+            Scan this code with the BlackGate mobile app on your phone to enable
+            2-Factor Authentication.
+          </p>
           <img src={sampleQR} alt="QR Code" className="w-48 h-48 mx-auto" />
           <div className="modal-action">
-            <button className="btn" onClick={() => document.getElementById('qr-modal').close()} >Done</button>
+            <button
+              className="btn"
+              onClick={() => document.getElementById("qr-modal").close()}
+            >
+              Done
+            </button>
           </div>
         </div>
       </dialog>
@@ -171,7 +208,11 @@ const AdminProfile = () => {
                     onClick={handleSavePersonal}
                     disabled={isLoading}
                   >
-                    {isLoading ? <Loader2 className="animate-spin" size={16} /> : <Check size={16} />}
+                    {isLoading ? (
+                      <Loader2 className="animate-spin" size={16} />
+                    ) : (
+                      <Check size={16} />
+                    )}
                     Save
                   </button>
                 </div>
@@ -187,7 +228,9 @@ const AdminProfile = () => {
             </div>
             <div className="flex gap-2">
               <SquareUserRound size={32} className="text-primary" />
-              <h2 className="text-xl font-bold text-[#333333]">Personal Information</h2>
+              <h2 className="text-xl font-bold text-[#333333]">
+                Personal Information
+              </h2>
             </div>
             <div className="mt-6">
               <div className="grid grid-cols-3 gap-y-4 items-center">
@@ -199,11 +242,18 @@ const AdminProfile = () => {
                       <input
                         type="text"
                         value={editForm.firstName}
-                        onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            firstName: e.target.value,
+                          })
+                        }
                         className="input input-bordered w-full"
                       />
                       {errors.firstName && (
-                        <p className="text-red-500 text-sm">{errors.firstName}</p>
+                        <p className="text-red-500 text-sm">
+                          {errors.firstName}
+                        </p>
                       )}
                     </>
                   ) : (
@@ -219,11 +269,15 @@ const AdminProfile = () => {
                       <input
                         type="text"
                         value={editForm.lastName}
-                        onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, lastName: e.target.value })
+                        }
                         className="input input-bordered w-full"
                       />
                       {errors.lastName && (
-                        <p className="text-red-500 text-sm">{errors.lastName}</p>
+                        <p className="text-red-500 text-sm">
+                          {errors.lastName}
+                        </p>
                       )}
                     </>
                   ) : (
@@ -239,7 +293,9 @@ const AdminProfile = () => {
                       <input
                         type="email"
                         value={editForm.email}
-                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, email: e.target.value })
+                        }
                         className="input input-bordered w-full"
                       />
                       {errors.email && (
@@ -259,7 +315,9 @@ const AdminProfile = () => {
                       <input
                         type="tel"
                         value={editForm.phone}
-                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, phone: e.target.value })
+                        }
                         className="input input-bordered w-full"
                       />
                       {errors.phone && (
@@ -284,8 +342,8 @@ const AdminProfile = () => {
                     onClick={() => {
                       setEditingAuth(false);
                       setAuthForm({
-                        newPassword: '',
-                        confirmPassword: '',
+                        newPassword: "",
+                        confirmPassword: "",
                         twoFactorAuth: profile.twoFactorAuth,
                       });
                       setErrors({});
@@ -300,7 +358,11 @@ const AdminProfile = () => {
                     onClick={handleSaveAuth}
                     disabled={isLoading}
                   >
-                    {isLoading ? <Loader2 className="animate-spin" size={16} /> : <Check size={16} />}
+                    {isLoading ? (
+                      <Loader2 className="animate-spin" size={16} />
+                    ) : (
+                      <Check size={16} />
+                    )}
                     Save
                   </button>
                 </div>
@@ -316,7 +378,9 @@ const AdminProfile = () => {
             </div>
             <div className="flex gap-2">
               <KeyRound size={32} className="text-primary" />
-              <h2 className="text-xl font-bold text-[#333333]">Authentication</h2>
+              <h2 className="text-xl font-bold text-[#333333]">
+                Authentication
+              </h2>
             </div>
             <div className="mt-6">
               <div className="grid grid-cols-3 gap-y-4 items-center">
@@ -329,22 +393,34 @@ const AdminProfile = () => {
                         type="password"
                         placeholder="New Password"
                         value={authForm.newPassword}
-                        onChange={(e) => setAuthForm({ ...authForm, newPassword: e.target.value })}
+                        onChange={(e) =>
+                          setAuthForm({
+                            ...authForm,
+                            newPassword: e.target.value,
+                          })
+                        }
                         className="input input-bordered w-full"
                       />
                       <input
                         type="password"
                         placeholder="Confirm Password"
                         value={authForm.confirmPassword}
-                        onChange={(e) => setAuthForm({ ...authForm, confirmPassword: e.target.value })}
+                        onChange={(e) =>
+                          setAuthForm({
+                            ...authForm,
+                            confirmPassword: e.target.value,
+                          })
+                        }
                         className="input input-bordered w-full mt-2"
                       />
                       {errors.password && (
-                        <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.password}
+                        </p>
                       )}
                     </>
                   ) : (
-                    <p>{profile.passwordSet ? 'Set' : 'Not Set'}</p>
+                    <p>{profile.passwordSet ? "Set" : "Not Set"}</p>
                   )}
                 </div>
 
@@ -356,13 +432,20 @@ const AdminProfile = () => {
                       <input
                         type="checkbox"
                         checked={authForm.twoFactorAuth}
-                        onChange={(e) => {setAuthForm({ ...authForm, twoFactorAuth: e.target.checked }); if(e.target.checked) document.getElementById('qr-modal').showModal();}}
+                        onChange={(e) => {
+                          setAuthForm({
+                            ...authForm,
+                            twoFactorAuth: e.target.checked,
+                          });
+                          if (e.target.checked)
+                            document.getElementById("qr-modal").showModal();
+                        }}
                         className="checkbox checkbox-primary"
                       />
                       <span>Enable 2-Factor Authentication</span>
                     </div>
                   ) : (
-                    <p>{profile.twoFactorAuth ? 'Enabled' : 'Disabled'}</p>
+                    <p>{profile.twoFactorAuth ? "Enabled" : "Disabled"}</p>
                   )}
                 </div>
               </div>
