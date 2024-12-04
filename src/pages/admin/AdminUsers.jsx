@@ -1,5 +1,5 @@
-import { Edit, Search, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { Edit, Search, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Modal from "../../components/Modal";

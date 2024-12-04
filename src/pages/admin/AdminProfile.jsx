@@ -56,11 +56,22 @@ const AdminProfile = () => {
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("http://localhost:8000/admin/v1/updateProfile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editForm),
+      });
+
+      if (!response.ok) throw new Error('Failed to update profile');
+
       setProfile(editForm);
       setEditingPersonal(false);
       setErrors({});
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setErrors({ submit: "Failed to update profile" });
     } finally {
       setIsLoading(false);
     }
@@ -75,8 +86,16 @@ const AdminProfile = () => {
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("http://localhost:8000/admin/v1/updateAuth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(authForm),
+      });
+
+      if (!response.ok) throw new Error('Failed to update authentication');
+
       setProfile((prev) => ({
         ...prev,
         passwordSet: authForm.newPassword ? true : prev.passwordSet,
@@ -89,6 +108,9 @@ const AdminProfile = () => {
         twoFactorAuth: authForm.twoFactorAuth,
       });
       setErrors({});
+    } catch (error) {
+      console.error("Error updating authentication:", error);
+      setErrors({ submit: "Failed to update authentication" });
     } finally {
       setIsLoading(false);
     }
