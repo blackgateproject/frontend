@@ -6,17 +6,38 @@ const Help = () => {
   const [ticketTitle, setTicketTitle] = useState('');
   const [ticketDescription, setTicketDescription] = useState('');
   const [charCount, setCharCount] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const maxCharCount = 500;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Replace this section with backend functionality to submit a support ticket
-    const ticket = {
-      title: ticketTitle,
-      description: ticketDescription,
-    };
+    setIsSubmitting(true);
 
-    console.log('Ticket submitted:', ticket);
+    try {
+      const response = await fetch('http://127.0.0.1:8000/user/v1/tickets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: ticketTitle,
+          description: ticketDescription,
+          user_id: sessionStorage.getItem("uuid"),
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to submit ticket');
+
+      setTicketTitle('');
+      setTicketDescription('');
+      setCharCount(0);
+      alert('Ticket submitted successfully!');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to submit ticket. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -67,8 +88,12 @@ const Help = () => {
              />
              <div className="flex justify-between items-center">
                <span className="text-gray-400 text-sm">{charCount}/{maxCharCount}</span>
-               <button type="submit" className="btn bg-primary/75 hover:bg-primary text-base-100 p-3 rounded-2xl px-4">
-                 Submit
+               <button 
+                 type="submit" 
+                 className="btn bg-primary/75 hover:bg-primary text-base-100 p-3 rounded-2xl px-4"
+                 disabled={isSubmitting}
+               >
+                 {isSubmitting ? 'Submitting...' : 'Submit'}
                </button>
              </div>
            </form>

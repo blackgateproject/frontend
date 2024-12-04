@@ -1,54 +1,80 @@
-import React, { useState, useEffect } from 'react';
-import { CheckCheckIcon, ClockIcon, Search, TicketCheckIcon, TicketIcon } from 'lucide-react';
-import Sidebar from '../../components/Sidebar';
-import Modal from '../../components/Modal';
-import Loader from '../../components/Loader';
+import {
+  CheckCheckIcon,
+  ClockIcon,
+  Search,
+  TicketCheckIcon,
+  TicketIcon,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import Loader from "../../components/Loader";
+import Modal from "../../components/Modal";
+import Sidebar from "../../components/Sidebar";
 
 const Tickets = () => {
   // State variables
   const [tickets, setTickets] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'pending', 'completed'
-  const [sortOrder, setSortOrder] = useState('desc'); // 'asc', 'desc'
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all"); // 'all', 'pending', 'completed'
+  const [sortOrder, setSortOrder] = useState("desc"); // 'asc', 'desc'
   const [currentPage, setCurrentPage] = useState(1);
   const [ticketsPerPage] = useState(5);
   const [loading, setLoading] = useState(false);
   const [modalTicketId, setModalTicketId] = useState(null);
 
-  // Generate dummy tickets
   useEffect(() => {
-    const dummyTickets = [];
-    for (let i = 1; i <= 20; i++) {
-      dummyTickets.push({
-        id: i,
-        heading: `Ticket #${i}`,
-        content: `This is the content for ticket number ${i}.`,
-        openedBy: `User ${i}`,
-        date: new Date(Date.now() - i * 10000000),
-        pending: i % 2 === 0,
-      });
-    }
-    setTickets(dummyTickets);
+    fetchTickets();
   }, []);
 
-  // Handle ticket completion
-  const handleComplete = async (ticketId) => {
-    document.getElementById('confirm-modal').close();
+  const fetchTickets = async () => {
     setLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setTickets((prevTickets) =>
-      prevTickets.map((ticket) =>
-        ticket.id === ticketId ? { ...ticket, pending: false } : ticket
-      )
-    );
-    setLoading(false);
+    try {
+      const response = await fetch("http://127.0.0.1:8000/admin/v1/tickets");
+      if (!response.ok) throw new Error("Failed to fetch tickets");
+      const data = await response.json();
+      setTickets(
+        data.map((ticket) => ({
+          id: ticket.id,
+          heading: ticket.title,
+          content: ticket.description,
+          openedBy: ticket.openedBy,
+          date: new Date(ticket.created_at),
+          pending: ticket.status === "pending",
+        }))
+      );
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleComplete = async (ticketId) => {
+    document.getElementById("confirm-modal").close();
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/admin/v1/tickets/${ticketId}/complete`,
+        {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      if (!response.ok) throw new Error("Failed to complete ticket");
+      await fetchTickets();
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to complete ticket. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Open modal
   const openModal = (ticketId) => {
     setModalTicketId(ticketId);
-    document.getElementById('confirm-modal').showModal();
+    document.getElementById("confirm-modal").showModal();
   };
 
   // Filter and sort tickets
@@ -58,13 +84,13 @@ const Tickets = () => {
         ticket.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ticket.heading.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus =
-        filterStatus === 'all' ||
-        (filterStatus === 'pending' && ticket.pending) ||
-        (filterStatus === 'completed' && !ticket.pending);
+        filterStatus === "all" ||
+        (filterStatus === "pending" && ticket.pending) ||
+        (filterStatus === "completed" && !ticket.pending);
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
-      if (sortOrder === 'asc') {
+      if (sortOrder === "asc") {
         return a.date - b.date;
       } else {
         return b.date - a.date;
@@ -74,7 +100,10 @@ const Tickets = () => {
   // Pagination logic
   const indexOfLastTicket = currentPage * ticketsPerPage;
   const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
-  const currentTickets = filteredTickets.slice(indexOfFirstTicket, indexOfLastTicket);
+  const currentTickets = filteredTickets.slice(
+    indexOfFirstTicket,
+    indexOfLastTicket
+  );
   const totalPages = Math.ceil(filteredTickets.length / ticketsPerPage);
 
   const paginate = (pageNumber) => {
@@ -145,17 +174,21 @@ const Tickets = () => {
           <div className="text-center flex flex-col gap-3 items-center justify-center py-10 min-h-screen">
             <Loader />
             <span className="mt-3"> Loading...</span>
-           
-            </div>
+          </div>
         ) : currentTickets.length > 0 ? (
           currentTickets.map((ticket) => (
-            <div key={ticket.id} className="bg-base-100 rounded-2xl shadow-md p-6 mb-4">
+            <div
+              key={ticket.id}
+              className="bg-base-100 rounded-2xl shadow-md p-6 mb-4"
+            >
               {/* Main content */}
               <div>
                 {/* Ticket heading and icon */}
                 <div className="flex items-center">
                   <TicketCheckIcon className="text-primary mr-3" size={24} />
-                  <h2 className="text-xl font-bold text-[#333333]">{ticket.heading}</h2>
+                  <h2 className="text-xl font-bold text-[#333333]">
+                    {ticket.heading}
+                  </h2>
                 </div>
 
                 {/* Ticket ID and Status badges */}
@@ -163,7 +196,7 @@ const Tickets = () => {
                   <div className="badge badge-secondary">ID-{ticket.id}</div>
                   <div
                     className={`badge ${
-                      ticket.pending ? 'badge-primary' : 'badge-success'
+                      ticket.pending ? "badge-primary" : "badge-success"
                     } text-base-100 flex gap-2`}
                   >
                     {ticket.pending ? (
@@ -171,7 +204,7 @@ const Tickets = () => {
                     ) : (
                       <CheckCheckIcon className="size-3" />
                     )}
-                    {ticket.pending ? 'Pending' : 'Completed'}
+                    {ticket.pending ? "Pending" : "Completed"}
                   </div>
                 </div>
 
@@ -182,8 +215,9 @@ const Tickets = () => {
               {/* Name, Date, and Complete Button Row */}
               <div className="flex justify-between items-center mt-4">
                 <p className="text-gray-500 text-sm">
-                  Opened by {ticket.openedBy} on{' '}
-                  {ticket.date.toLocaleDateString()} {ticket.date.toLocaleTimeString()}
+                  Opened by {ticket.openedBy} on{" "}
+                  {ticket.date.toLocaleDateString()}{" "}
+                  {ticket.date.toLocaleTimeString()}
                 </p>
                 {ticket.pending && (
                   <button
@@ -203,14 +237,16 @@ const Tickets = () => {
         )}
 
         {/* Pagination */}
-        {(!loading && totalPages > 1) && (
+        {!loading && totalPages > 1 && (
           <div className="flex justify-center mt-6">
             <div className="btn-group">
               {[...Array(totalPages).keys()].map((number) => (
                 <button
                   key={number + 1}
                   onClick={() => paginate(number + 1)}
-                  className={`btn ${currentPage === number + 1 ? 'btn-active' : ''}`}
+                  className={`btn ${
+                    currentPage === number + 1 ? "btn-active" : ""
+                  }`}
                 >
                   {number + 1}
                 </button>

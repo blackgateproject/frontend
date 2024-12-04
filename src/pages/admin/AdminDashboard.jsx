@@ -3,6 +3,7 @@ import { ActivityIcon, CheckSquare, Search, Ticket, Users } from 'lucide-react';
 import Sidebar from '../../components/Sidebar'
 import { Link } from 'react-router-dom';
 import UserActivity from '../../components/UserActivity';
+import Loader from "../../components/Loader";
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -11,6 +12,7 @@ const Dashboard = () => {
     pendingTickets: 0
   });
   const [loading, setLoading] = useState(true);
+  const [pendingTickets, setPendingTickets] = useState(0);
   
   useEffect(() => {
     const fetchStats = async () => {
@@ -32,7 +34,23 @@ const Dashboard = () => {
     };
 
     fetchStats();
+    fetchPendingTickets();
   }, []);
+
+  const fetchPendingTickets = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("http://127.0.0.1:8000/admin/v1/tickets");
+      if (!response.ok) throw new Error("Failed to fetch tickets");
+      const data = await response.json();
+      const pendingCount = data.filter(ticket => ticket.status === "pending").length;
+      setPendingTickets(pendingCount);
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Placeholder data for user activity (Replace with backend data)
   const userActivities = [
@@ -88,7 +106,7 @@ const Dashboard = () => {
             <div>
               <div className="flex gap-3 items-center">
                 <Ticket className='text-primary' size={30} />
-                <h2 className="text-4xl font-bold text-primary">6</h2>
+                <h2 className="text-4xl font-bold text-primary">{loading ? '...' : pendingTickets}</h2>
               </div>
               <p className="text-gray-500">Pending Tickets</p>
             </div>
