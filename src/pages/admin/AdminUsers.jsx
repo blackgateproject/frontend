@@ -45,7 +45,7 @@ const AdminUsers = () => {
   const handleDeleteUser = async (userId) => {
     setLoading(true);
     try {
-      await fetch(`http://127.0.0.1:8000/api/auth/deleteUser/${userId}`, {
+      await fetch(`http://127.0.0.1:8000/admin/v1/deleteUser/${userId}`, { // Updated URL
         method: "DELETE",
       });
       // Remove the user from the state after successful deletion
