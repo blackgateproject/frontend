@@ -1,12 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
-// NOTE:: Client from connector needs to pass the access_token(JWT) to the user who will then verify the JWT either directly
-//        from supabase or call a function in connector to verify the JWT
-//
-//        Honestly if the user has a JWT it might be faster to bypass the connector and directly verify the JWT with supabase
-//        but then we risk not logging the user's activity in the connector. However this might not be important? Or maybe it
-//        is
+
 const LoginPage = ({ role }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,12 +11,10 @@ const LoginPage = ({ role }) => {
   const navigate = useNavigate();
 
   const handleNextStep = async (e) => {
-    // Animation after button is clicked for 2fa
     e.preventDefault();
     setSliding(true);
     await fetchUser();
 
-    // Small delay for animation
     setTimeout(() => {
       setStep(2);
       setSliding(false);
@@ -29,19 +22,15 @@ const LoginPage = ({ role }) => {
   };
 
   const handleLogin = async (e) => {
-    // Prevent Default Form Submission
     e.preventDefault();
 
-    // ConnectorServer URL
-    const URL = "http://127.0.0.1:8000/functions/v1/verifyUser";
+    const URL = "http://127.0.0.1:8000/auth/v1/verify";
 
-    // User Object
     const user = {
       email: email,
       password: password,
     };
 
-    // Validate that the domain is of only @admin.com or @user.com
     if (email) {
       const domain = email.split("@")[1];
       if (domain !== "admin.com" && domain !== "user.com") {
@@ -52,45 +41,41 @@ const LoginPage = ({ role }) => {
       }
     }
 
-    // Log User Object
     console.log("USER: ", JSON.stringify(user));
 
     const response = await fetch(URL, {
       method: "POST",
-      // mode: "no-cors",
       headers: {
         "content-type": "application/json",
       },
       body: JSON.stringify(user),
     });
 
-    // Log response
-    // console.log("Response: ", response);
-
-    // Check if response is OK
     if (response.ok) {
-      // Log response data
       const data = await response.json();
       console.log(data);
 
-      // Check if user is authenticated and navigate to dashboard
       if (data["authenticated"] === true) {
         console.log(
           "Authenticated! Navigating to: ",
           `/${data.role}/dashboard`
         );
-        // If user was already logged in, an error is also returned that can be shown as an alert
         navigate(`/${data.role}/dashboard`);
+
         if (data["error"]) {
-          alert("Server Error: " + data["error"]);
+          // alert("Server Error: " + data["error"]);
           console.log("Response: ", data["error"]);
         }
 
-        // Server passes a UUID, store it in local storage
-        localStorage.setItem("uuid", data.uuid);
+        sessionStorage.setItem("access_token", data.access_token);
+        sessionStorage.setItem("refresh_token", data.refresh_token);
+        sessionStorage.setItem("uuid", data.uuid);
+        console.log("Set Access Token: ", data.access_token);
+        console.log("Set Refresh Token: ", data.refresh_token);
+        console.log("Set UUID: ", data.uuid);
       } else {
-        alert("Server Error: " + data["error"]);
-        console.log("Response: ", data["error"]);
+        // alert("Server Error: " + data["error"]);
+        // console.log("Response: ", data["error"]);
       }
     } else {
       const errorData = await response.json();
@@ -103,13 +88,12 @@ const LoginPage = ({ role }) => {
       );
     }
   };
-  // Def func from his bhabhi
+
   const fetchUser = async () => {
-    // Dummy API call
     console.log(email);
     const user = {
       email: "johndoe@mail.com",
-      enabled2fa: false, // Toggle this to test different flows
+      enabled2fa: false,
     };
     setEnabled2fa(user.enabled2fa);
   };
@@ -181,7 +165,6 @@ const LoginPage = ({ role }) => {
         </div>
 
         <div className="mt-4 text-center">
-          {/* Create a button to login as admin with email a@admin.com and password: a */}
           <button
             onClick={async () => {
               setEmail("a@admin.com");
@@ -193,7 +176,6 @@ const LoginPage = ({ role }) => {
           >
             Login as Admin
           </button>
-          {/* Create a button to login as user with email a@user.com and password: a */}
           <button
             onClick={async () => {
               setEmail("a@user.com");
