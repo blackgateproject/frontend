@@ -58,7 +58,7 @@ const Tickets = () => {
         {
           method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
@@ -73,7 +73,9 @@ const Tickets = () => {
   };
 
   const handleModalSubmit = async () => {
-    const confirmed = window.confirm("Are you sure you want to save these changes?");
+    const confirmed = window.confirm(
+      "Are you sure you want to save these changes?"
+    );
     if (!confirmed) return;
     setModalOpen(false); // Close the modal after editing
   };
