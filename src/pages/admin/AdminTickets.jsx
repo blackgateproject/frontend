@@ -14,7 +14,7 @@ const Tickets = () => {
   // State variables
   const [tickets, setTickets] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all"); // 'all', 'pending', 'completed'
+  const [filterStatus, setFilterStatus] = useState("pending"); // 'all', 'pending', 'completed'
   const [sortOrder, setSortOrder] = useState("desc"); // 'asc', 'desc'
   const [currentPage, setCurrentPage] = useState(1);
   const [ticketsPerPage] = useState(5);
