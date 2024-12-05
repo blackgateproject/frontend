@@ -1,31 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import UserActivity from '../../components/UserActivity';
 import { Search } from 'lucide-react';
 
 const UserActivityLogs = () => {
-  // Original activities data
-  const userActivitiesData = [
-    { id: 1, name: 'Abdullah Abubaker', activity: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', date: '12/10/24 4:53 PM', type: 'Login' },
-    { id: 2, name: 'Muhammad Qasim', activity: 'The purpose of lorem ipsum is to create a natural looking block of text', date: '12/12/24 4:53 PM', type: 'Logout' },
-    { id: 3, name: 'Awais Shahid', activity: 'when an unknown printer took a galley of type and scrambled it to make a type specimen book', date: '13/10/23 4:53 PM', type: 'Profile Edit' },
-    { id: 4, name: 'Taha Qaisar', activity: 'Lorem Ipsum has been the industrys standard dummy text ever since the 1500s', date: '12/10/21 4:53 PM', type: 'App Access' },
-    { id: 5, name: 'Abdullah Abubaker', activity: ' Lorem Ipsum is simply dummy text of the printing and typesetting industry.', date: '10/10/24 4:53 PM', type: 'Login' },
-    { id: 6, name: 'Muhammad Qasim', activity: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', date: '12/11/24 4:53 PM', type: 'Logout' },
-    { id: 7, name: 'Awais Shahid', activity: 'The purpose of lorem ipsum is to create a natural looking block of text', date: '12/11/21 4:53 PM', type: 'Profile Edit' },
-    { id: 8, name: 'Awais Shahid', activity: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', date: '12/10/24 4:53 PM', type: 'Profile Edit' },
-    { id: 9, name: 'Taha Qaisar', activity: 'Lorem Ipsum has been the industrys standard dummy text ever since the 1500s', date: '11/11/24 4:53 PM', type: 'App Access' },
-    { id: 10, name: 'Abdullah Abubaker', activity: 'Lorem Ipsum has been the industrys standard dummy text ever since the 1500s', date: '12/11/22 4:53 PM', type: 'Login' },
-    { id: 11, name: 'Fahad Sheikh', activity: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', date: '12/10/24 4:53 PM', type: 'App Access' },
-    { id: 12, name: 'Ubaid Ullah', activity: 'when an unknown printer took a galley of type and scrambled it to make a type specimen book', date: '12/10/24 4:53 PM', type: 'App Access' },
-  ];
-
-  // State variables
+  const [userActivitiesData, setUserActivitiesData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('All');
   const [sortOrder, setSortOrder] = useState('desc');
 
-  // Handler functions
+  useEffect(() => {
+    const fetchUserActivities = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/admin/v1/user-activity-logs');
+        if (!response.ok) throw new Error('Failed to fetch user activities');
+        const activities = await response.json();
+
+        const userResponse = await fetch('http://localhost:8000/admin/v1/getAllUsers');
+        if (!userResponse.ok) throw new Error('Failed to fetch user details');
+        const users = await userResponse.json();
+
+        const userMap = users.reduce((acc, user) => {
+          acc[user.id] = user.email;
+          return acc;
+        }, {});
+
+        const userActivitiesWithDetails = activities.map(activity => ({
+          ...activity,
+          name: userMap[activity.user_id] || 'Unknown User',
+        }));
+
+        setUserActivitiesData(userActivitiesWithDetails);
+      } catch (error) {
+        console.error('Error fetching user activities:', error);
+      }
+    };
+
+    fetchUserActivities();
+  }, []);
+
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
@@ -38,28 +51,18 @@ const UserActivityLogs = () => {
     setSortOrder(e.target.value);
   };
 
-  // Filter and sort the activities
   const filteredActivities = userActivitiesData
     .filter((activity) => {
-      // Filter by search query
       const matchesSearch =
-        activity.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        activity.activity.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // Filter by type
+        (activity.name && activity.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (activity.activity && activity.activity.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesType = filterType === 'All' || activity.type === filterType;
-
       return matchesSearch && matchesType;
     })
     .sort((a, b) => {
-      // Sort by date
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      if (sortOrder === 'asc') {
-        return dateA - dateB;
-      } else {
-        return dateB - dateA;
-      }
+      const dateA = new Date(a.timestamp);
+      const dateB = new Date(b.timestamp);
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
     });
 
   return (
@@ -79,6 +82,11 @@ const UserActivityLogs = () => {
             <option value="Logout">Logout</option>
             <option value="Profile Edit">Profile Edit</option>
             <option value="App Access">App Access</option>
+            <option value="Profile View">Profile View</option>
+            <option value="User Edit">User Edit</option>
+            <option value="Ticket Submission">Ticket Submission</option>
+            <option value="Ticket Creation">Ticket Creation</option>
+            <option value="Ticket Completion">Ticket Completion</option>
           </select>
 
           {/* Sort Order */}

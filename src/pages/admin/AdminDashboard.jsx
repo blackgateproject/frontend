@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityIcon, CheckSquare, Search, Ticket, Users } from 'lucide-react';
-import Sidebar from '../../components/Sidebar'
+import Sidebar from '../../components/Sidebar';
 import { Link } from 'react-router-dom';
 import UserActivity from '../../components/UserActivity';
 import Loader from "../../components/Loader";
@@ -13,7 +13,8 @@ const Dashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [pendingTickets, setPendingTickets] = useState(0);
-  
+  const [userActivities, setUserActivities] = useState([]);
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -33,8 +34,35 @@ const Dashboard = () => {
       }
     };
 
+    const fetchUserActivities = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/admin/v1/user-activity-logs');
+        if (!response.ok) throw new Error('Failed to fetch user activities');
+        const activities = await response.json();
+
+        const userResponse = await fetch('http://localhost:8000/admin/v1/getAllUsers');
+        if (!userResponse.ok) throw new Error('Failed to fetch user details');
+        const users = await userResponse.json();
+
+        const userMap = users.reduce((acc, user) => {
+          acc[user.id] = user.email;
+          return acc;
+        }, {});
+
+        const userActivitiesWithDetails = activities.map(activity => ({
+          ...activity,
+          name: userMap[activity.user_id] || 'Unknown User',
+        }));
+
+        setUserActivities(userActivitiesWithDetails);
+      } catch (error) {
+        console.error('Error fetching user activities:', error);
+      }
+    };
+
     fetchStats();
     fetchPendingTickets();
+    fetchUserActivities();
   }, []);
 
   const fetchPendingTickets = async () => {
@@ -51,16 +79,6 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
-
-  // Placeholder data for user activity (Replace with backend data)
-  const userActivities = [
-    { name: 'Abdullah Abubaker', activity: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', date: '12/10/24 4:53 PM', type: 'Login' },
-    { name: 'Muhammad Qasim', activity: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', date: '12/10/24 4:53 PM', type: 'Logout' },
-    { name: 'Awais Shahid', activity: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', date: '12/10/24 4:53 PM', type: 'Profile Edit' },
-    { name: 'Taha Qaisar', activity: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', date: '12/10/24 4:53 PM', type: 'App Access' },
-    { name: 'Fahad Sheikh', activity: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', date: '12/10/24 4:53 PM', type: 'App Access' },
-    { name: 'Ubaid Ullah', activity: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit', date: '12/10/24 4:53 PM', type: 'App Access' },
-  ];
 
   return (
     <Sidebar role={"admin"}>
