@@ -8,20 +8,24 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import sampleQR from "../../assets/sample-QR.png";
+import { QRCode } from "react-qrcode-logo";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 
 const UserProfile = () => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [editingPersonal, setEditingPersonal] = useState(false);
   const [editingAuth, setEditingAuth] = useState(false);
   const [errors, setErrors] = useState({});
+  const [qrCode, setQrCode] = useState("0xScanYourPrivateKey");
+  const logoSize = 192;
 
   const [profile, setProfile] = useState({
-    firstName: "Abdullah",
-    lastName: "Abubaker",
-    email: "abdullah.abubaker@blackgate.com",
-    phone: "+92-300-456-8910",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
     passwordSet: true,
     twoFactorAuth: false,
   });
@@ -44,17 +48,22 @@ const UserProfile = () => {
             Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
           },
         });
+        if (response.status === 401 || response.status === 403) {
+          navigate("/");
+          return;
+        }
         const userData = await response.json();
         setProfile(userData);
       } catch (error) {
         console.error("Error fetching user profile:", error);
+        navigate("/");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchUserProfile();
-  }, []);
+  }, [navigate]);
 
   // Validation functions
   const validatePersonal = () => {
@@ -106,6 +115,25 @@ const UserProfile = () => {
     }
   };
 
+  const handleEnable2FA = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/user/v1/enable-2fa", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
+        },
+        body: JSON.stringify({ user_id: profile.id }),
+      });
+      const data = await response.json();
+      console.log("2FA enabled:", data.private_key + "\n" + data.public_key);
+      setQrCode(JSON.stringify(data)); // Update QR code value
+      document.getElementById("qr-modal").showModal();
+    } catch (error) {
+      console.error("Error enabling 2FA:", error);
+    }
+  };
+
   const handleSaveAuth = async () => {
     const validationErrors = validateAuth();
     if (Object.keys(validationErrors).length > 0) {
@@ -122,6 +150,9 @@ const UserProfile = () => {
         passwordSet: authForm.newPassword ? true : prev.passwordSet,
         twoFactorAuth: authForm.twoFactorAuth,
       }));
+      if (authForm.twoFactorAuth) {
+        await handleEnable2FA();
+      }
       setEditingAuth(false);
       setAuthForm({
         newPassword: "",
@@ -164,7 +195,17 @@ const UserProfile = () => {
             Scan this code with the BlackGate mobile app on your phone to enable
             2-Factor Authentication.
           </p>
-          <img src={sampleQR} alt="QR Code" className="w-48 h-48 mx-auto" />
+          <div className="flex justify-center">
+            <QRCode
+              value={qrCode}
+              // logoImage={logo}
+              // removeQrCodeBehindLogo={true}
+              size={logoSize * 1.2}
+              // logoHeight={logoSize * 0.4}
+              // logoWidth={logoSize * 0.4}
+            />
+          </div>
+          <p className="text-center mt-4 break-words">{qrCode}</p>
           <div className="modal-action">
             <button
               className="btn"
@@ -441,13 +482,14 @@ const UserProfile = () => {
                       <input
                         type="checkbox"
                         checked={authForm.twoFactorAuth}
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           setAuthForm({
                             ...authForm,
                             twoFactorAuth: e.target.checked,
                           });
-                          if (e.target.checked)
-                            document.getElementById("qr-modal").showModal();
+                          if (e.target.checked) {
+                            await handleEnable2FA();
+                          }
                         }}
                         className="checkbox checkbox-primary"
                       />
