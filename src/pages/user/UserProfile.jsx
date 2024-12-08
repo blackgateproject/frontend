@@ -200,7 +200,7 @@ const UserProfile = () => {
               value={qrCode}
               // logoImage={logo}
               // removeQrCodeBehindLogo={true}
-              size={logoSize * 1.2}
+              size={logoSize * 1.5}
               // logoHeight={logoSize * 0.4}
               // logoWidth={logoSize * 0.4}
             />
