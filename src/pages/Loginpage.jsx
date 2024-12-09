@@ -111,6 +111,14 @@ const LoginPage = ({ role }) => {
   return (
     <div className="h-screen flex items-center justify-center bg-gradient-to-r from-purple-600 to-pink-600">
       <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
+        {(step === 2 || step === 3) && (
+          <button
+            onClick={() => window.location.reload()}
+            className="btn btn-sm btn-outline mb-4"
+          >
+            Back
+          </button>
+        )}
         <img src={logo} alt="logo" className="w-24 mx-auto mb-4" />
         <h2 className="text-center text-3xl font-bold mb-6 text-primary">
           BLACKGATE
@@ -178,30 +186,32 @@ const LoginPage = ({ role }) => {
           )}
         </div>
 
-        <div className="mt-4 text-center">
-          <button
-            onClick={async () => {
-              setEmail("a@admin.com");
-              await handleEmailSubmit();
-              setPassword("123456");
-              handleLogin();
-            }}
-            className="btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl"
-          >
-            Login as Admin
-          </button>
-          <button
-            onClick={async () => {
-              setEmail("a@user.com");
-              await handleEmailSubmit();
-              setPassword("123456");
-              await handleLogin();
-            }}
-            className="btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl"
-          >
-            Login as User
-          </button>
-        </div>
+        {step === 1 && !enabled2fa && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={async () => {
+                setEmail("a@admin.com");
+                await handleEmailSubmit();
+                setPassword("123456");
+                handleLogin();
+              }}
+              className="btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl"
+            >
+              Login as Admin
+            </button>
+            <button
+              onClick={async () => {
+                setEmail("a@user.com");
+                await handleEmailSubmit();
+                setPassword("123456");
+                await handleLogin();
+              }}
+              className="btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl"
+            >
+              Login as User
+            </button>
+          </div>
+        )}
         <div className="mt-4 text-center">
           <a href="/forgot-password" className="text-purple-600">
             Forgot Password?
