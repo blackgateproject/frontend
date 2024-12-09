@@ -6,19 +6,50 @@ const LoginPage = ({ role }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [enabled2fa, setEnabled2fa] = useState(false);
-  const [step, setStep] = useState(1); // 1: email, 2: 2fa/password
+  const [step, setStep] = useState(1); // 1: email, 2: fetching 2fa state, 3: 2fa/password
   const [sliding, setSliding] = useState(false);
   const navigate = useNavigate();
 
-  const handleNextStep = async (e) => {
-    e.preventDefault();
-    setSliding(true);
-    await fetchUser();
+  const fetchUserUUIDAnd2FA = async (email) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/auth/v1/get-uuid`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
 
-    setTimeout(() => {
-      setStep(2);
-      setSliding(false);
-    }, 300);
+      if (response.ok) {
+        const data = await response.json();
+        const uuid = data.uuid;
+
+        const twoFAResponse = await fetch(`http://127.0.0.1:8000/auth/v1/get-2fa-state`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({ uuid }),
+        });
+
+        if (twoFAResponse.ok) {
+          const twoFAData = await twoFAResponse.json();
+          setEnabled2fa(twoFAData.enabled2fa);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching user UUID and 2FA state:", error);
+    }
+  };
+
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    console.log('Fetching 2fa state for email: ', email);
+    setSliding(true);
+    setStep(2);
+    await fetchUserUUIDAnd2FA(email);
+    setSliding(false);
+    setStep(3);
   };
 
   const handleLogin = async (e) => {
@@ -30,16 +61,6 @@ const LoginPage = ({ role }) => {
       email: email,
       password: password,
     };
-
-    // if (email) {
-    //   const domain = email.split("@")[1];
-    //   if (domain !== "admin.com" && domain !== "user.com") {
-    //     alert(
-    //       "Invalid email domain, please use either @admin.com or @user.com"
-    //     );
-    //     return;
-    //   }
-    // }
 
     console.log("USER: ", JSON.stringify(user));
 
@@ -63,7 +84,6 @@ const LoginPage = ({ role }) => {
         navigate(`/${data.role}/dashboard`);
 
         if (data["error"]) {
-          // alert("Server Error: " + data["error"]);
           console.log("Response: ", data["error"]);
         }
 
@@ -74,8 +94,7 @@ const LoginPage = ({ role }) => {
         console.log("Set Refresh Token: ", data.refresh_token);
         console.log("Set UUID: ", data.uuid);
       } else {
-        // alert("Server Error: " + data["error"]);
-        // console.log("Response: ", data["error"]);
+        console.log("Response: ", data["error"]);
       }
     } else {
       const errorData = await response.json();
@@ -87,15 +106,6 @@ const LoginPage = ({ role }) => {
           errorData.error
       );
     }
-  };
-
-  const fetchUser = async () => {
-    console.log(email);
-    const user = {
-      email: "johndoe@mail.com",
-      enabled2fa: false,
-    };
-    setEnabled2fa(user.enabled2fa);
   };
 
   return (
@@ -112,7 +122,7 @@ const LoginPage = ({ role }) => {
           }`}
         >
           {step === 1 ? (
-            <form onSubmit={handleNextStep}>
+            <form onSubmit={handleEmailSubmit}>
               <div className="mb-4">
                 <input
                   type="email"
@@ -127,6 +137,10 @@ const LoginPage = ({ role }) => {
                 Next
               </button>
             </form>
+          ) : step === 2 ? (
+            <div className="text-center">
+              <p className="mb-4">Fetching 2FA state...</p>
+            </div>
           ) : (
             <div
               className={`transition-transform duration-300 ${
@@ -168,7 +182,7 @@ const LoginPage = ({ role }) => {
           <button
             onClick={async () => {
               setEmail("a@admin.com");
-              handleNextStep();
+              await handleEmailSubmit();
               setPassword("123456");
               handleLogin();
             }}
@@ -179,6 +193,7 @@ const LoginPage = ({ role }) => {
           <button
             onClick={async () => {
               setEmail("a@user.com");
+              await handleEmailSubmit();
               setPassword("123456");
               await handleLogin();
             }}
