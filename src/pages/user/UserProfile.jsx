@@ -126,8 +126,9 @@ const UserProfile = () => {
         body: JSON.stringify({ user_id: profile.id }),
       });
       const data = await response.json();
+      const uuid = sessionStorage.getItem("uuid"); // Get the UUID from sessionStorage
       console.log("2FA enabled:", data.private_key + "\n" + data.public_key);
-      setQrCode(JSON.stringify(data)); // Update QR code value
+      setQrCode(JSON.stringify({ ...data, uuid })); // Update QR code value with UUID
       document.getElementById("qr-modal").showModal();
     } catch (error) {
       console.error("Error enabling 2FA:", error);
