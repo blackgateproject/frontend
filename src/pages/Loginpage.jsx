@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 
@@ -8,6 +8,7 @@ const LoginPage = ({ role }) => {
   const [enabled2fa, setEnabled2fa] = useState(false);
   const [step, setStep] = useState(1); // 1: email, 2: fetching 2fa state, 3: 2fa/password
   const [sliding, setSliding] = useState(false);
+  const [uuid, setUuid] = useState("");
   const navigate = useNavigate();
 
   const fetchUserUUIDAnd2FA = async (email) => {
@@ -23,6 +24,7 @@ const LoginPage = ({ role }) => {
       if (response.ok) {
         const data = await response.json();
         const uuid = data.uuid;
+        setUuid(uuid);
 
         const twoFAResponse = await fetch(`http://127.0.0.1:8000/auth/v1/get-2fa-state`, {
           method: "POST",
@@ -41,6 +43,62 @@ const LoginPage = ({ role }) => {
       console.error("Error fetching user UUID and 2FA state:", error);
     }
   };
+
+  const handle2FAState = async (uuid, state) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/auth/v1/set-2fa-state`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ uuid, state }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to set 2FA state");
+      }
+    } catch (error) {
+      console.error("Error setting 2FA state:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (enabled2fa && step === 3) {
+      handle2FAState(uuid, true);
+    }
+  }, [enabled2fa, step]);
+
+  const query2FASession = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/auth/v1/2fa-frontend-check`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ uuid }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.isLoginAccepted) {
+          sessionStorage.setItem("access_token", data.access_token);
+          sessionStorage.setItem("refresh_token", data.refresh_token);
+          sessionStorage.setItem("uuid", uuid);
+          // navigate(`/${data.role}/dashboard`);
+          navigate(`/user/dashboard`);
+        }
+      }
+    } catch (error) {
+      console.error("Error querying 2FA session:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (enabled2fa && step === 3) {
+      const interval = setInterval(query2FASession, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [enabled2fa, step]);
 
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
