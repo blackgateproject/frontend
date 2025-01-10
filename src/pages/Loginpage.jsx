@@ -13,7 +13,7 @@ const LoginPage = ({ role }) => {
 
   const fetchUserUUIDAnd2FA = async (email) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/auth/v1/get-uuid`, {
+      const response = await fetch(`http://127.0.0.1:8000/auth/v1/get-uuid-and-2fa`, {
         method: "POST",
         headers: {
           "content-type": "application/json",
@@ -23,21 +23,8 @@ const LoginPage = ({ role }) => {
 
       if (response.ok) {
         const data = await response.json();
-        const uuid = data.uuid;
-        setUuid(uuid);
-
-        const twoFAResponse = await fetch(`http://127.0.0.1:8000/auth/v1/get-2fa-state`, {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({ uuid }),
-        });
-
-        if (twoFAResponse.ok) {
-          const twoFAData = await twoFAResponse.json();
-          setEnabled2fa(twoFAData.enabled2fa);
-        }
+        setUuid(data.uuid);
+        setEnabled2fa(data.enabled2fa);
       }
     } catch (error) {
       console.error("Error fetching user UUID and 2FA state:", error);
