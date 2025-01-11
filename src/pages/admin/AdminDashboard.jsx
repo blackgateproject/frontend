@@ -14,35 +14,21 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [pendingTickets, setPendingTickets] = useState(0);
   const [userActivities, setUserActivities] = useState([]);
-
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchStatsAndActivities = async () => {
       try {
-        const response = await fetch("http://localhost:8000/admin/v1/getUsers");
-        if (!response.ok) throw new Error('Failed to fetch users');
-        
-        const users = await response.json();
-        setStats({
-          totalUsers: users.length,
-          onlineUsers: users.filter(user => user.online).length,
-          pendingTickets: 6 // Hardcoded for now
-        });
-      } catch (error) {
-        console.error("Error fetching stats:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchUserActivities = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/admin/v1/user-activity-logs');
-        if (!response.ok) throw new Error('Failed to fetch user activities');
-        const activities = await response.json();
-
         const userResponse = await fetch('http://localhost:8000/admin/v1/getAllUsers');
         if (!userResponse.ok) throw new Error('Failed to fetch user details');
         const users = await userResponse.json();
+
+        setStats({
+          totalUsers: users.length,
+          onlineUsers: users.filter(user => user.online.toString().toLowerCase() === 'true').length,
+        });
+
+        const activityResponse = await fetch('http://localhost:8000/admin/v1/user-activity-logs');
+        if (!activityResponse.ok) throw new Error('Failed to fetch user activities');
+        const activities = await activityResponse.json();
 
         const userMap = users.reduce((acc, user) => {
           acc[user.id] = user.email;
@@ -56,13 +42,14 @@ const Dashboard = () => {
 
         setUserActivities(userActivitiesWithDetails);
       } catch (error) {
-        console.error('Error fetching user activities:', error);
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchStats();
+    fetchStatsAndActivities();
     fetchPendingTickets();
-    fetchUserActivities();
   }, []);
 
   const fetchPendingTickets = async () => {
