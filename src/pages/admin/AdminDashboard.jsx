@@ -14,58 +14,30 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [pendingTickets, setPendingTickets] = useState(0);
   const [userActivities, setUserActivities] = useState([]);
+
   useEffect(() => {
-    const fetchStatsAndActivities = async () => {
+    const fetchDashboardStats = async () => {
+      setLoading(true);
       try {
-        const userResponse = await fetch('http://localhost:8000/admin/v1/getAllUsers');
-        if (!userResponse.ok) throw new Error('Failed to fetch user details');
-        const users = await userResponse.json();
+        const response = await fetch('http://localhost:8000/admin/v1/dashboard');
+        if (!response.ok) throw new Error('Failed to fetch dashboard stats');
+        const data = await response.json();
 
         setStats({
-          totalUsers: users.length,
-          onlineUsers: users.filter(user => user.online.toString().toLowerCase() === 'true').length,
+          totalUsers: data.totalUsers,
+          onlineUsers: data.onlineUsers,
+          pendingTickets: data.pendingTickets
         });
-
-        const activityResponse = await fetch('http://localhost:8000/admin/v1/user-activity-logs');
-        if (!activityResponse.ok) throw new Error('Failed to fetch user activities');
-        const activities = await activityResponse.json();
-
-        const userMap = users.reduce((acc, user) => {
-          acc[user.id] = user.email;
-          return acc;
-        }, {});
-
-        const userActivitiesWithDetails = activities.map(activity => ({
-          ...activity,
-          name: userMap[activity.user_id] || 'Unknown User',
-        }));
-
-        setUserActivities(userActivitiesWithDetails);
+        setUserActivities(data.userActivities);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching dashboard stats:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStatsAndActivities();
-    fetchPendingTickets();
+    fetchDashboardStats();
   }, []);
-
-  const fetchPendingTickets = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("http://127.0.0.1:8000/admin/v1/tickets");
-      if (!response.ok) throw new Error("Failed to fetch tickets");
-      const data = await response.json();
-      const pendingCount = data.filter(ticket => ticket.status === "pending").length;
-      setPendingTickets(pendingCount);
-    } catch (error) {
-      console.error("Error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <Sidebar role={"admin"}>
