@@ -44,10 +44,12 @@ const AddUser = () => {
 
     setIsLoading(true);
     try {
+      const accessToken = sessionStorage.getItem("access_token") || "";
       const response = await fetch("http://localhost:8000/admin/v1/addUser", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(form),
       });
@@ -202,9 +204,7 @@ const AddUser = () => {
               <option value="admin">Admin</option>
             </select>
           </div>
-          {errors.form && (
-            <p className="text-red-500 text-sm">{errors.form}</p>
-          )}
+          {errors.form && <p className="text-red-500 text-sm">{errors.form}</p>}
           <div>
             <button
               type="submit"

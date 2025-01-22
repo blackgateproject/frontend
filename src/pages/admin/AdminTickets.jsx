@@ -29,7 +29,13 @@ const Tickets = () => {
   const fetchTickets = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://127.0.0.1:8000/admin/v1/tickets");
+      const accessToken = sessionStorage.getItem("access_token") || "";
+
+      const response = await fetch("http://127.0.0.1:8000/admin/v1/tickets", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       if (!response.ok) throw new Error("Failed to fetch tickets");
       const data = await response.json();
       setTickets(
@@ -51,6 +57,8 @@ const Tickets = () => {
 
   const handleComplete = async (ticketId) => {
     document.getElementById("confirm-modal").close();
+    const accessToken = sessionStorage.getItem("access_token") || "";
+
     setLoading(true);
     try {
       const response = await fetch(
@@ -59,6 +67,7 @@ const Tickets = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );

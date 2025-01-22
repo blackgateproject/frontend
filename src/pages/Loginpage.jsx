@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 
@@ -13,13 +13,19 @@ const LoginPage = ({ role }) => {
 
   const fetchUserUUIDAnd2FA = async (email) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/auth/v1/get-uuid-and-2fa`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
+      const accessToken = sessionStorage.getItem("access_token") || "";
+
+      const response = await fetch(
+        // `http://127.0.0.1:8000/auth/v1/get-uuid-and-2fa`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            // Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -33,13 +39,19 @@ const LoginPage = ({ role }) => {
 
   const handle2FAState = async (uuid, state) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/auth/v1/set-2fa-state`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ uuid, state }),
-      });
+      // const accessToken = sessionStorage.getItem("access_token") || "";
+
+      const response = await fetch(
+        `http://127.0.0.1:8000/auth/v1/set-2fa-state`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            // Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ uuid, state }),
+        }
+      );
 
       if (!response.ok) {
         console.error("Failed to set 2FA state");
@@ -57,13 +69,19 @@ const LoginPage = ({ role }) => {
 
   const query2FASession = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/auth/v1/2fa-frontend-check`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ uuid }),
-      });
+      // const accessToken = sessionStorage.getItem("access_token") || "";
+
+      const response = await fetch(
+        `http://127.0.0.1:8000/auth/v1/2fa-frontend-check`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            // Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ uuid }),
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -89,7 +107,7 @@ const LoginPage = ({ role }) => {
 
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
-    console.log('Fetching 2fa state for email: ', email);
+    console.log("Fetching 2fa state for email: ", email);
     setSliding(true);
     setStep(2);
     await fetchUserUUIDAnd2FA(email);
@@ -99,13 +117,13 @@ const LoginPage = ({ role }) => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     const URL = "http://127.0.0.1:8000/auth/v1/verify";
 
     const user = {
       email: email,
       password: password,
     };
+
 
     console.log("USER: ", JSON.stringify(user));
 

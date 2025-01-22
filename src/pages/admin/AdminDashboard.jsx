@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { ActivityIcon, CheckSquare, Search, Ticket, Users } from 'lucide-react';
-import Sidebar from '../../components/Sidebar';
-import { Link } from 'react-router-dom';
-import UserActivity from '../../components/UserActivity';
-import Loader from "../../components/Loader";
+import { ActivityIcon, CheckSquare, Search, Ticket, Users } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import Sidebar from "../../components/Sidebar";
+import UserActivity from "../../components/UserActivity";
 
 const Dashboard = () => {
+  const accessToken = sessionStorage.getItem("access_token") || "";
   const [stats, setStats] = useState({
     totalUsers: 0,
     onlineUsers: 0,
-    pendingTickets: 0
+    pendingTickets: 0,
   });
+
   const [loading, setLoading] = useState(true);
   const [pendingTickets, setPendingTickets] = useState(0);
   const [userActivities, setUserActivities] = useState([]);
@@ -19,18 +20,25 @@ const Dashboard = () => {
     const fetchDashboardStats = async () => {
       setLoading(true);
       try {
-        const response = await fetch('http://localhost:8000/admin/v1/dashboard');
-        if (!response.ok) throw new Error('Failed to fetch dashboard stats');
+        const response = await fetch(
+          "http://localhost:8000/admin/v1/dashboard",
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        if (!response.ok) throw new Error("Failed to fetch dashboard stats");
         const data = await response.json();
 
         setStats({
           totalUsers: data.totalUsers,
           onlineUsers: data.onlineUsers,
-          pendingTickets: data.pendingTickets
+          pendingTickets: data.pendingTickets,
         });
         setUserActivities(data.userActivities);
       } catch (error) {
-        console.error('Error fetching dashboard stats:', error);
+        console.error("Error fetching dashboard stats:", error);
       } finally {
         setLoading(false);
       }
@@ -64,8 +72,10 @@ const Dashboard = () => {
           <div className="bg-base-100 lg:w-48 rounded-2xl shadow-md p-6 flex items-center justify-between">
             <div>
               <div className="flex gap-1 items-center">
-                <Users className='text-primary' size={30} />
-                <h2 className="text-4xl font-bold text-primary">{loading ? '...' : stats.totalUsers}</h2>
+                <Users className="text-primary" size={30} />
+                <h2 className="text-4xl font-bold text-primary">
+                  {loading ? "..." : stats.totalUsers}
+                </h2>
               </div>
               <p className="text-gray-500">Total Users</p>
             </div>
@@ -73,8 +83,10 @@ const Dashboard = () => {
           <div className="bg-base-100 lg:w-48 rounded-2xl shadow-md p-6 flex items-center justify-between">
             <div>
               <div className="flex gap-3 items-center">
-                <CheckSquare className='text-primary' size={30} />
-                <h2 className="text-4xl font-bold text-primary">{loading ? '...' : stats.onlineUsers}</h2>
+                <CheckSquare className="text-primary" size={30} />
+                <h2 className="text-4xl font-bold text-primary">
+                  {loading ? "..." : stats.onlineUsers}
+                </h2>
               </div>
               <p className="text-gray-500">Users Online</p>
             </div>
@@ -82,8 +94,10 @@ const Dashboard = () => {
           <div className="bg-base-100 lg:w-48 rounded-2xl shadow-md p-6 flex items-center justify-between">
             <div>
               <div className="flex gap-3 items-center">
-                <Ticket className='text-primary' size={30} />
-                <h2 className="text-4xl font-bold text-primary">{loading ? '...' : pendingTickets}</h2>
+                <Ticket className="text-primary" size={30} />
+                <h2 className="text-4xl font-bold text-primary">
+                  {loading ? "..." : pendingTickets}
+                </h2>
               </div>
               <p className="text-gray-500">Pending Tickets</p>
             </div>
@@ -91,12 +105,11 @@ const Dashboard = () => {
         </div>
 
         {/* User Activity Section */}
-        <div
-          className="bg-base-300 rounded-2xl shadow-md max-h-[34rem] overflow-y-scroll p-6 mb-4"
-          
-        >
+        <div className="bg-base-300 rounded-2xl shadow-md max-h-[34rem] overflow-y-scroll p-6 mb-4">
           <div className="w-full flex justify-between items-center my-3 mb-5">
-            <h2 className="text-2xl font-bold mb-4 text-[#333333]">User Activity</h2>
+            <h2 className="text-2xl font-bold mb-4 text-[#333333]">
+              User Activity
+            </h2>
             <Link
               to="/admin/user-activity"
               className="btn btn-primary flex items-center gap-2"
@@ -111,7 +124,6 @@ const Dashboard = () => {
         </div>
       </div>
     </Sidebar>
-
   );
 };
 

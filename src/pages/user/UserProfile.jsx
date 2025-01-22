@@ -39,13 +39,15 @@ const UserProfile = () => {
 
   useEffect(() => {
     const fetchUserProfile = async () => {
+      const accessToken = sessionStorage.getItem("access_token") || "";
+
       setIsLoading(true);
       try {
         const response = await fetch("http://127.0.0.1:8000/user/v1/profile", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         });
         if (response.status === 401 || response.status === 403) {

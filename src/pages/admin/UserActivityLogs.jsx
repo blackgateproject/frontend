@@ -1,23 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import Sidebar from '../../components/Sidebar';
-import UserActivity from '../../components/UserActivity';
-import { Search } from 'lucide-react';
+import { Search } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import Sidebar from "../../components/Sidebar";
+import UserActivity from "../../components/UserActivity";
 
 const UserActivityLogs = () => {
+  const accessToken = sessionStorage.getItem("access_token") || "";
+
   const [userActivitiesData, setUserActivitiesData] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState('All');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState("All");
+  const [sortOrder, setSortOrder] = useState("desc");
 
   useEffect(() => {
     const fetchUserActivities = async () => {
       try {
-        const response = await fetch('http://localhost:8000/admin/v1/user-activity-logs');
-        if (!response.ok) throw new Error('Failed to fetch user activities');
+        const response = await fetch(
+          "http://localhost:8000/admin/v1/user-activity-logs",
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        if (!response.ok) throw new Error("Failed to fetch user activities");
         const activities = await response.json();
 
-        const userResponse = await fetch('http://localhost:8000/admin/v1/getAllUsers');
-        if (!userResponse.ok) throw new Error('Failed to fetch user details');
+        const userResponse = await fetch(
+          "http://localhost:8000/admin/v1/getAllUsers",
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        if (!userResponse.ok) throw new Error("Failed to fetch user details");
         const users = await userResponse.json();
 
         const userMap = users.reduce((acc, user) => {
@@ -25,14 +41,14 @@ const UserActivityLogs = () => {
           return acc;
         }, {});
 
-        const userActivitiesWithDetails = activities.map(activity => ({
+        const userActivitiesWithDetails = activities.map((activity) => ({
           ...activity,
-          name: userMap[activity.user_id] || 'Unknown User',
+          name: userMap[activity.user_id] || "Unknown User",
         }));
 
         setUserActivitiesData(userActivitiesWithDetails);
       } catch (error) {
-        console.error('Error fetching user activities:', error);
+        console.error("Error fetching user activities:", error);
       }
     };
 
@@ -54,15 +70,17 @@ const UserActivityLogs = () => {
   const filteredActivities = userActivitiesData
     .filter((activity) => {
       const matchesSearch =
-        (activity.name && activity.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (activity.activity && activity.activity.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchesType = filterType === 'All' || activity.type === filterType;
+        (activity.name &&
+          activity.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (activity.activity &&
+          activity.activity.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesType = filterType === "All" || activity.type === filterType;
       return matchesSearch && matchesType;
     })
     .sort((a, b) => {
       const dateA = new Date(a.timestamp);
       const dateB = new Date(b.timestamp);
-      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
     });
 
   return (

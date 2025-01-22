@@ -22,12 +22,14 @@ const AdminProfile = () => {
   useEffect(() => {
     const fetchAdminProfile = async () => {
       setIsLoading(true);
+      const accessToken = sessionStorage.getItem("access_token") || "";
+
       try {
         const response = await fetch("http://127.0.0.1:8000/admin/v1/profile", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         });
         const adminData = await response.json();
@@ -72,6 +74,8 @@ const AdminProfile = () => {
 
   // Save handlers with dummy API calls
   const handleSavePersonal = async () => {
+    const accessToken = sessionStorage.getItem("access_token") || "";
+
     const validationErrors = validatePersonal();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -86,6 +90,7 @@ const AdminProfile = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify(editForm),
         }
@@ -105,6 +110,8 @@ const AdminProfile = () => {
   };
 
   const handleSaveAuth = async () => {
+    const accessToken = sessionStorage.getItem("access_token") || "";
+
     const validationErrors = validateAuth();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -119,6 +126,7 @@ const AdminProfile = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify(authForm),
         }

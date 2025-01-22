@@ -1,28 +1,44 @@
-import React, { useEffect, useState } from "react";
 import { Edit, Search, Trash2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../../components/Sidebar";
-import Modal from "../../components/Modal";
 import Loader from "../../components/Loader"; // Import the Loader component
+import Modal from "../../components/Modal";
+import Sidebar from "../../components/Sidebar";
 
 const AdminUsers = () => {
+  const accessToken = sessionStorage.getItem("access_token") || "";
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false); // State to control the loading status
   const [modalOpen, setModalOpen] = useState(false); // State to control Modal visibility
   const [selectedUser, setSelectedUser] = useState(null); // Store the selected user for editing
   const [editForm, setEditForm] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    role: '',
-    password: ''
+    firstName: "",
+    lastName: "",
+    email: "",
+    role: "",
+    password: "",
   });
   const navigate = useNavigate();
 
   // Dummy data to display if no users are fetched
   const dummyData = [
-    { id: 1, firstName: "John", lastName: "Doe", email: "john.doe@example.com", role: "user", online: true },
-    { id: 2, firstName: "Jane", lastName: "Smith", email: "jane.smith@example.com", role: "admin", online: false },
+    {
+      id: 1,
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+      role: "user",
+      online: true,
+    },
+    {
+      id: 2,
+      firstName: "Jane",
+      lastName: "Smith",
+      email: "jane.smith@example.com",
+      role: "admin",
+      online: false,
+    },
   ];
 
   // Fetch users from the backend
@@ -50,13 +66,19 @@ const AdminUsers = () => {
 
   // Handle delete user with confirmation
   const handleDeleteUser = async (userId) => {
-    const confirmed = window.confirm("Are you sure you want to delete this user?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this user?"
+    );
     if (!confirmed) return;
 
     setLoading(true);
     try {
       await fetch(`http://127.0.0.1:8000/admin/v1/deleteUser/${userId}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
       // Remove the user from the state after successful deletion
       setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
@@ -75,26 +97,29 @@ const AdminUsers = () => {
       lastName: user.lastName,
       email: user.email,
       role: user.role,
-      password: ''
+      password: "",
     });
     setModalOpen(true); // Open the modal
   };
 
   // Handle modal submit (edit user)
   const handleModalSubmit = async () => {
-    const confirmed = window.confirm("Are you sure you want to save these changes?");
+    const confirmed = window.confirm(
+      "Are you sure you want to save these changes?"
+    );
     if (!confirmed) return;
 
     setLoading(true);
     try {
       const updatedUserData = {
         ...selectedUser,
-        ...editForm
+        ...editForm,
       };
       const response = await fetch("http://127.0.0.1:8000/admin/v1/editUser", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(updatedUserData),
       });
@@ -159,7 +184,7 @@ const AdminUsers = () => {
                 <div className="flex items-center space-x-2">
                   <div className="flex flex-col">
                     <h2 className="text-lg font-semibold text-[#333333]">
-                      {user.firstName +" " +user.lastName}
+                      {user.firstName + " " + user.lastName}
                     </h2>
                     <p className="text-sm text-gray-500">{user.email}</p>
                     <p className="text-sm text-gray-500">{user.role}</p>
@@ -203,26 +228,34 @@ const AdminUsers = () => {
                 type="text"
                 placeholder={selectedUser.firstName}
                 value={editForm.firstName}
-                onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, firstName: e.target.value })
+                }
                 className="input input-bordered w-full"
               />
               <input
                 type="text"
                 placeholder={selectedUser.lastName}
                 value={editForm.lastName}
-                onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, lastName: e.target.value })
+                }
                 className="input input-bordered w-full"
               />
               <input
                 type="email"
                 placeholder={selectedUser.email}
                 value={editForm.email}
-                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, email: e.target.value })
+                }
                 className="input input-bordered w-full"
               />
               <select
                 value={editForm.role}
-                onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, role: e.target.value })
+                }
                 className="select select-bordered w-full"
               >
                 <option value="user">User</option>
@@ -232,7 +265,9 @@ const AdminUsers = () => {
                 type="password"
                 placeholder="Password"
                 value={editForm.password}
-                onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, password: e.target.value })
+                }
                 className="input input-bordered w-full"
               />
             </div>
