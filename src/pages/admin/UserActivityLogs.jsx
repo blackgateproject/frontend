@@ -22,6 +22,11 @@ const UserActivityLogs = () => {
             },
           }
         );
+        if (response.status === 401) {
+          console.log("Redirecting to:", "/");
+          window.location.href = "/";
+          return;
+        }
         if (!response.ok) throw new Error("Failed to fetch user activities");
         const activities = await response.json();
 
@@ -33,6 +38,11 @@ const UserActivityLogs = () => {
             },
           }
         );
+        if (response.status === 401) {
+          console.log("Redirecting to:", "/");
+          window.location.href = "/";
+          return;
+        }
         if (!userResponse.ok) throw new Error("Failed to fetch user details");
         const users = await userResponse.json();
 

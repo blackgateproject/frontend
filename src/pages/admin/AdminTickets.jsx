@@ -36,6 +36,11 @@ const Tickets = () => {
           Authorization: `Bearer ${accessToken}`,
         },
       });
+      if (response.status === 401) {
+        console.log("Redirecting to:", "/");
+        window.location.href = "/";
+        return;
+      }
       if (!response.ok) throw new Error("Failed to fetch tickets");
       const data = await response.json();
       setTickets(
@@ -71,6 +76,11 @@ const Tickets = () => {
           },
         }
       );
+      if (response.status === 401) {
+        console.log("Redirecting to:", "/");
+        window.location.href = "/";
+        return;
+      }
       if (!response.ok) throw new Error("Failed to complete ticket");
       await fetchTickets();
     } catch (error) {

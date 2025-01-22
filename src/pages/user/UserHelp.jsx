@@ -28,6 +28,11 @@ const Help = () => {
           user_id: sessionStorage.getItem("uuid"),
         }),
       });
+      if (response.status === 401) {
+        console.log("Redirecting to:", "/");
+        window.location.href = "/";
+        return;
+      }
 
       if (!response.ok) throw new Error("Failed to submit ticket");
 

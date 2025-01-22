@@ -53,6 +53,11 @@ const AddUser = () => {
         },
         body: JSON.stringify(form),
       });
+      if (response.status === 401) {
+        console.log("Redirecting to:", "/");
+        window.location.href = "/";
+        return;
+      }
       if (response.ok) {
         navigate("/admin/users");
       } else {

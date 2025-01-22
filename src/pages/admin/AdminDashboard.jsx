@@ -28,7 +28,13 @@ const Dashboard = () => {
             },
           }
         );
+        if (response.status === 401) {
+          console.log("Redirecting to:", "/");
+          window.location.href = "/";
+          return;
+        }
         if (!response.ok) throw new Error("Failed to fetch dashboard stats");
+
         const data = await response.json();
 
         setStats({

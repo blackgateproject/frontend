@@ -50,8 +50,9 @@ const UserProfile = () => {
             Authorization: `Bearer ${accessToken}`,
           },
         });
-        if (response.status === 401 || response.status === 403) {
-          navigate("/");
+        if (response.status === 401) {
+          console.log("Redirecting to:", "/");
+          window.location.href = "/";
           return;
         }
         const userData = await response.json();

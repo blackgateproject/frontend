@@ -32,6 +32,11 @@ const AdminProfile = () => {
             Authorization: `Bearer ${accessToken}`,
           },
         });
+        if (response.status === 401) {
+          console.log("Redirecting to:", "/");
+          window.location.href = "/";
+          return;
+        }
         const adminData = await response.json();
         setProfile(adminData);
       } catch (error) {
@@ -95,6 +100,11 @@ const AdminProfile = () => {
           body: JSON.stringify(editForm),
         }
       );
+      if (response.status === 401) {
+        console.log("Redirecting to:", "/");
+        window.location.href = "/";
+        return;
+      }
 
       if (!response.ok) throw new Error("Failed to update profile");
 

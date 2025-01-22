@@ -45,13 +45,17 @@ const AdminUsers = () => {
   const getUsers = async () => {
     setLoading(true);
     try {
-      const accessToken = sessionStorage.getItem("access_token") || "";
-
       const response = await fetch("http://127.0.0.1:8000/admin/v1/getUsers", {
         headers: {
+          "content-type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
       });
+      if (response.status === 401) {
+        console.log("Redirecting to:", "/");
+        window.location.href = "/"
+        return;
+      }
       const data = await response.json();
       if (!Array.isArray(data) || data.length === 0) {
         setUsers(dummyData); // Set dummy data if fetched data is not an array or empty
@@ -79,13 +83,21 @@ const AdminUsers = () => {
 
     setLoading(true);
     try {
-      await fetch(`http://127.0.0.1:8000/admin/v1/deleteUser/${userId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `http://127.0.0.1:8000/admin/v1/deleteUser/${userId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      if (response.status === 302) {
+        const redirectUrl = response.headers.get("Location");
+        window.location.href = redirectUrl;
+        return;
+      }
       // Remove the user from the state after successful deletion
       setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
     } catch (error) {
@@ -129,6 +141,11 @@ const AdminUsers = () => {
         },
         body: JSON.stringify(updatedUserData),
       });
+      if (response.status === 302) {
+        const redirectUrl = response.headers.get("Location");
+        window.location.href = redirectUrl;
+        return;
+      }
       const updatedUser = await response.json();
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
