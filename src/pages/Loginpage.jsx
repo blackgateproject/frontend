@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 
-const LoginPage = ({ role }) => {
+const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [enabled2fa, setEnabled2fa] = useState(false);
@@ -13,10 +13,10 @@ const LoginPage = ({ role }) => {
 
   const fetchUserUUIDAnd2FA = async (email) => {
     try {
-      const accessToken = sessionStorage.getItem("access_token") || "";
+      // const accessToken = sessionStorage.getItem("access_token") || "";
 
       const response = await fetch(
-        // `http://127.0.0.1:8000/auth/v1/get-uuid-and-2fa`,
+        `http://127.0.0.1:8000/auth/v1/get-uuid-and-2fa`,
         {
           method: "POST",
           headers: {
@@ -123,7 +123,6 @@ const LoginPage = ({ role }) => {
       email: email,
       password: password,
     };
-
 
     console.log("USER: ", JSON.stringify(user));
 
