@@ -45,7 +45,13 @@ const AdminUsers = () => {
   const getUsers = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://127.0.0.1:8000/admin/v1/getUsers");
+      const accessToken = sessionStorage.getItem("access_token") || "";
+
+      const response = await fetch("http://127.0.0.1:8000/admin/v1/getUsers", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       const data = await response.json();
       if (!Array.isArray(data) || data.length === 0) {
         setUsers(dummyData); // Set dummy data if fetched data is not an array or empty
