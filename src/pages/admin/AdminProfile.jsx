@@ -490,7 +490,7 @@ const AdminProfile = () => {
             </div>
           </div>
 
-          {/* Authentication Card */}
+          {/* Wallet Card */}
           <div className="bg-base-100 rounded-2xl shadow-md p-6 relative">
             <div className="absolute top-4 right-4">
               <button

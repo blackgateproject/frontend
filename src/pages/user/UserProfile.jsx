@@ -8,6 +8,7 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { ethers } from 'ethers';
 import { QRCode } from "react-qrcode-logo";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
@@ -19,6 +20,7 @@ const UserProfile = () => {
   const [editingAuth, setEditingAuth] = useState(false);
   const [errors, setErrors] = useState({});
   const [qrCode, setQrCode] = useState("0xScanYourPrivateKey");
+  const [account, setAccount] = useState(null);
   const logoSize = 192;
 
   const [profile, setProfile] = useState({
@@ -187,6 +189,24 @@ const UserProfile = () => {
       console.error("Error editing user:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const connectWallet = async () => {
+    try {
+      if (window.ethereum) {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const address = await signer.getAddress();
+        setAccount(address);
+
+      } else {
+        // navigate('/home');
+        alert('Please install MetaMask!');
+      }
+    } catch (err) {
+      console.error('Error in connectWallet:', err);
+      alert('Failed to connect wallet.');
     }
   };
 
@@ -502,6 +522,32 @@ const UserProfile = () => {
                   ) : (
                     <p>{profile.twoFactorAuth ? "Enabled" : "Disabled"}</p>
                   )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Wallet Card */}
+          <div className="bg-base-100 rounded-2xl shadow-md p-6 relative">
+            <div className="absolute top-4 right-4">
+              <button
+                className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
+                onClick={connectWallet}
+              >
+                Connect
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <KeyRound size={32} className="text-primary" />
+              <h2 className="text-xl font-bold text-[#333333]">
+                Wallet
+              </h2>
+            </div>
+            <div className="mt-6">
+              <div className="grid grid-cols-3 gap-y-4 items-center">
+              <p className="font-semibold">Wallet:</p>
+                <div className="col-span-2">
+                  <p>{account}</p>
                 </div>
               </div>
             </div>
