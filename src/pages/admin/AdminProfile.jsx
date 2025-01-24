@@ -495,9 +495,9 @@ const AdminProfile = () => {
             <div className="absolute top-4 right-4">
               <button
                 className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
-                onClick={() => {connectWallet}
-                }>
-                  Connect
+                onClick={connectWallet}
+              >
+                Connect
               </button>
             </div>
             <div className="flex gap-2">
