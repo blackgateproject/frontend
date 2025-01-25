@@ -48,7 +48,18 @@ const AdminProfile = () => {
       }
     };
 
+    const checkWalletConnection = async () => {
+      if (window.ethereum) {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const accounts = await provider.listAccounts();
+        if (accounts.length > 0) {
+          setAccount(accounts[0].address);
+        }
+      }
+    };
+
     fetchAdminProfile();
+    checkWalletConnection();
   }, []);
 
   const [editForm, setEditForm] = useState({ ...profile });
