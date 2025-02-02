@@ -1,5 +1,6 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
+import Onboarding from "./pages/Onboarding";
 import AddUser from "./pages/admin/AddUser";
 import AdminApplications from "./pages/admin/AdminApplications";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -48,6 +49,10 @@ function App() {
           path="/admin/user-activity"
           element={<UserActivityLogs role={"admin"} />}
         />
+        <Route
+          path="/admin/onboarding"
+          element={<Onboarding role={"admin"} />}
+        />
 
         {/* User Routes */}
         <Route
@@ -65,6 +70,11 @@ function App() {
         <Route
           path="/user/profile"
           element={<UserProfile role={"user"} />}
+        />
+
+        <Route
+          path="/user/onboarding"
+          element={<Onboarding role={"user"} />}
         />
       </Routes>
     </Router>
