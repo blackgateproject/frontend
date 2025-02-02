@@ -1,3 +1,6 @@
+import { issueCredential, resolveDID } from "@spruceid/didkit-wasm";
+import { Buffer } from "buffer";
+import { ethers, SigningKey } from "ethers";
 import {
   Check,
   Edit,
@@ -8,16 +11,23 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { ethers } from 'ethers';
 import sampleQR from "../../assets/sample-QR.png";
 import Sidebar from "../../components/Sidebar";
-
 const AdminProfile = () => {
+  // console.log("Resolve DID:", resolveDID("did:ethr:0x1234567890"));
   const [isLoading, setIsLoading] = useState(false);
   const [editingPersonal, setEditingPersonal] = useState(false);
   const [editingAuth, setEditingAuth] = useState(false);
   const [errors, setErrors] = useState({});
   const [account, setAccount] = useState(null);
+  const [didDetails, setDidDetails] = useState(null);
+  const [wallet, setWallet] = useState(null);
+  const [walletPassword, setWalletPassword] = useState("");
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isLoadingWallet, setIsLoadingWallet] = useState(false);
+  const [walletExists, setWalletExists] = useState(
+    !!localStorage.getItem("encryptedWallet")
+  );
 
   const [profile, setProfile] = useState({});
 
@@ -48,18 +58,7 @@ const AdminProfile = () => {
       }
     };
 
-    const checkWalletConnection = async () => {
-      if (window.ethereum) {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const accounts = await provider.listAccounts();
-        if (accounts.length > 0) {
-          setAccount(accounts[0].address);
-        }
-      }
-    };
-
     fetchAdminProfile();
-    checkWalletConnection();
   }, []);
 
   const [editForm, setEditForm] = useState({ ...profile });
@@ -177,22 +176,167 @@ const AdminProfile = () => {
     }
   };
 
-  const connectWallet = async () => {
+  const createWallet = async () => {
     try {
-      if (window.ethereum) {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const signer = await provider.getSigner();
-        const address = await signer.getAddress();
-        setAccount(address);
-
-      } else {
-        // navigate('/home');
-        alert('Please install MetaMask!');
-      }
+      setIsLoadingWallet(true);
+      const wallet = ethers.Wallet.createRandom();
+      const encryptedJson = await wallet.encrypt(walletPassword);
+      localStorage.setItem("encryptedWallet", encryptedJson);
+      setWallet(wallet);
+      setAccount(wallet.address);
+      setWalletExists(true);
+      console.log("Wallet created:", wallet);
+      console.log("Encrypted JSON:", encryptedJson);
     } catch (err) {
-      console.error('Error in connectWallet:', err);
-      alert('Failed to connect wallet.');
+      console.error("Error in createWallet:", err);
+      alert("Failed to create wallet.");
+    } finally {
+      setIsLoadingWallet(false);
+      setIsPasswordModalOpen(false);
     }
+  };
+
+  const getDIDandVC = async (did) => {
+    // try {
+    //   const response = await fetch(
+    //     `http://localhost:8000/blockchain/v1/resolveDID/${did}`,
+    //     {
+    //       method: "GET",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //     }
+    //   );
+    //   if (!response.ok) throw new Error("Failed to resolve DID");
+
+    //   const didDetails = await response.json();
+    //   setDidDetails(didDetails);
+    //   console.log("DID Details:", didDetails);
+    // } catch (error) {
+    //   console.error("Error resolving DID:", error);
+    //   alert("Failed to resolve DID.");
+    // }
+    const didDoc = await resolveDID(String(did), "{}");
+    console.log("DID Document:", didDoc);
+    const credential = JSON.stringify({
+      "@context": ["https://www.w3.org/2018/credentials/v1"],
+      type: ["VerifiableCredential"],
+      issuer: did,
+      credentialSubject: { id: "did:example:123" },
+      issuanceDate: new Date().toISOString(),
+    });
+
+    console.log("Credential:", credential);
+    const proof_options = JSON.stringify({
+      proofPurpose: "assertionMethod",
+      verificationMethod: `${did}#controller`,
+    });
+
+    console.log("Proof Options:", proof_options);
+
+    let newUncompPubKey = SigningKey.computePublicKey(
+      wallet.privateKey,
+      false
+    );
+    // console.log("New Uncompressed Public Key:", newUncompPubKey);
+    if (newUncompPubKey instanceof Uint8Array) {
+      newUncompPubKey = hexlify(newUncompPubKey);
+    }
+
+    // Remove the '0x04' prefix
+    const rawPubKey = newUncompPubKey.startsWith("0x04")
+      ? newUncompPubKey.slice(4)
+      : newUncompPubKey;
+    const newRawPubKey = "0x" + rawPubKey;
+    // console.log("Public Key with 0x prefix:", newRawPubKey);
+
+    const xPubKey = Buffer.from(newRawPubKey.slice(2, 66), "hex")
+      .toString("base64")
+      .replace(/=+$/, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_");
+    const yPubKey = Buffer.from(newRawPubKey.slice(66), "hex")
+      .toString("base64")
+      .replace(/=+$/, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_");
+    // console.log("X Public Key:", xPubKey);
+    // console.log("Y Public Key:", yPubKey);
+    const jwk = JSON.stringify({
+      kty: "EC",
+      crv: "secp256k1",
+      d: Buffer.from(wallet.privateKey.slice(2), "hex")
+        .toString("base64")
+        .replace(/=+$/, "")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_"),
+      x: xPubKey,
+      y: yPubKey,
+      // y: Buffer.from(wallet.publicKey.slice(32), "hex")
+      // .toString("base64")
+      // .replace(/=+$/, "")
+      // .replace(/\+/g, "-")
+      // .replace(/\//g, "_"),
+    });
+    // console.log("Wallet Private Key:", wallet.privateKey);
+    // const Uint8ArrayKey = new Uint8Array(Buffer.from(wallet.privateKey.slice(2), "hex"));
+    // const jwk = await exportJWK(Uint8ArrayKey)
+
+    console.log("JWK:", jwk);
+    const signed_vc = await issueCredential(
+      credential,
+      // "{}",
+      proof_options,
+      // "{}",
+      // String(wallet.privateKey)
+      jwk
+      // "{}"
+    );
+    console.log("Signed VC:", signed_vc);
+  };
+
+  const loadWallet = async () => {
+    const encryptedWallet = localStorage.getItem("encryptedWallet");
+    if (encryptedWallet) {
+      try {
+        setIsLoadingWallet(true);
+        const wallet = await ethers.Wallet.fromEncryptedJson(
+          encryptedWallet,
+          walletPassword
+        );
+        setWallet(wallet);
+        setAccount(wallet.address);
+        console.log("Wallet loaded:", wallet);
+        const did = "did:ethr:" + wallet.address;
+        console.log("DID:", did);
+        getDIDandVC(did);
+      } catch (err) {
+        console.error("Error in loadWallet:", err);
+        alert("Failed to load wallet.");
+      } finally {
+        setIsLoadingWallet(false);
+        setIsPasswordModalOpen(false);
+      }
+    } else {
+      alert("No wallet found. Please create a new wallet.");
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (walletExists) {
+      loadWallet();
+    } else {
+      createWallet();
+    }
+  };
+
+  const handleOpenPasswordModal = () => {
+    setIsPasswordModalOpen(true);
+    setIsLoadingWallet(false);
+    setTimeout(() => {
+      document.getElementById("wallet-password-input").focus();
+    }, 100);
   };
 
   return (
@@ -214,6 +358,43 @@ const AdminProfile = () => {
             </button>
           </div>
         </div>
+      </dialog>
+
+      <dialog id="password-modal" className="modal" open={isPasswordModalOpen}>
+        <form className="modal-box" onSubmit={handleSubmit}>
+          <h3 className="font-bold text-lg">Enter Wallet Password</h3>
+          <input
+            id="wallet-password-input"
+            type="password"
+            // value={walletPassword}
+            onChange={(e) => setWalletPassword(e.target.value)}
+            className="input input-bordered w-full mt-4"
+            placeholder="Enter your wallet password"
+          />
+          <div className="modal-action">
+            <button
+              type="button"
+              className="btn"
+              onClick={() => {
+                setIsPasswordModalOpen(false);
+                setWalletPassword("");
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={isLoadingWallet}
+            >
+              {isLoadingWallet ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                "Submit"
+              )}
+            </button>
+          </div>
+        </form>
       </dialog>
 
       <div className="col-span-12">
@@ -506,27 +687,58 @@ const AdminProfile = () => {
             <div className="absolute top-4 right-4">
               <button
                 className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
-                onClick={connectWallet}
+                onClick={handleOpenPasswordModal}
               >
-                Connect
+                {walletExists ? "Load Wallet" : "Create Wallet"}
               </button>
             </div>
             <div className="flex gap-2">
               <KeyRound size={32} className="text-primary" />
-              <h2 className="text-xl font-bold text-[#333333]">
-                Wallet
-              </h2>
+              <h2 className="text-xl font-bold text-[#333333]">Wallet</h2>
             </div>
             <div className="mt-6">
               <div className="grid grid-cols-3 gap-y-4 items-center">
-              <p className="font-semibold">Wallet:</p>
+                <p className="font-semibold">Wallet:</p>
                 <div className="col-span-2">
                   <p>{account}</p>
                 </div>
+                {wallet && (
+                  <>
+                    <p className="font-semibold">Private Key:</p>
+                    <div className="col-span-2">
+                      <p>{wallet.privateKey}</p>
+                    </div>
+                    <p className="font-semibold">Public Key:</p>
+                    <div className="col-span-2">
+                      <p>{wallet.publicKey}</p>
+                    </div>
+                  </>
+                )}
+                {didDetails && (
+                  <>
+                    <p className="font-semibold">DID Document:</p>
+                    <div className="col-span-2">
+                      <pre>
+                        {JSON.stringify(didDetails.didDocument, null, 2)}
+                      </pre>
+                    </div>
+                    <p className="font-semibold">Credential:</p>
+                    <div className="col-span-2">
+                      <pre>
+                        {JSON.stringify(didDetails.credential, null, 2)}
+                      </pre>
+                    </div>
+                    <p className="font-semibold">Proof Options:</p>
+                    <div className="col-span-2">
+                      <pre>
+                        {JSON.stringify(didDetails.proof_options, null, 2)}
+                      </pre>
+                    </div>
+                  </>
+                )}
               </div>
-              </div>
+            </div>
           </div>
-
         </div>
       </div>
     </Sidebar>
