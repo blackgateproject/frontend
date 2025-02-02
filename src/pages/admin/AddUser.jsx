@@ -79,17 +79,7 @@ const AddUser = () => {
         {/* Header Row */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-[#333333]">Add User</h1>
-          <div className="relative">
-            {/* Search Icon inside the input field */}
-            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="w-5 h-5 text-gray-500" />
-            </span>
-            <input
-              type="text"
-              placeholder="Search"
-              className="input input-bordered w-60 pl-10 rounded-2xl bg-[#ffffff] text-gray-500 border-none shadow-sm"
-            />
-          </div>
+          
         </div>
 
         {/* Form Section */}
