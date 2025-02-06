@@ -1,4 +1,3 @@
-import { Search } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
@@ -21,12 +20,12 @@ const AddUser = () => {
 
   const validateForm = () => {
     const errors = {};
-    if (!form.firstName) errors.firstName = "First name is required";
-    if (!form.lastName) errors.lastName = "Last name is required";
+    // if (!form.firstName) errors.firstName = "First name is required";
+    // if (!form.lastName) errors.lastName = "Last name is required";
     if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       errors.email = "Valid email is required";
-    if (!form.phoneNumber || !/^\+?[\d\s-]+$/.test(form.phoneNumber))
-      errors.phoneNumber = "Valid phone number is required";
+    // if (!form.phoneNumber || !/^\+?[\d\s-]+$/.test(form.phoneNumber))
+    //   errors.phoneNumber = "Valid phone number is required";
     if (!form.password || form.password.length < 8)
       errors.password = "Password must be at least 8 characters";
     if (form.password !== form.confirmPassword)
@@ -79,13 +78,12 @@ const AddUser = () => {
         {/* Header Row */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-[#333333]">Add User</h1>
-          
         </div>
 
         {/* Form Section */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
+          {/* <div> */}
+          {/* <label className="block text-sm font-medium text-gray-700">
               First Name
             </label>
             <input
@@ -111,7 +109,7 @@ const AddUser = () => {
             {errors.lastName && (
               <p className="text-red-500 text-sm">{errors.lastName}</p>
             )}
-          </div>
+          </div> */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Email
@@ -126,7 +124,7 @@ const AddUser = () => {
               <p className="text-red-500 text-sm">{errors.email}</p>
             )}
           </div>
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700">
               Phone Number
             </label>
@@ -141,7 +139,7 @@ const AddUser = () => {
             {errors.phoneNumber && (
               <p className="text-red-500 text-sm">{errors.phoneNumber}</p>
             )}
-          </div>
+          </div> */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Password
@@ -197,6 +195,8 @@ const AddUser = () => {
             >
               <option value="user">User</option>
               <option value="admin">Admin</option>
+              <option value="userOnboard">userOnboard</option>
+              <option value="adminOnboard">adminOnboard</option>
             </select>
           </div>
           {errors.form && <p className="text-red-500 text-sm">{errors.form}</p>}

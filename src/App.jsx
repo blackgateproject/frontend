@@ -51,7 +51,7 @@ function App() {
         />
         <Route
           path="/admin/onboarding"
-          element={<Onboarding role={"admin"} />}
+          element={<Onboarding role={"adminOnboard"} />}
         />
 
         {/* User Routes */}
@@ -74,7 +74,7 @@ function App() {
 
         <Route
           path="/user/onboarding"
-          element={<Onboarding role={"user"} />}
+          element={<Onboarding role={"userOnboard"} />}
         />
       </Routes>
     </Router>

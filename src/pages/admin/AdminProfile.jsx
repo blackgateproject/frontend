@@ -1,6 +1,4 @@
-import { issueCredential, resolveDID } from "@spruceid/didkit-wasm";
-import { Buffer } from "buffer";
-import { ethers, SigningKey } from "ethers";
+import { ethers } from "ethers";
 import {
   Check,
   Edit,
@@ -13,8 +11,8 @@ import {
 import React, { useEffect, useState } from "react";
 import sampleQR from "../../assets/sample-QR.png";
 import Sidebar from "../../components/Sidebar";
+
 const AdminProfile = () => {
-  // console.log("Resolve DID:", resolveDID("did:ethr:0x1234567890"));
   const [isLoading, setIsLoading] = useState(false);
   const [editingPersonal, setEditingPersonal] = useState(false);
   const [editingAuth, setEditingAuth] = useState(false);
@@ -196,105 +194,6 @@ const AdminProfile = () => {
     }
   };
 
-  const getDIDandVC = async (did) => {
-    // try {
-    //   const response = await fetch(
-    //     `http://localhost:8000/blockchain/v1/resolveDID/${did}`,
-    //     {
-    //       method: "GET",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //     }
-    //   );
-    //   if (!response.ok) throw new Error("Failed to resolve DID");
-
-    //   const didDetails = await response.json();
-    //   setDidDetails(didDetails);
-    //   console.log("DID Details:", didDetails);
-    // } catch (error) {
-    //   console.error("Error resolving DID:", error);
-    //   alert("Failed to resolve DID.");
-    // }
-    const didDoc = await resolveDID(String(did), "{}");
-    console.log("DID Document:", didDoc);
-    const credential = JSON.stringify({
-      "@context": ["https://www.w3.org/2018/credentials/v1"],
-      type: ["VerifiableCredential"],
-      issuer: did,
-      credentialSubject: { id: "did:example:123" },
-      issuanceDate: new Date().toISOString(),
-    });
-
-    console.log("Credential:", credential);
-    const proof_options = JSON.stringify({
-      proofPurpose: "assertionMethod",
-      verificationMethod: `${did}#controller`,
-    });
-
-    console.log("Proof Options:", proof_options);
-
-    let newUncompPubKey = SigningKey.computePublicKey(
-      wallet.privateKey,
-      false
-    );
-    // console.log("New Uncompressed Public Key:", newUncompPubKey);
-    if (newUncompPubKey instanceof Uint8Array) {
-      newUncompPubKey = hexlify(newUncompPubKey);
-    }
-
-    // Remove the '0x04' prefix
-    const rawPubKey = newUncompPubKey.startsWith("0x04")
-      ? newUncompPubKey.slice(4)
-      : newUncompPubKey;
-    const newRawPubKey = "0x" + rawPubKey;
-    // console.log("Public Key with 0x prefix:", newRawPubKey);
-
-    const xPubKey = Buffer.from(newRawPubKey.slice(2, 66), "hex")
-      .toString("base64")
-      .replace(/=+$/, "")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_");
-    const yPubKey = Buffer.from(newRawPubKey.slice(66), "hex")
-      .toString("base64")
-      .replace(/=+$/, "")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_");
-    // console.log("X Public Key:", xPubKey);
-    // console.log("Y Public Key:", yPubKey);
-    const jwk = JSON.stringify({
-      kty: "EC",
-      crv: "secp256k1",
-      d: Buffer.from(wallet.privateKey.slice(2), "hex")
-        .toString("base64")
-        .replace(/=+$/, "")
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_"),
-      x: xPubKey,
-      y: yPubKey,
-      // y: Buffer.from(wallet.publicKey.slice(32), "hex")
-      // .toString("base64")
-      // .replace(/=+$/, "")
-      // .replace(/\+/g, "-")
-      // .replace(/\//g, "_"),
-    });
-    // console.log("Wallet Private Key:", wallet.privateKey);
-    // const Uint8ArrayKey = new Uint8Array(Buffer.from(wallet.privateKey.slice(2), "hex"));
-    // const jwk = await exportJWK(Uint8ArrayKey)
-
-    console.log("JWK:", jwk);
-    const signed_vc = await issueCredential(
-      credential,
-      // "{}",
-      proof_options,
-      // "{}",
-      // String(wallet.privateKey)
-      jwk
-      // "{}"
-    );
-    console.log("Signed VC:", signed_vc);
-  };
-
   const loadWallet = async () => {
     const encryptedWallet = localStorage.getItem("encryptedWallet");
     if (encryptedWallet) {
@@ -307,9 +206,6 @@ const AdminProfile = () => {
         setWallet(wallet);
         setAccount(wallet.address);
         console.log("Wallet loaded:", wallet);
-        const did = "did:ethr:" + wallet.address;
-        console.log("DID:", did);
-        getDIDandVC(did);
       } catch (err) {
         console.error("Error in loadWallet:", err);
         alert("Failed to load wallet.");
@@ -401,6 +297,17 @@ const AdminProfile = () => {
         {/* Header Row */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-[#333333]">Profile</h1>
+          <div className="relative">
+            {/* Search Icon inside the input field */}
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="w-5 h-5 text-gray-500" />
+            </span>
+            <input
+              type="text"
+              placeholder="Search"
+              className="input input-bordered w-60 pl-10 rounded-2xl bg-[#ffffff] text-gray-500 border-none shadow-sm"
+            />
+          </div>
         </div>
 
         {/* Cards Section */}
