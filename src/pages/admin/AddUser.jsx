@@ -203,7 +203,7 @@ const AddUser = () => {
           <div>
             <button
               type="submit"
-              className={`btn btn-primary w-full ${isLoading && "loading"}`}
+              className={`btn bg-primary/75 hover:bg-primary text-base-100 w-full ${isLoading && "loading"}`}
               disabled={isLoading}
             >
               Add User

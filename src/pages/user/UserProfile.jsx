@@ -361,7 +361,7 @@ const UserProfile = () => {
             <input
               type="text"
               placeholder="Search"
-              className="input input-bordered w-60 pl-10 rounded-2xl bg-[#ffffff] text-gray-500 border-none shadow-sm"
+              className="input input-bordered w-60 pl-10 rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
             />
           </div>
         </div>
@@ -374,7 +374,7 @@ const UserProfile = () => {
               {editingPersonal ? (
                 <div className="space-x-2">
                   <button
-                    className="btn bg-gray-500 hover:bg-gray-600 text-base-100 p-2 rounded-2xl px-4"
+                    className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
                     onClick={() => {
                       setEditingPersonal(false);
                       setEditForm({ ...profile });
@@ -520,7 +520,7 @@ const UserProfile = () => {
               {editingAuth ? (
                 <div className="space-x-2">
                   <button
-                    className="btn bg-gray-500 hover:bg-gray-600 text-base-100 p-2 rounded-2xl px-4"
+                    className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
                     onClick={() => {
                       setEditingAuth(false);
                       setAuthForm({

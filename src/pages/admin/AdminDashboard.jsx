@@ -68,7 +68,7 @@ const Dashboard = () => {
             <input
               type="text"
               placeholder="Search"
-              className="input input-bordered w-60 pl-10 rounded-2xl bg-[#FFFFFF] text-gray-500 border-none shadow-sm"
+              className="input input-bordered w-60 pl-10 rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
             />
           </div>
         </div>

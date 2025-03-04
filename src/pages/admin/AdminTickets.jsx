@@ -194,7 +194,7 @@ const Tickets = () => {
                 placeholder="Search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input input-bordered w-full md:w-60 pl-10 rounded-2xl bg-white text-gray-500 border-none shadow-sm"
+                className="input input-bordered w-full md:w-60 pl-10 rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
               />
             </div>
           </div>

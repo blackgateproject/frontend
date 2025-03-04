@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { Provider, Wallet } from "zksync-web3";
-import ContractABI from "../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json";
+// import ContractABI from "../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json";
 
 export const contractInstance = async () => {
   const provider = await providerInstance();

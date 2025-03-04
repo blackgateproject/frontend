@@ -103,7 +103,7 @@ const UserActivityLogs = () => {
           <select
             value={filterType}
             onChange={handleFilterTypeChange}
-            className="select select-bordered rounded-2xl bg-white text-gray-500 border-none shadow-sm"
+            className="select select-bordered rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
           >
             <option value="All">All Types</option>
             <option value="Login">Login</option>
@@ -121,7 +121,7 @@ const UserActivityLogs = () => {
           <select
             value={sortOrder}
             onChange={handleSortOrderChange}
-            className="select select-bordered rounded-2xl bg-white text-gray-500 border-none shadow-sm"
+            className="select select-bordered rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
           >
             <option value="desc">Newest First</option>
             <option value="asc">Oldest First</option>
@@ -138,7 +138,7 @@ const UserActivityLogs = () => {
               placeholder="Search"
               value={searchQuery}
               onChange={handleSearchChange}
-              className="input input-bordered lg:w-60 w-full pl-10 rounded-2xl bg-white text-gray-500 border-none shadow-sm"
+              className="input input-bordered lg:w-60 w-full pl-10 rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
             />
           </div>
         </div>
