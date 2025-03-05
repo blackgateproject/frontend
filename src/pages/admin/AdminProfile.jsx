@@ -247,7 +247,7 @@ const AdminProfile = () => {
           <img src={sampleQR} alt="QR Code" className="w-48 h-48 mx-auto" />
           <div className="modal-action">
             <button
-              className="btn"
+              className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
               onClick={() => document.getElementById("qr-modal").close()}
             >
               Done
@@ -270,7 +270,7 @@ const AdminProfile = () => {
           <div className="modal-action">
             <button
               type="button"
-              className="btn"
+              className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
               onClick={() => {
                 setIsPasswordModalOpen(false);
                 setWalletPassword("");
@@ -280,7 +280,7 @@ const AdminProfile = () => {
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
+              className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
               disabled={isLoadingWallet}
             >
               {isLoadingWallet ? (

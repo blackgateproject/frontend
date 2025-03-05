@@ -15,13 +15,13 @@ export default {
       "nord",
       {
         blackgate: {
-          "primary": "#521EA0",
+          "primary": "#000000",
           "secondary": "#B80000",
           "accent": "#AE4AFF",
           "neutral": "#FFFFFF",
           "base-100": "#ffffff",
-          "base-200": "#F7F3F8",
-          "base-300": "#F8F5F9",
+          "base-200": "#F4F4F4",
+          "base-300": "#F3F3F3",
         },
       },
     ], // Set the default theme to "light"

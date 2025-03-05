@@ -118,7 +118,7 @@ const Dashboard = () => {
             </h2>
             <Link
               to="/admin/user-activity"
-              className="btn btn-primary flex items-center gap-2"
+              className="btn bg-primary/75 hover:bg-primary text-base-100 flex items-center gap-2"
             >
               <ActivityIcon className="w-5 h-5" />
               View All
