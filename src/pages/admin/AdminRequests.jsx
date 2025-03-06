@@ -14,12 +14,12 @@ const requests = () => {
   // State variables
   const [requests, setrequests] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("pending"); // 'all', 'pending', 'completed'
+  const [filterStatus, setFilterStatus] = useState("all"); // 'all', 'pending', 'completed'
   const [sortOrder, setSortOrder] = useState("desc"); // 'asc', 'desc'
   const [currentPage, setCurrentPage] = useState(1);
   const [requestsPerPage] = useState(5);
   const [loading, setLoading] = useState(false);
-  const [modalTicketId, setModalTicketId] = useState(null);
+  const [modalRequestId, setModalRequestId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false); // State to control Modal visibility
 
   useEffect(() => {
@@ -44,13 +44,11 @@ const requests = () => {
       if (!response.ok) throw new Error("Failed to fetch requests");
       const data = await response.json();
       setrequests(
-        data.map((ticket) => ({
-          id: ticket.id,
-          heading: ticket.title,
-          content: ticket.description,
-          openedBy: ticket.openedBy,
-          date: new Date(ticket.created_at),
-          pending: ticket.status === "pending",
+        data.map((request) => ({
+          id: request.id,
+          walletAddr: request.wallet_addr,
+          userNetworkInfo: request.usernetwork_info,
+          date: new Date(request.created_at),
         }))
       );
     } catch (error) {
@@ -60,14 +58,13 @@ const requests = () => {
     }
   };
 
-  const handleComplete = async (ticketId) => {
-    document.getElementById("confirm-modal").close();
+  const handleApprove = async (requestId) => {
     const accessToken = sessionStorage.getItem("access_token") || "";
 
     setLoading(true);
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/admin/v1/requests/${ticketId}/complete`,
+        `http://127.0.0.1:8000/admin/v1/requests/${requestId}/approve`,
         {
           method: "POST",
           headers: {
@@ -81,41 +78,52 @@ const requests = () => {
         window.location.href = "/";
         return;
       }
-      if (!response.ok) throw new Error("Failed to complete ticket");
+      if (!response.ok) throw new Error("Failed to approve request");
       await fetchrequests();
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to complete ticket. Please try again.");
+      alert("Failed to approve request. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleModalSubmit = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to save these changes?"
-    );
-    if (!confirmed) return;
-    setModalOpen(false); // Close the modal after editing
-  };
+  const handleReject = async (requestId) => {
+    const accessToken = sessionStorage.getItem("access_token") || "";
 
-  // Open modal
-  const openModal = (ticketId) => {
-    setModalTicketId(ticketId);
-    setModalOpen(true);
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/admin/v1/requests/${requestId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      if (response.status === 401) {
+        console.log("Redirecting to:", "/");
+        window.location.href = "/";
+        return;
+      }
+      if (!response.ok) throw new Error("Failed to reject request");
+      await fetchrequests();
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to reject request. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Filter and sort requests
   const filteredrequests = requests
-    .filter((ticket) => {
+    .filter((request) => {
       const matchesSearch =
-        ticket.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ticket.heading.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus =
-        filterStatus === "all" ||
-        (filterStatus === "pending" && ticket.pending) ||
-        (filterStatus === "completed" && !ticket.pending);
-      return matchesSearch && matchesStatus;
+        request.walletAddr.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSearch;
     })
     .sort((a, b) => {
       if (sortOrder === "asc") {
@@ -126,11 +134,11 @@ const requests = () => {
     });
 
   // Pagination logic
-  const indexOfLastTicket = currentPage * requestsPerPage;
-  const indexOfFirstTicket = indexOfLastTicket - requestsPerPage;
+  const indexOfLastRequest = currentPage * requestsPerPage;
+  const indexOfFirstRequest = indexOfLastRequest - requestsPerPage;
   const currentrequests = filteredrequests.slice(
-    indexOfFirstTicket,
-    indexOfLastTicket
+    indexOfFirstRequest,
+    indexOfLastRequest
   );
   const totalPages = Math.ceil(filteredrequests.length / requestsPerPage);
 
@@ -150,9 +158,9 @@ const requests = () => {
           id="confirm-modal"
           icon={<TicketIcon className="size-8" />}
           titleText="Confirm Completion"
-          contentText="Are you sure you want to mark this ticket as completed?"
+          contentText="Are you sure you want to mark this request as completed?"
           actionButtonText="Confirm"
-          onSubmit={() => handleComplete(modalTicketId)}
+          onSubmit={() => handleComplete(modalRequestId)}
           onClose={() => setModalOpen(false)} // Ensure modal closes on cancel
         />
       )}
@@ -161,7 +169,7 @@ const requests = () => {
       <div className="">
         {/* Header Row */}
         <div className="flex flex-wrap flex-col lg:flex-row justify-between lg:items-center mb-6">
-          <h1 className="text-3xl font-bold text-[#333333] mb-3">requests</h1>
+          <h1 className="text-3xl font-bold text-[#333333] mb-3">Requests</h1>
           <div className="flex  lg:items-center lg:flex-row flex-col space-y-2 lg:space-y-0 lg:space-x-4">
             {/* Filter Status */}
             <select
@@ -169,9 +177,9 @@ const requests = () => {
               onChange={(e) => setFilterStatus(e.target.value)}
               className="select select-bordered rounded-2xl"
             >
-              <option value="all">All requests</option>
-              <option value="pending">Pending requests</option>
-              <option value="completed">Completed requests</option>
+              <option value="all">All Requests</option>
+              <option value="pending">Pending Requests</option>
+              <option value="completed">Completed Requests</option>
             </select>
 
             {/* Sort Order */}
@@ -200,64 +208,71 @@ const requests = () => {
           </div>
         </div>
 
-        {/* requests Section */}
+        {/* Requests Section */}
         {loading ? (
           <div className="text-center flex flex-col gap-3 items-center justify-center py-10 min-h-screen">
             <Loader />
             <span className="mt-3"> Loading...</span>
           </div>
         ) : currentrequests.length > 0 ? (
-          currentrequests.map((ticket) => (
+          currentrequests.map((request) => (
             <div
-              key={ticket.id}
+              key={request.id}
               className="bg-base-100 rounded-2xl shadow-md p-6 mb-4"
             >
               {/* Main content */}
               <div>
-                {/* Ticket heading and icon */}
+                {/* Request heading and icon */}
                 <div className="flex items-center">
                   <TicketCheckIcon className="text-primary mr-3" size={24} />
                   <h2 className="text-xl font-bold text-[#333333]">
-                    {ticket.heading}
+                    Request ID: {request.id}
                   </h2>
                 </div>
 
-                {/* Ticket ID and Status badges */}
+                {/* Request ID and Status badges */}
                 <div className="flex gap-2 my-3">
-                  <div className="badge badge-secondary">ID-{ticket.id}</div>
-                  <div
-                    className={`badge ${
-                      ticket.pending ? "badge-primary" : "badge-success"
-                    } text-base-100 flex gap-2`}
-                  >
-                    {ticket.pending ? (
-                      <ClockIcon className="size-3" />
-                    ) : (
-                      <CheckCheckIcon className="size-3" />
-                    )}
-                    {ticket.pending ? "Pending" : "Completed"}
-                  </div>
+                  <div className="badge badge-secondary">ID-{request.id}</div>
                 </div>
 
-                {/* Ticket Content */}
-                <p className="text-gray-600 mt-2 mb-4">"{ticket.content}"</p>
+                {/* Request Content */}
+                <p className="text-gray-600 mt-2 mb-4">
+                  Wallet Address: {request.walletAddr}
+                </p>
+                <p className="text-gray-600 mt-2 mb-4">
+                  IP Address: {request.userNetworkInfo.ip_address}
+                </p>
+                <p className="text-gray-600 mt-2 mb-4">
+                  User Agent: {request.userNetworkInfo.user_agent}
+                </p>
+                <p className="text-gray-600 mt-2 mb-4">
+                  User Language: {request.userNetworkInfo.user_language}
+                </p>
+                <p className="text-gray-600 mt-2 mb-4">
+                  Location: {request.userNetworkInfo.location_lat}, {request.userNetworkInfo.location_long}
+                </p>
               </div>
 
-              {/* Name, Date, and Complete Button Row */}
+              {/* Name, Date, and Action Buttons Row */}
               <div className="flex justify-between items-center mt-4">
                 <p className="text-gray-500 text-sm">
-                  Opened by {ticket.openedBy} on{" "}
-                  {ticket.date.toLocaleDateString()}{" "}
-                  {ticket.date.toLocaleTimeString()}
+                  Created on {request.date.toLocaleDateString()}{" "}
+                  {request.date.toLocaleTimeString()}
                 </p>
-                {ticket.pending && (
+                <div className="flex gap-2">
                   <button
                     className="btn bg-primary/75 hover:bg-primary text-base-100 p-3 rounded-2xl px-4"
-                    onClick={() => openModal(ticket.id)}
+                    onClick={() => handleApprove(request.id)}
                   >
-                    Complete
+                    Approve
                   </button>
-                )}
+                  <button
+                    className="btn bg-red-500 hover:bg-red-700 text-base-100 p-3 rounded-2xl px-4"
+                    onClick={() => handleReject(request.id)}
+                  >
+                    Reject
+                  </button>
+                </div>
               </div>
             </div>
           ))

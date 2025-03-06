@@ -6,7 +6,7 @@ export const getDIDandVC = async (
   wallet,
   did,
   selectedClaims,
-  setSignedVC,
+  // setSignedVC,
   setIsLoadingDID,
   setCurrentStep
 ) => {
@@ -14,6 +14,7 @@ export const getDIDandVC = async (
     console.error("Wallet is not loaded.");
     return;
   }
+  console.log("DID:", did);
   const didDoc = await resolveDID(String(did), "{}");
   console.log("DID Document:", didDoc);
   const credential = JSON.stringify({
@@ -88,7 +89,7 @@ export const getDIDandVC = async (
     // "{}"
   );
   console.log("Signed VC:", signed_vc);
-  setSignedVC(signed_vc);
+  // setSignedVC(signed_vc);
 
   //   // Send DID, DIDDoc, and VC to Connector
   //   const response = await fetch("http://127.0.0.1:8000/connector/verify", {
@@ -111,6 +112,7 @@ export const getDIDandVC = async (
   //   } finally {
   //     setIsLoadingDID(false);
   //   }
+  return signed_vc;
 };
 
 export const signChallenge = async (wallet, challenge, navigate) => {
