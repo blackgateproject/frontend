@@ -1,10 +1,4 @@
-import {
-  CheckCheckIcon,
-  ClockIcon,
-  Search,
-  TicketCheckIcon,
-  TicketIcon,
-} from "lucide-react";
+import { Search, TicketCheckIcon, TicketIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Loader from "../../components/Loader";
 import Modal from "../../components/Modal";
@@ -121,8 +115,9 @@ const requests = () => {
   // Filter and sort requests
   const filteredrequests = requests
     .filter((request) => {
-      const matchesSearch =
-        request.walletAddr.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = request.walletAddr
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
       return matchesSearch;
     })
     .sort((a, b) => {
@@ -249,7 +244,8 @@ const requests = () => {
                   User Language: {request.userNetworkInfo.user_language}
                 </p>
                 <p className="text-gray-600 mt-2 mb-4">
-                  Location: {request.userNetworkInfo.location_lat}, {request.userNetworkInfo.location_long}
+                  Location: {request.userNetworkInfo.location_lat},{" "}
+                  {request.userNetworkInfo.location_long}
                 </p>
               </div>
 
