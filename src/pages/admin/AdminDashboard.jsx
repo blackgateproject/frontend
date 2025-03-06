@@ -9,11 +9,11 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     totalUsers: 0,
     onlineUsers: 0,
-    pendingTickets: 0,
+    pendingrequests: 0,
   });
 
   const [loading, setLoading] = useState(true);
-  const [pendingTickets, setPendingTickets] = useState(0);
+  const [pendingrequests, setPendingrequests] = useState(0);
   const [userActivities, setUserActivities] = useState([]);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ const Dashboard = () => {
         setStats({
           totalUsers: data.totalUsers,
           onlineUsers: data.onlineUsers,
-          pendingTickets: data.pendingTickets,
+          pendingrequests: data.pendingrequests,
         });
         setUserActivities(data.userActivities);
       } catch (error) {
@@ -102,10 +102,10 @@ const Dashboard = () => {
               <div className="flex gap-3 items-center">
                 <Ticket className="text-primary" size={30} />
                 <h2 className="text-4xl font-bold text-primary">
-                  {loading ? "..." : pendingTickets}
+                  {loading ? "..." : pendingrequests}
                 </h2>
               </div>
-              <p className="text-gray-500">Pending Tickets</p>
+              <p className="text-gray-500">Pending requests</p>
             </div>
           </div>
         </div>

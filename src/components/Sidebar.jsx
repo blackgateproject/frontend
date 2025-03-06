@@ -23,7 +23,7 @@ const Sidebar = ({ role, children }) => {
     { name: "Dashboard", path: "/admin/dashboard", icon: <ChartArea /> },
     { name: "Applications", path: "/admin/applications", icon: <Shapes /> },
     { name: "Users", path: "/admin/users", icon: <Users /> },
-    { name: "Tickets", path: "/admin/tickets", icon: <Ticket /> },
+    { name: "requests", path: "/admin/requests", icon: <Ticket /> },
     { name: "Profile", path: "/admin/profile", icon: <User /> },
   ];
 

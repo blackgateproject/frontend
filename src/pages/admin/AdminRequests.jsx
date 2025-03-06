@@ -10,28 +10,28 @@ import Loader from "../../components/Loader";
 import Modal from "../../components/Modal";
 import Sidebar from "../../components/Sidebar";
 
-const Tickets = () => {
+const requests = () => {
   // State variables
-  const [tickets, setTickets] = useState([]);
+  const [requests, setrequests] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("pending"); // 'all', 'pending', 'completed'
   const [sortOrder, setSortOrder] = useState("desc"); // 'asc', 'desc'
   const [currentPage, setCurrentPage] = useState(1);
-  const [ticketsPerPage] = useState(5);
+  const [requestsPerPage] = useState(5);
   const [loading, setLoading] = useState(false);
   const [modalTicketId, setModalTicketId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false); // State to control Modal visibility
 
   useEffect(() => {
-    fetchTickets();
+    fetchrequests();
   }, []);
 
-  const fetchTickets = async () => {
+  const fetchrequests = async () => {
     setLoading(true);
     try {
       const accessToken = sessionStorage.getItem("access_token") || "";
 
-      const response = await fetch("http://127.0.0.1:8000/admin/v1/tickets", {
+      const response = await fetch("http://127.0.0.1:8000/admin/v1/requests", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -41,9 +41,9 @@ const Tickets = () => {
         window.location.href = "/";
         return;
       }
-      if (!response.ok) throw new Error("Failed to fetch tickets");
+      if (!response.ok) throw new Error("Failed to fetch requests");
       const data = await response.json();
-      setTickets(
+      setrequests(
         data.map((ticket) => ({
           id: ticket.id,
           heading: ticket.title,
@@ -67,7 +67,7 @@ const Tickets = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/admin/v1/tickets/${ticketId}/complete`,
+        `http://127.0.0.1:8000/admin/v1/requests/${ticketId}/complete`,
         {
           method: "POST",
           headers: {
@@ -82,7 +82,7 @@ const Tickets = () => {
         return;
       }
       if (!response.ok) throw new Error("Failed to complete ticket");
-      await fetchTickets();
+      await fetchrequests();
     } catch (error) {
       console.error("Error:", error);
       alert("Failed to complete ticket. Please try again.");
@@ -105,8 +105,8 @@ const Tickets = () => {
     setModalOpen(true);
   };
 
-  // Filter and sort tickets
-  const filteredTickets = tickets
+  // Filter and sort requests
+  const filteredrequests = requests
     .filter((ticket) => {
       const matchesSearch =
         ticket.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -126,13 +126,13 @@ const Tickets = () => {
     });
 
   // Pagination logic
-  const indexOfLastTicket = currentPage * ticketsPerPage;
-  const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
-  const currentTickets = filteredTickets.slice(
+  const indexOfLastTicket = currentPage * requestsPerPage;
+  const indexOfFirstTicket = indexOfLastTicket - requestsPerPage;
+  const currentrequests = filteredrequests.slice(
     indexOfFirstTicket,
     indexOfLastTicket
   );
-  const totalPages = Math.ceil(filteredTickets.length / ticketsPerPage);
+  const totalPages = Math.ceil(filteredrequests.length / requestsPerPage);
 
   const paginate = (pageNumber) => {
     setLoading(true);
@@ -161,7 +161,7 @@ const Tickets = () => {
       <div className="">
         {/* Header Row */}
         <div className="flex flex-wrap flex-col lg:flex-row justify-between lg:items-center mb-6">
-          <h1 className="text-3xl font-bold text-[#333333] mb-3">Tickets</h1>
+          <h1 className="text-3xl font-bold text-[#333333] mb-3">requests</h1>
           <div className="flex  lg:items-center lg:flex-row flex-col space-y-2 lg:space-y-0 lg:space-x-4">
             {/* Filter Status */}
             <select
@@ -169,9 +169,9 @@ const Tickets = () => {
               onChange={(e) => setFilterStatus(e.target.value)}
               className="select select-bordered rounded-2xl"
             >
-              <option value="all">All Tickets</option>
-              <option value="pending">Pending Tickets</option>
-              <option value="completed">Completed Tickets</option>
+              <option value="all">All requests</option>
+              <option value="pending">Pending requests</option>
+              <option value="completed">Completed requests</option>
             </select>
 
             {/* Sort Order */}
@@ -200,14 +200,14 @@ const Tickets = () => {
           </div>
         </div>
 
-        {/* Tickets Section */}
+        {/* requests Section */}
         {loading ? (
           <div className="text-center flex flex-col gap-3 items-center justify-center py-10 min-h-screen">
             <Loader />
             <span className="mt-3"> Loading...</span>
           </div>
-        ) : currentTickets.length > 0 ? (
-          currentTickets.map((ticket) => (
+        ) : currentrequests.length > 0 ? (
+          currentrequests.map((ticket) => (
             <div
               key={ticket.id}
               className="bg-base-100 rounded-2xl shadow-md p-6 mb-4"
@@ -263,7 +263,7 @@ const Tickets = () => {
           ))
         ) : (
           <div className="text-center text-gray-500 mt-10">
-            No tickets found, please try a different keyword or filter.
+            No requests found, please try a different keyword or filter.
           </div>
         )}
 
@@ -290,4 +290,4 @@ const Tickets = () => {
   );
 };
 
-export default Tickets;
+export default requests;
