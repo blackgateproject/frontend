@@ -1,11 +1,14 @@
-import { ethers } from "ethers";
 import { Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { createNewWallet, loadWallet } from "../utils/contractInteractions";
-import { handleProceedToNextStep } from "../utils/registrations";
-import { getDIDandVC, signChallenge } from "../utils/verification";
+import {
+  createNewWallet,
+  fetchBalance,
+  loadWallet,
+} from "./utils/contractInteractions";
+import { handleProceedToNextStep } from "./utils/registrations";
+import { getDIDandVC, signChallenge } from "./utils/verification";
 
 const LoginPage = () => {
   const [walletExists, setWalletExists] = useState(
@@ -32,16 +35,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchBalance = async () => {
-      if (wallet) {
-        const provider = new ethers.JsonRpcProvider(
-          "https://sepolia.era.zksync.dev"
-        );
-        const balance = await provider.getBalance(wallet.address);
-        setBalance(parseFloat(ethers.formatEther(balance)).toFixed(4));
-      }
-    };
-    fetchBalance();
+    fetchBalance(wallet, setBalance);
   }, [wallet]);
 
   const handleOpenPasswordModal = () => {
