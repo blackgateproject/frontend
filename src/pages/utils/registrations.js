@@ -58,6 +58,7 @@ export const handleProceedToNextStep = async (
   setCurrentStep,
   signer
 ) => {
+  console.log("Registeration Processs BEGIN!");
   console.log("Fetching Network Info");
   await logUserInfo();
   const did = "did:ethr:" + wallet.address;
@@ -83,22 +84,22 @@ export const handleProceedToNextStep = async (
     );
     // Send credentials to Connector
     // ...
-    console.log(
-      "WARN:: This next func will fail as it does not exist on the contract"
-    );
-    // const tx = await contract
-    //   .connect(signer)
-    //   .changeOwner(wallet.address, wallet.address);
-    // const txResponse = await tx.getTransaction();
-    // const txReceipt = await txResponse.wait();
-    // console.log("Transaction Receipt:", txReceipt);
-    // console.log("Transaction Logs:", txReceipt.logs);
-    // console.log("Transaction Hash:", txReceipt.transactionHash);
-    // console.log("Transaction Status:", txReceipt.status);
-    // console.log("Transaction Confirmations:", txReceipt.confirmations);
-    // console.log("Transaction Events:", txReceipt.events);
+    // console.log(
+    //   "WARN:: This next func will fail as it does not exist on the contract"
+    // );
+    const tx = await contract
+      .connect(signer)
+      .changeOwner(wallet.address, wallet.address);
+    const txResponse = await tx.getTransaction();
+    const txReceipt = await txResponse.wait();
+    console.log("Transaction Receipt:", txReceipt);
+    console.log("Transaction Logs:", txReceipt.logs);
+    console.log("Transaction Hash:", txReceipt.transactionHash);
+    console.log("Transaction Status:", txReceipt.status);
+    console.log("Transaction Confirmations:", txReceipt.confirmations);
+    console.log("Transaction Events:", txReceipt.events);
 
-    console.log("Address now registered on-chain");
+    console.log("Registeration Processs End!");
     // Send Transaction ID and DID for verification
     // ...
   }

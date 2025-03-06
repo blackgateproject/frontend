@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { Provider, Wallet } from "zksync-web3";
-// import ContractABI from "../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json";
+import ContractABI from "../../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json";
 
 export const contractInstance = async () => {
   const provider = await providerInstance();
@@ -13,9 +13,19 @@ export const contractInstance = async () => {
 };
 
 export const providerInstance = async () => {
-    const provider = new ethers.JsonRpcProvider("https://sepolia.era.zksync.dev");
-    return provider;
-}
+  const provider = new ethers.JsonRpcProvider("https://sepolia.era.zksync.dev");
+  return provider;
+};
+
+export const fetchBalance = async (wallet, setBalance) => {
+  if (wallet) {
+    const provider = new ethers.JsonRpcProvider(
+      "https://sepolia.era.zksync.dev"
+    );
+    const balance = await provider.getBalance(wallet.address);
+    setBalance(parseFloat(ethers.formatEther(balance)).toFixed(4));
+  }
+};
 
 export const createNewWallet = async (
   walletPassword,
