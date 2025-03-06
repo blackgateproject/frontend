@@ -2,26 +2,32 @@ import { ethers } from "ethers";
 import { Provider, Wallet } from "zksync-web3";
 import ContractABI from "../../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json";
 
+
+export const providerInstance = async (providerType) => {
+  // Use "ethers" for Ethereum and "zksync" for zkSync
+  if (providerType === "zksync") {
+    const provider = new Provider("https://sepolia.era.zksync.dev");
+    return provider;
+  } else if (providerType === "ethers") {
+    const provider = new ethers.JsonRpcProvider(
+      "https://sepolia.era.zksync.dev"
+    );
+    return provider;
+  }
+};
 export const contractInstance = async () => {
-  const provider = await providerInstance();
+  const provider = await providerInstance("ethers");
   const contractAddress = ContractABI.entries[0].address;
   const contractABI = ContractABI.abi;
   console.log("Contract Address:", contractAddress);
-  console.log("Contract ABI:", contractABI);
+  // console.log("Contract ABI:", contractABI);
   const contract = new ethers.Contract(contractAddress, contractABI, provider);
   return contract;
 };
 
-export const providerInstance = async () => {
-  const provider = new ethers.JsonRpcProvider("https://sepolia.era.zksync.dev");
-  return provider;
-};
-
 export const fetchBalance = async (wallet, setBalance) => {
   if (wallet) {
-    const provider = new ethers.JsonRpcProvider(
-      "https://sepolia.era.zksync.dev"
-    );
+    const provider = await providerInstance("ethers");
     const balance = await provider.getBalance(wallet.address);
     setBalance(parseFloat(ethers.formatEther(balance)).toFixed(4));
   }
@@ -31,7 +37,7 @@ export const createNewWallet = async (
   walletPassword,
   setWalletExists,
   setWallet,
-  setAccount
+  // setAccount
 ) => {
   console.log("Creating new wallet with password:", walletPassword);
   const newWallet = ethers.Wallet.createRandom();
@@ -39,7 +45,7 @@ export const createNewWallet = async (
   localStorage.setItem("encryptedWallet", encryptedWallet);
   setWalletExists(true);
   setWallet(newWallet);
-  setAccount(newWallet.address);
+  // setAccount(newWallet.address);
   console.log("New wallet created:", newWallet);
 };
 
@@ -47,7 +53,7 @@ export const loadWallet = async (
   encryptedWallet,
   walletPassword,
   setWallet,
-  setAccount,
+  // setAccount,
   setIsWalletLoaded,
   setIsLoadingWallet,
   setIsPasswordModalOpen,
@@ -62,11 +68,11 @@ export const loadWallet = async (
         walletPassword
       );
       setWallet(loadedWallet);
-      setAccount(loadedWallet.address);
+      // setAccount(loadedWallet.address);
       console.log("Wallet loaded:", loadedWallet);
       setIsWalletLoaded(true);
 
-      const provider = new Provider("https://sepolia.era.zksync.dev");
+      const provider = await providerInstance("zksync");
       const zkSyncWallet = new Wallet(loadedWallet.privateKey, provider);
       const signer = zkSyncWallet.connect(provider);
       console.log("Signer:", signer);
