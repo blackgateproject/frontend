@@ -64,7 +64,7 @@ export const handleProceedToNextStep = async (
   console.log("Fetching Network Info");
 
   // Fetch Network based Identifiers
-  await logUserInfo();
+  const networkInfo = await logUserInfo();
 
   // Setup DID String
   did = "did:ethr:" + wallet.address;
@@ -97,6 +97,7 @@ export const handleProceedToNextStep = async (
       wallet_address: wallet.address,
       didStr: did,
       verifiableCredential: signed_vc,
+      usernetwork_info: networkInfo,
     };
     console.log("Data:", data);
 
@@ -115,7 +116,10 @@ export const handleProceedToNextStep = async (
       const data = await response.json();
       console.log("Registration finalized:", data);
       // navigate("/dashboard");
-    } else {
+    } else if (response.status === 500) {
+      console.error("Server Error:", await response.text());
+    }
+    else {
       console.error("Failed to finalize registration");
     }
     // const contract = await contractInstance();
