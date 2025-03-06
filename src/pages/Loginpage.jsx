@@ -8,30 +8,32 @@ import {
   loadWallet,
 } from "./utils/contractInteractions";
 import { handleProceedToNextStep } from "./utils/registrations";
-import { getDIDandVC, signChallenge } from "./utils/verification";
+import { getDIDandVC } from "./utils/verification";
 
 const LoginPage = () => {
+  // non state
+  let did = "";
+  let signed_vc = "";
+
+  // state vars
   const [walletExists, setWalletExists] = useState(
     !!localStorage.getItem("encryptedWallet")
   );
-  const [walletPassword, setWalletPassword] = useState("");
-  const [isLoadingWallet, setIsLoadingWallet] = useState(false);
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [isSetupModalOpen, setIsSetupModalOpen] = useState(false);
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [wallet, setWallet] = useState(null);
-  const [signer, setSigner] = useState(null);
-  const [account, setAccount] = useState("");
-  const [balance, setBalance] = useState("---");
-  const [signedVC, setSignedVC] = useState(null);
-  const [challenge, setChallenge] = useState(null);
-  const [isClaimsModalOpen, setIsClaimsModalOpen] = useState(false);
-  const [selectedClaims, setSelectedClaims] = useState([]);
-  const [currentStep, setCurrentStep] = useState("");
-  const [isLoadingDID, setIsLoadingDID] = useState(false);
-  const [isWalletLoaded, setIsWalletLoaded] = useState(false);
-  const [isLoadingTx, setIsLoadingTx] = useState(false);
+  const [walletPassword, setWalletPassword] = useState(""); // not state
+  const [isLoadingWallet, setIsLoadingWallet] = useState(false); //stateful
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false); //stateful
+  const [isSetupModalOpen, setIsSetupModalOpen] = useState(false); //stateful
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false); //stateful
+  const [errorMessage, setErrorMessage] = useState(""); //stateful
+  const [wallet, setWallet] = useState(null); //stateful
+  const [signer, setSigner] = useState(null); //stateful
+  const [balance, setBalance] = useState("---"); //stateful
+  const [isClaimsModalOpen, setIsClaimsModalOpen] = useState(false); //stateful
+  const [selectedClaims, setSelectedClaims] = useState([]); //no clue
+  const [currentStep, setCurrentStep] = useState(""); //stateful
+  const [isLoadingDID, setIsLoadingDID] = useState(false); //where is this used
+  const [isWalletLoaded, setIsWalletLoaded] = useState(false); //stateful
+  const [isLoadingTx, setIsLoadingTx] = useState(false); //stateful
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -66,7 +68,7 @@ const LoginPage = () => {
           localStorage.getItem("encryptedWallet"),
           walletPassword,
           setWallet,
-          setAccount,
+          // setAccount,
           setIsWalletLoaded,
           setIsLoadingWallet,
           setIsPasswordModalOpen,
@@ -84,7 +86,7 @@ const LoginPage = () => {
         walletPassword,
         setWalletExists,
         setWallet,
-        setAccount
+        // setAccount
       );
     }
     console.log("[handleSubmit()] Exited");
@@ -98,24 +100,23 @@ const LoginPage = () => {
       return;
     }
     setIsSetupModalOpen(false);
-    createNewWallet(walletPassword, setWalletExists, setWallet, setAccount);
+    // createNewWallet(walletPassword, setWalletExists, setWallet, setAccount);
+    createNewWallet(walletPassword, setWalletExists, setWallet);
   };
 
   const handleClaimsSubmit = (e) => {
     e.preventDefault();
     setIsClaimsModalOpen(false);
     setCurrentStep("Generating DID...");
-    const did = "did:ethr:" + wallet.address;
-    console.log("DID:", did);
     getDIDandVC(
       wallet,
       did,
       selectedClaims,
-      setSignedVC,
+      // setSignedVC,
       setIsLoadingDID,
       setCurrentStep
     );
-    signChallenge(wallet, challenge, navigate);
+    // signChallenge(wallet, challenge, navigate);
   };
 
   return (
@@ -139,8 +140,9 @@ const LoginPage = () => {
                       try {
                         await handleProceedToNextStep(
                           wallet,
+                          did,
                           selectedClaims,
-                          setSignedVC,
+                          // setSignedVC,
                           setIsLoadingDID,
                           setCurrentStep,
                           signer
