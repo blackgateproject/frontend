@@ -43,6 +43,8 @@ const requests = () => {
           walletAddr: request.wallet_addr,
           userNetworkInfo: request.usernetwork_info,
           date: new Date(request.created_at),
+          isApproved: request.isApproved,
+          isRegistered: request.isRegistered,
         }))
       );
     } catch (error) {
@@ -88,7 +90,7 @@ const requests = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/admin/v1/requests/${requestId}`,
+        `http://127.0.0.1:8000/admin/v1/requests/${requestId}/reject`,
         {
           method: "DELETE",
           headers: {
