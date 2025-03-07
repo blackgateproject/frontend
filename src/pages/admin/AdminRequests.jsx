@@ -183,7 +183,8 @@ const Requests = () => {
           date: new Date(request.created_at),
           isApproved: request.isApproved,
           isRegistered: request.isRegistered,
-          status: request.request_status
+          status: request.request_status,
+          role: request.role
         }))
       );
     } catch (error) {
