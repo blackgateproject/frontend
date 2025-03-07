@@ -295,7 +295,7 @@ const Onboarding = () => {
                   >
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary">
+                  <button type="submit" className="btn bg-primary/75 hover:bg-primary text-base-100">
                     {walletExists ? "Load" : "Create"}
                   </button>
                 </div>

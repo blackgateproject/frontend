@@ -326,7 +326,7 @@ const UserProfile = () => {
           <div className="modal-action">
             <button
               type="button"
-              className="btn"
+              className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
               onClick={() => {
                 setIsPasswordModalOpen(false);
                 setWalletPassword("");
@@ -336,7 +336,7 @@ const UserProfile = () => {
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
+              className="btn bg-primary/75 hover:bg-primary text-base-100"
               disabled={isLoadingWallet}
             >
               {isLoadingWallet ? (

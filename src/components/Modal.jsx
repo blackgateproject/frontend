@@ -31,7 +31,7 @@ const Modal = ({
         
         <div className="modal-action">
           <button
-            className="btn"
+            className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
             onClick={() => {
               onClose();
               document.getElementById(id).close();
@@ -40,7 +40,7 @@ const Modal = ({
             Cancel
           </button>
           {actionButton && <button
-            className={`btn ${actionButtonClass || "btn-primary"}`}
+            className={`btn ${actionButtonClass || "bg-primary/75 hover:bg-primary text-base-100"}`}
             onClick={() => {
               onSubmit(modalData);
               document.getElementById(id).close();

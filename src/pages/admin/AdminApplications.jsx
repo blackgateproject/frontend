@@ -40,7 +40,7 @@ const Applications = () => {
 
           <div className="modal-action">
             <button className="btn" onClick={() => document.getElementById('connect-new-modal').close()} >Cancel</button>
-            <button className="btn btn-primary" >Connect</button>
+            <button className="btn bg-primary/75 hover:bg-primary text-base-100" >Connect</button>
           </div>
         </div>
       </dialog>

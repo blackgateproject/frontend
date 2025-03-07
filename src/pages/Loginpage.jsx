@@ -223,7 +223,7 @@ const LoginPage = () => {
             <div className="modal-action">
               <button
                 type="button"
-                className="btn"
+                className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
                 onClick={() => {
                   setIsPasswordModalOpen(false);
                   setWalletPassword("");
@@ -233,7 +233,7 @@ const LoginPage = () => {
               </button>
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4 flex items-center gap-2"
                 disabled={isLoadingWallet}
               >
                 {isLoadingWallet ? (
@@ -264,7 +264,7 @@ const LoginPage = () => {
             <div className="modal-action">
               <button
                 type="button"
-                className="btn"
+                className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
                 onClick={() => {
                   setIsSetupModalOpen(false);
                   setWalletPassword("");
@@ -272,7 +272,7 @@ const LoginPage = () => {
               >
                 Cancel
               </button>
-              <button type="submit" className="btn btn-primary">
+              <button type="submit" className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4">
                 Set Password
               </button>
             </div>
@@ -336,12 +336,12 @@ const LoginPage = () => {
             <div className="modal-action">
               <button
                 type="button"
-                className="btn"
+                className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
                 onClick={() => setIsClaimsModalOpen(false)}
               >
                 Cancel
               </button>
-              <button type="submit" className="btn btn-primary">
+              <button type="submit" className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4">
                 Submit
               </button>
             </div>

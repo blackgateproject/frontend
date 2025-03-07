@@ -192,7 +192,7 @@ const SignupForm = ({ onClose }) => {
               </div>
               <button
                 type="button"
-                className="btn btn-primary flex items-center gap-2"
+                className="btn bg-primary/75 hover:bg-primary text-base-100 flex items-center gap-2 p-2 rounded-2xl px-4"
                 onClick={generateKeys}
                 disabled={isGeneratingKeys}
               >
@@ -375,7 +375,7 @@ const SignupForm = ({ onClose }) => {
           <div className="pt-2 pb-4">
             <button
               type="submit"
-              className="btn btn-primary w-full rounded-xl"
+              className="btn bg-primary/75 hover:bg-primary text-base-100 w-full p-2 rounded-2xl px-4"
               disabled={isLoading}
             >
               {isLoading ? (

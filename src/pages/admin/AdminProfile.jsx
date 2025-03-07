@@ -269,7 +269,7 @@ const AdminProfile = () => {
           />
           <div className="modal-action">
             <button
-              type="button"
+              type="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
               className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
               onClick={() => {
                 setIsPasswordModalOpen(false);
