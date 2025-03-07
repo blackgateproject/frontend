@@ -18,6 +18,7 @@
     "daisyui": "^4.12.13",
     "elliptic": "^6.6.1",
     "ethers": "^6.13.5",
+    "framer-motion": "^12.4.10",
     "jose": "^5.9.6",
     "lucide-react": "^0.451.0",
     "qrcode.react": "^4.1.0",

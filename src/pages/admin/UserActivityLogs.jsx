@@ -125,6 +125,8 @@ const UserActivityLogs = () => {
           >
             <option value="desc">Newest First</option>
             <option value="asc">Oldest First</option>
+            <option value="Last 24 hrs">Last 24 hrs</option>
+            <option value="Last 30 Days">Last 30 Days</option>
           </select>
 
           {/* Search Input */}

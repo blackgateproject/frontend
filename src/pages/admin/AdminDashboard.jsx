@@ -9,7 +9,7 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     totalUsers: 0,
     onlineUsers: 0,
-    pendingrequests: 0,
+    // pendingrequests: 0,
   });
 
   const [loading, setLoading] = useState(true);
@@ -95,17 +95,6 @@ const Dashboard = () => {
                 </h2>
               </div>
               <p className="text-gray-500">Users Online</p>
-            </div>
-          </div>
-          <div className="bg-base-100 lg:w-48 rounded-2xl shadow-md p-6 flex items-center justify-between">
-            <div>
-              <div className="flex gap-3 items-center">
-                <Ticket className="text-primary" size={30} />
-                <h2 className="text-4xl font-bold text-primary">
-                  {loading ? "..." : pendingrequests}
-                </h2>
-              </div>
-              <p className="text-gray-500">Pending requests</p>
             </div>
           </div>
         </div>

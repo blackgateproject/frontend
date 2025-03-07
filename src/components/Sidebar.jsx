@@ -23,13 +23,13 @@ const Sidebar = ({ role, children }) => {
     { name: "Dashboard", path: "/admin/dashboard", icon: <ChartArea /> },
     { name: "Applications", path: "/admin/applications", icon: <Shapes /> },
     { name: "Users", path: "/admin/users", icon: <Users /> },
-    { name: "requests", path: "/admin/requests", icon: <Ticket /> },
+    { name: "Requests", path: "/admin/requests", icon: <Ticket /> },
     { name: "Profile", path: "/admin/profile", icon: <User /> },
   ];
 
   const userLinks = [
     { name: "Home", path: "/user/dashboard", icon: <Home /> },
-    { name: "Help", path: "/user/help", icon: <HelpCircle /> },
+    // { name: "Help", path: "/user/help", icon: <HelpCircle /> },
     { name: "Profile", path: "/user/profile", icon: <User /> },
   ];
 

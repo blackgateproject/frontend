@@ -70,7 +70,7 @@ const UserProfile = () => {
         setProfile(userData);
       } catch (error) {
         console.error("Error fetching user profile:", error);
-        navigate("/");
+        // navigate("/");
       } finally {
         setIsLoading(false);
       }
@@ -283,7 +283,7 @@ const UserProfile = () => {
 
   return (
     <Sidebar role={"user"}>
-      <dialog id="qr-modal" className="modal">
+      <dialog id="qr-modal" className="modal backdrop-brightness-75">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Connect with your mobile app</h3>
           <p className="py-4">
@@ -312,7 +312,7 @@ const UserProfile = () => {
         </div>
       </dialog>
 
-      <dialog id="password-modal" className="modal" open={isPasswordModalOpen}>
+      <dialog id="password-modal" className="modal backdrop-brightness-75" open={isPasswordModalOpen}>
         <form className="modal-box" onSubmit={handleSubmit}>
           <h3 className="font-bold text-lg">Enter Wallet Password</h3>
           <input
@@ -326,7 +326,7 @@ const UserProfile = () => {
           <div className="modal-action">
             <button
               type="button"
-              className="btn"
+              className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
               onClick={() => {
                 setIsPasswordModalOpen(false);
                 setWalletPassword("");
@@ -336,7 +336,7 @@ const UserProfile = () => {
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
+              className="btn bg-primary/75 hover:bg-primary text-base-100"
               disabled={isLoadingWallet}
             >
               {isLoadingWallet ? (

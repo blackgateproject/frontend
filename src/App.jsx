@@ -2,6 +2,7 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import AddUser from "./pages/admin/AddUser";
 import AdminApplications from "./pages/admin/AdminApplications";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import GrafanaDashboard from "./pages/admin/GrafanaDashboard";
 import AdminProfile from "./pages/admin/AdminProfile";
 import AdminRequests from "./pages/admin/AdminRequests";
 import AdminUsers from "./pages/admin/AdminUsers";
@@ -43,6 +44,10 @@ function App() {
         <Route
           path="/admin/onboarding"
           element={<Onboarding role={"adminOnboard"} />}
+        />
+        <Route
+          path="/admin/grafana-dashboard"
+          element={<GrafanaDashboard role={"admin"} />}
         />
 
         {/* User Routes */}
