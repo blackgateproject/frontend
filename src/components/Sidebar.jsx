@@ -29,7 +29,7 @@ const Sidebar = ({ role, children }) => {
 
   const userLinks = [
     { name: "Home", path: "/user/dashboard", icon: <Home /> },
-    { name: "Help", path: "/user/help", icon: <HelpCircle /> },
+    // { name: "Help", path: "/user/help", icon: <HelpCircle /> },
     { name: "Profile", path: "/user/profile", icon: <User /> },
   ];
 

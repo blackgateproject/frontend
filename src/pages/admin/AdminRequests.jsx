@@ -1,10 +1,21 @@
-import { Search, TicketCheckIcon, TicketIcon } from "lucide-react";
+import {
+  Search,
+  TicketIcon,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  MapPin,
+  Globe,
+  Monitor,
+  Info,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Loader from "../../components/Loader";
 import Modal from "../../components/Modal";
 import Sidebar from "../../components/Sidebar";
+import { motion } from "framer-motion";
 
-const requests = () => {
+const Requests = () => {
   // // Dummy data for testing
   // const dummyData = {
   //   all: [
@@ -149,7 +160,7 @@ const requests = () => {
   //   ],
   // };
 
-  // // Preprocess the data to generate role-specific arrays
+  // Preprocess the data to generate role-specific arrays
   // const processedData = (() => {
   //   const allData = dummyData.all;
   //   const result = { all: allData };
@@ -481,21 +492,22 @@ const requests = () => {
     };
 
   // Filter and sort requests
-  const filteredrequests = requests
+  const filteredRequests = requests
     .filter((request) => {
-      const matchesSearch = request.walletAddr
+      // Filter by search query
+      return request.walletAddr
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
-      return matchesSearch;
     })
     .sort((a, b) => {
+      // Sort by date
       if (sortOrder === "asc") {
         return a.date - b.date;
       } else {
         return b.date - a.date;
       }
     });
-
+    
   // Pagination logic
   const indexOfLastRequest = currentPage * requestsPerPage;
   const indexOfFirstRequest = indexOfLastRequest - requestsPerPage;
