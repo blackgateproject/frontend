@@ -16,149 +16,7 @@ import Sidebar from "../../components/Sidebar";
 import { motion } from "framer-motion";
 
 const Requests = () => {
-  // // Dummy data for testing
-  // const dummyData = {
-  //   all: [
-  //     {
-  //       id: 1001,
-  //       wallet_addr: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
-  //       usernetwork_info: {
-  //         ip_address: "192.168.1.100",
-  //         user_agent:
-  //           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-  //         user_language: "en-US",
-  //         location_lat: "37.7749",
-  //         location_long: "-122.4194",
-  //         country: "United States",
-  //         city: "San Francisco",
-  //         isp: "Comcast",
-  //         timezone: "America/Los_Angeles",
-  //         connection_type: "Broadband",
-  //       },
-  //       created_at: "2025-02-15T09:30:45Z",
-  //       role: "admin",
-  //       status: "pending",
-  //     },
-  //     {
-  //       id: 1002,
-  //       wallet_addr: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-  //       usernetwork_info: {
-  //         ip_address: "10.0.0.25",
-  //         user_agent:
-  //           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15",
-  //         user_language: "en-GB",
-  //         location_lat: "51.5074",
-  //         location_long: "-0.1278",
-  //         country: "United Kingdom",
-  //         city: "London",
-  //         isp: "British Telecom",
-  //         timezone: "Europe/London",
-  //         connection_type: "Fiber",
-  //       },
-  //       created_at: "2025-02-18T14:22:31Z",
-  //       role: "admin",
-  //       status: "approved",
-  //     },
-  //     {
-  //       id: 1003,
-  //       wallet_addr: "0x2546BcD3c84621e976D8185a91A922aE77ECEc30",
-  //       usernetwork_info: {
-  //         ip_address: "172.16.254.1",
-  //         user_agent:
-  //           "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
-  //         user_language: "es-ES",
-  //         location_lat: "40.4168",
-  //         location_long: "-3.7038",
-  //         country: "Spain",
-  //         city: "Madrid",
-  //         isp: "Telefonica",
-  //         timezone: "Europe/Madrid",
-  //         connection_type: "Mobile",
-  //       },
-  //       created_at: "2025-02-20T18:10:15Z",
-  //       role: "admin",
-  //       status: "rejected",
-  //     },
-  //     {
-  //       id: 2001,
-  //       wallet_addr: "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
-  //       usernetwork_info: {
-  //         ip_address: "192.168.10.15",
-  //         user_agent:
-  //           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36",
-  //         user_language: "zh-CN",
-  //         location_lat: "39.9042",
-  //         location_long: "116.4074",
-  //         country: "China",
-  //         city: "Beijing",
-  //         isp: "China Telecom",
-  //         timezone: "Asia/Shanghai",
-  //         connection_type: "DSL",
-  //       },
-  //       created_at: "2025-02-14T10:15:20Z",
-  //       role: "user",
-  //       status: "pending",
-  //     },
-  //     {
-  //       id: 2002,
-  //       wallet_addr: "0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C",
-  //       usernetwork_info: {
-  //         ip_address: "10.10.10.25",
-  //         user_agent:
-  //           "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_5_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Safari/605.1.15",
-  //         user_language: "ko-KR",
-  //         location_lat: "37.5665",
-  //         location_long: "126.9780",
-  //         country: "South Korea",
-  //         city: "Seoul",
-  //         isp: "Korea Telecom",
-  //         timezone: "Asia/Seoul",
-  //         connection_type: "Fiber",
-  //       },
-  //       created_at: "2025-02-17T13:45:12Z",
-  //       role: "user",
-  //       status: "approved",
-  //     },
-  //     {
-  //       id: 3001,
-  //       wallet_addr: "0x6c6Bc977E13Df9b0de53b251522280BB72383700",
-  //       usernetwork_info: {
-  //         ip_address: "192.168.5.200",
-  //         user_agent: "IoT-Device/1.0 (RaspberryPi; Sensor Network)",
-  //         user_language: "en-US",
-  //         location_lat: "34.0522",
-  //         location_long: "-118.2437",
-  //         country: "United States",
-  //         city: "Los Angeles",
-  //         isp: "Spectrum",
-  //         timezone: "America/Los_Angeles",
-  //         connection_type: "Fixed Wireless",
-  //       },
-  //       created_at: "2025-02-10T08:20:15Z",
-  //       role: "device",
-  //       status: "pending",
-  //     },
-  //     {
-  //       id: 3002,
-  //       wallet_addr: "0xCA35b7d915458EF540aDe6068dFe2F44E8fa733c",
-  //       usernetwork_info: {
-  //         ip_address: "10.50.12.75",
-  //         user_agent: "SmartDevice/2.1 (Arduino; Telemetry)",
-  //         user_language: "en-US",
-  //         location_lat: "40.7128",
-  //         location_long: "-74.0060",
-  //         country: "United States",
-  //         city: "New York",
-  //         isp: "Verizon",
-  //         timezone: "America/New_York",
-  //         connection_type: "IoT Network",
-  //       },
-  //       created_at: "2025-02-12T15:10:45Z",
-  //       role: "device",
-  //       status: "rejected",
-  //     },
-  //   ],
-  // };
+
 
   // Preprocess the data to generate role-specific arrays
   // const processedData = (() => {
@@ -280,7 +138,7 @@ const Requests = () => {
   const [requestsPerPage] = useState(5);
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState("all");
-  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("pending");
   const [confirmModal, setConfirmModal] = useState({
     open: false,
     type: "",
@@ -317,7 +175,7 @@ const Requests = () => {
       }
       if (!response.ok) throw new Error("Failed to fetch requests");
       const data = await response.json();
-      setrequests(
+      setRequests(
         data.map((request) => ({
           id: request.id,
           walletAddr: request.wallet_addr,
@@ -325,6 +183,7 @@ const Requests = () => {
           date: new Date(request.created_at),
           isApproved: request.isApproved,
           isRegistered: request.isRegistered,
+          status: request.request_status
         }))
       );
     } catch (error) {
