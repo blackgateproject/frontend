@@ -70,7 +70,7 @@ const UserProfile = () => {
         setProfile(userData);
       } catch (error) {
         console.error("Error fetching user profile:", error);
-        navigate("/");
+        // navigate("/");
       } finally {
         setIsLoading(false);
       }
@@ -283,7 +283,7 @@ const UserProfile = () => {
 
   return (
     <Sidebar role={"user"}>
-      <dialog id="qr-modal" className="modal">
+      <dialog id="qr-modal" className="modal backdrop-brightness-75">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Connect with your mobile app</h3>
           <p className="py-4">
@@ -312,7 +312,7 @@ const UserProfile = () => {
         </div>
       </dialog>
 
-      <dialog id="password-modal" className="modal" open={isPasswordModalOpen}>
+      <dialog id="password-modal" className="modal backdrop-brightness-75" open={isPasswordModalOpen}>
         <form className="modal-box" onSubmit={handleSubmit}>
           <h3 className="font-bold text-lg">Enter Wallet Password</h3>
           <input

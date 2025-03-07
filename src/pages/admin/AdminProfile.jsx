@@ -237,7 +237,7 @@ const AdminProfile = () => {
 
   return (
     <Sidebar role={"admin"}>
-      <dialog id="qr-modal" className="modal">
+      <dialog id="qr-modal" className="modal backdrop-brightness-75">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Connect with your mobile app</h3>
           <p className="py-4">
@@ -256,7 +256,7 @@ const AdminProfile = () => {
         </div>
       </dialog>
 
-      <dialog id="password-modal" className="modal" open={isPasswordModalOpen}>
+      <dialog id="password-modal" className="modal backdrop-brightness-75" open={isPasswordModalOpen}>
         <form className="modal-box" onSubmit={handleSubmit}>
           <h3 className="font-bold text-lg">Enter Wallet Password</h3>
           <input
