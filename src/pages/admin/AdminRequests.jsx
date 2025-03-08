@@ -184,7 +184,7 @@ const Requests = () => {
           isApproved: request.isApproved,
           isRegistered: request.isRegistered,
           status: request.request_status,
-          role: request.role
+          role: request.requested_role
         }))
       );
     } catch (error) {

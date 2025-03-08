@@ -1,7 +1,96 @@
-import { ethers } from "ethers";
-import { contractInstance, providerInstance } from "./contractInteractions";
+import { issueCredential, resolveDID } from "@spruceid/didkit-wasm";
+import { Buffer } from "buffer";
+import { ethers, SigningKey } from "ethers";
+import { contractInstance } from "./contractInteractions";
 import { logUserInfo } from "./secUtils";
-import { getDIDandVC } from "./verification";
+
+export const getDIDandVC = async (wallet, role) => {
+  if (!wallet) {
+    console.error("Wallet is not loaded.");
+    return;
+  }
+  const did = "did:ethr:" + wallet.address;
+  console.log("DID:", did);
+  const didDoc = await resolveDID(String(did), "{}");
+  console.log("DID Document:", didDoc);
+  const credential = JSON.stringify({
+    "@context": ["https://www.w3.org/2018/credentials/v1"],
+    type: ["VerifiableCredential"],
+    issuer: did,
+    credentialSubject: { id: "did:example:123" },
+    issuanceDate: new Date().toISOString(),
+  });
+
+  console.log("Credential:", credential);
+  const proof_options = JSON.stringify({
+    proofPurpose: "assertionMethod",
+    verificationMethod: `${did}#controller`,
+  });
+
+  console.log("Proof Options:", proof_options);
+
+  let newUncompPubKey = SigningKey.computePublicKey(wallet.privateKey, false);
+  // console.log("New Uncompressed Public Key:", newUncompPubKey);
+  if (newUncompPubKey instanceof Uint8Array) {
+    newUncompPubKey = hexlify(newUncompPubKey);
+  }
+
+  // Remove the '0x04' prefix
+  const rawPubKey = newUncompPubKey.startsWith("0x04")
+    ? newUncompPubKey.slice(4)
+    : newUncompPubKey;
+  const newRawPubKey = "0x" + rawPubKey;
+  // console.log("Public Key with 0x prefix:", newRawPubKey);
+
+  const xPubKey = Buffer.from(newRawPubKey.slice(2, 66), "hex")
+    .toString("base64")
+    .replace(/=+$/, "")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_");
+  const yPubKey = Buffer.from(newRawPubKey.slice(66), "hex")
+    .toString("base64")
+    .replace(/=+$/, "")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_");
+  // console.log("X Public Key:", xPubKey);
+  // console.log("Y Public Key:", yPubKey);
+  const jwk = JSON.stringify({
+    kty: "EC",
+    crv: "secp256k1",
+    d: Buffer.from(wallet.privateKey.slice(2), "hex")
+      .toString("base64")
+      .replace(/=+$/, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_"),
+    x: xPubKey,
+    y: yPubKey,
+    // y: Buffer.from(wallet.publicKey.slice(32), "hex")
+    // .toString("base64")
+    // .replace(/=+$/, "")
+    // .replace(/\+/g, "-")
+    // .replace(/\//g, "_"),
+  });
+  // console.log("Wallet Private Key:", wallet.privateKey);
+  // const Uint8ArrayKey = new Uint8Array(Buffer.from(wallet.privateKey.slice(2), "hex"));
+  // const jwk = await exportJWK(Uint8ArrayKey)
+
+  console.log("JWK:", jwk);
+  const signed_vc = await issueCredential(
+    credential,
+    proof_options,
+    jwk
+    // "{}",
+    // "{}",
+    // String(wallet.privateKey)
+    // "{}"
+  );
+  console.log("Signed VC:", signed_vc);
+
+  return {
+    did,
+    signed_vc,
+  };
+};
 
 export const checkRegistration = async (contract, address) => {
   // Check if the address exists in DIDOwnerChanged event logs
@@ -50,25 +139,12 @@ export const checkRegistration = async (contract, address) => {
   return { isSelfOwned, isRegistered };
 };
 
-export const handleProceedToNextStep = async (
-  wallet,
-  did, 
-  signed_vc,
-  selectedClaims,
-  // setSignedVC,
-  setIsLoadingDID,
-  setCurrentStep,
-  signer
-) => {
+export const sendToConnector = async (wallet, selectedRole) => {
   console.log("Registeration Processs BEGIN!");
   console.log("Fetching Network Info");
 
   // Fetch Network based Identifiers
   const networkInfo = await logUserInfo();
-
-  // Setup DID String
-  did = "did:ethr:" + wallet.address;
-  console.log("DID:", did);
 
   // Check if DID is registered onchain already
   const contract = await contractInstance();
@@ -77,27 +153,21 @@ export const handleProceedToNextStep = async (
   if (!result.isSelfOwned) {
     // Already onchain, just prompt for verification
     console.log("Address is registered, Verifying...");
-    console.log("NOTE:: No verification function has been implemented yet!");
+    console.warn("NOTE:: No verification function has been implemented yet!");
     // Proceed with verification
     // Send ZKP that's stored in memory
   } else {
     // Not onchain, proceed with registration
     console.log("Address is not registered");
     // Proceed with registration
-    const signed_vc = await getDIDandVC(
-      wallet,
-      did,
-      selectedClaims,
-      // setSignedVC,
-      setIsLoadingDID,
-      setCurrentStep
-    );
+    const { did, signed_vc } = await getDIDandVC(wallet, selectedRole);
 
     const data = {
       wallet_address: wallet.address,
       didStr: did,
       verifiableCredential: signed_vc,
       usernetwork_info: networkInfo,
+      requested_role: selectedRole,
     };
     console.log("Data:", data);
 
@@ -117,9 +187,11 @@ export const handleProceedToNextStep = async (
       console.log("Registration finalized:", data);
       // navigate("/dashboard");
     } else if (response.status === 500) {
-      console.error("Server Error:", await response.text());
-    }
-    else {
+      const errorLog = await response.json();
+      // console.log("Server Error:", errorLog.error);
+      console.error("Server Error:", errorLog.error);
+      alert(`Server Error: ${errorLog.error}`);
+    } else {
       console.error("Failed to finalize registration");
     }
     // const contract = await contractInstance();
@@ -137,6 +209,45 @@ export const handleProceedToNextStep = async (
     // console.log("Transaction Events:", txReceipt.events);
 
     // console.log("Registeration Processs End!");
+    // Send Transaction ID and DID for verification
+  }
+};
+
+export const sendToBlockchain = async (wallet, signer) => {
+  console.log("Registeration Processs BEGIN!");
+  console.log("Fetching Network Info");
+
+  // Fetch Network based Identifiers
+  const networkInfo = await logUserInfo();
+
+  // Check if DID is registered onchain already
+  const contract = await contractInstance();
+  const result = await checkRegistration(contract, wallet.address);
+  console.log("Registration Result:", result);
+  if (!result.isSelfOwned) {
+    // Already onchain, just prompt for verification
+    console.log("Address is registered, Verifying...");
+    console.log("NOTE:: No verification function has been implemented yet!");
+    // Proceed with verification
+    // Send ZKP that's stored in memory
+  } else {
+    // Not onchain, proceed with registration
+    console.log("Address is not registered");
+    // Proceed with registration
+
+    const tx = await contract
+      .connect(signer)
+      .changeOwner(wallet.address, wallet.address);
+    const txResponse = await tx.getTransaction();
+    const txReceipt = await txResponse.wait();
+    console.log("Transaction Receipt:", txReceipt);
+    console.log("Transaction Logs:", txReceipt.logs);
+    console.log("Transaction Hash:", txReceipt.transactionHash);
+    console.log("Transaction Status:", txReceipt.status);
+    console.log("Transaction Confirmations:", txReceipt.confirmations);
+    console.log("Transaction Events:", txReceipt.events);
+
+    console.log("Registeration Processs End!");
     // Send Transaction ID and DID for verification
   }
 };
