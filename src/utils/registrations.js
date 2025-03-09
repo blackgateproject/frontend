@@ -213,63 +213,72 @@ export const sendToConnector = async (wallet, selectedRole) => {
   }
 };
 
-export const pollForRequestStatus = (walletAddress) => {
+export const pollForRequestStatus = async (walletAddress) => {
   console.log("Polling for request status...");
 
   return fetch(`http://localhost:8000/auth/v1/poll/${walletAddress}`)
-    .then(response => {
+    .then((response) => {
       if (response.ok) {
-        console.log("Data (response.json): ", response);
+        // console.log("Data (response.json): ", response);
         return response.json();
       } else {
         throw new Error("Failed to fetch request status");
       }
     })
-    .then(data => {
-      console.log("then data:", data);
+    .then((data) => {
+      // console.log("then data:", data);
       return data.request_status;
     })
-    .catch(error => {
+    .catch((error) => {
       console.error(error);
       return null;
     });
-}
+};
 
 export const sendToBlockchain = async (wallet, signer) => {
-  console.log("Registeration Processs BEGIN!");
-  console.log("Fetching Network Info");
+  console.log("Blockchain Registeration Processs BEGIN!");
 
-  // Fetch Network based Identifiers
-  const networkInfo = await logUserInfo();
-
-  // Check if DID is registered onchain already
+  // Contract instance - get contract with signer attached
   const contract = await contractInstance();
-  const result = await checkRegistration(contract, wallet.address);
-  console.log("Registration Result:", result);
-  if (!result.isSelfOwned) {
-    // Already onchain, just prompt for verification
-    console.log("Address is registered, Verifying...");
-    console.log("NOTE:: No verification function has been implemented yet!");
-    // Proceed with verification
-    // Send ZKP that's stored in memory
-  } else {
-    // Not onchain, proceed with registration
-    console.log("Address is not registered");
-    // Proceed with registration
+  // Check if DID is registered onchain already (MOVE this to connector)
+  // const result = await checkRegistration(contract, wallet.address);
+  // console.log("Registration Result:", result);
+  // if (!result.isSelfOwned) {
+  //   // Already onchain, just prompt for verification
+  //   console.log("Address is registered, Verifying...");
+  //   console.log("NOTE:: No verification function has been implemented yet!");
+  //   // Proceed with verification
+  //   // Send ZKP that's stored in memory
+  // } else {
+  //   // Not onchain, proceed with registration
+  //   console.log("Address is not registered");
+  //   // Proceed with registration
 
-    const tx = await contract
-      .connect(signer)
-      .changeOwner(wallet.address, wallet.address);
-    const txResponse = await tx.getTransaction();
-    const txReceipt = await txResponse.wait();
-    console.log("Transaction Receipt:", txReceipt);
-    console.log("Transaction Logs:", txReceipt.logs);
-    console.log("Transaction Hash:", txReceipt.transactionHash);
-    console.log("Transaction Status:", txReceipt.status);
-    console.log("Transaction Confirmations:", txReceipt.confirmations);
-    console.log("Transaction Events:", txReceipt.events);
+  // Make sure signer is connected to a provider that can send transactions
 
-    console.log("Registeration Processs End!");
-    // Send Transaction ID and DID for verification
+  if (!signer.provider) {
+    throw new Error("Signer must be connected to a provider");
   }
+
+  // commit transaction with a properly connected signer
+  const connectedContract = contract.connect(signer);
+  const tx = await connectedContract.changeOwner(
+    wallet.address,
+    wallet.address
+  );
+  // Parse tx
+  const txResponse = await tx.getTransaction();
+  const txReceipt = await txResponse.wait();
+  console.log("Transaction Receipt:", txReceipt);
+  console.log("Transaction Logs:", txReceipt.logs);
+  console.log("Transaction Hash:", txReceipt.transactionHash);
+  console.log("Transaction Status:", txReceipt.status);
+  console.log("Transaction Confirmations:", txReceipt.confirmations);
+  console.log("Transaction Events:", txReceipt.events);
+
+  console.log("Registeration Processs End!");
+
+  return {
+    txHash: txReceipt.transactionHash,
+  };
 };

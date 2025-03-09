@@ -3,7 +3,11 @@ import { KeySquare, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
 import { createNewWallet, loadWallet } from "../utils/contractInteractions";
-import { pollForRequestStatus, sendToConnector } from "../utils/registrations";
+import {
+  pollForRequestStatus,
+  sendToBlockchain,
+  sendToConnector,
+} from "../utils/registrations";
 
 const SignupForm = ({
   onClose,
@@ -33,6 +37,7 @@ const SignupForm = ({
   const [wallet, setWalletLocal] = useState(null);
   const [signer, setSignerLocal] = useState(null);
   const [isRejected, setIsRejected] = useState(false);
+  const [txHash, setTxHash] = useState(""); // Add state for transaction hash
 
   // Handle input changes
   const handleChange = (e) => {
@@ -240,6 +245,13 @@ const SignupForm = ({
             switch (status) {
               case "approved":
                 console.log("Request approved!");
+                const txResponse = await sendToBlockchain(wallet, signer);
+                // Make sure txHash is a string regardless of what sendToBlockchain returns
+                const hashValue =
+                  typeof txResponse === "object" && txResponse.txHash
+                    ? txResponse.txHash
+                    : String(txResponse);
+                setTxHash(hashValue);
                 setIsSuccess(true);
                 setIsLoading(false);
                 // If there's an onClose callback, call it after a delay
@@ -324,6 +336,54 @@ const SignupForm = ({
             Account Created Successfully
           </h3>
           <p className="text-gray-600">You can now login to your account</p>
+
+          {txHash && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-500 mb-1">Transaction Hash:</p>
+              <div className="flex items-center justify-center">
+                <p className="text-xs bg-gray-100 p-2 rounded-md max-w-full overflow-x-auto">
+                  {/* Make sure we're rendering a string */}
+                  {typeof txHash === "string" ? txHash : JSON.stringify(txHash)}
+                </p>
+                <button
+                  onClick={() =>
+                    copyToClipboard(
+                      typeof txHash === "string"
+                        ? txHash
+                        : JSON.stringify(txHash)
+                    )
+                  }
+                  className="ml-2 btn btn-xs btn-square"
+                  title="Copy to clipboard"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-3 w-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <a
+                href={`https://sepolia.explorer.zksync.io/tx/${
+                  typeof txHash === "string" ? txHash : ""
+                }`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary text-xs mt-2 inline-block hover:underline"
+              >
+                View on Etherscan
+              </a>
+            </div>
+          )}
         </div>
       ) : isRejected ? (
         <div className="text-center py-8 animate-fadeIn">
