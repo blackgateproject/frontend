@@ -1,5 +1,5 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import AddUser from "./pages/admin/AddUser";
+// import AddUser from "./pages/admin/AddUser";
 import AdminApplications from "./pages/admin/AdminApplications";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import GrafanaDashboard from "./pages/admin/GrafanaDashboard";
@@ -59,10 +59,10 @@ function App() {
         <Route path="/user/help" element={<UserHelp role={"user"} />} />
         <Route path="/user/profile" element={<UserProfile role={"user"} />} />
 
-        <Route
+        {/* <Route
           path="/user/onboarding"
           element={<Onboarding role={"userOnboard"} />}
-        />
+        /> */}
       </Routes>
     </Router>
   );
