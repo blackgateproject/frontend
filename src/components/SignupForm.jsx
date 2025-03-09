@@ -1,8 +1,12 @@
 import { ethers } from "ethers";
 import { KeySquare, Loader2 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import logo from "../assets/logo.png";
-import { createNewWallet, loadWallet } from "../utils/contractInteractions";
+import {
+  createNewWallet,
+  fetchBalance,
+  loadWallet,
+} from "../utils/contractInteractions";
 import {
   pollForRequestStatus,
   sendToBlockchain,
@@ -13,11 +17,12 @@ const SignupForm = ({
   onClose,
   walletExists,
   setWalletExists,
-  setWallet, // Add this prop
-  setSigner, // Add this prop
-  setIsWalletLoaded, // Add this prop
-  setErrorMessage, // Add this prop
+  setWallet,
+  setSigner,
+  setIsWalletLoaded,
+  setErrorMessage,
   setIsErrorModalOpen,
+  wallet,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState("user");
@@ -34,10 +39,16 @@ const SignupForm = ({
   const [confirmWalletPassword, setConfirmWalletPassword] = useState("");
   const [showWalletPasswordModal, setShowWalletPasswordModal] = useState(false);
   const [isLoadingWallet, setIsLoadingWallet] = useState(false);
-  const [wallet, setWalletLocal] = useState(null);
+  const [walletLocal, setWalletLocal] = useState(null);
   const [signer, setSignerLocal] = useState(null);
   const [isRejected, setIsRejected] = useState(false);
-  const [txHash, setTxHash] = useState(""); // Add state for transaction hash
+  const [txHash, setTxHash] = useState("");
+  const [balance, setBalance] = useState("---"); // Add balance state
+
+  // Add useEffect to fetch balance
+  useEffect(() => {
+    fetchBalance(wallet || walletLocal, setBalance);
+  }, [wallet, walletLocal]);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -248,7 +259,10 @@ const SignupForm = ({
 
                 // Store merkle proof and hash in local storage
                 localStorage.setItem("merkleHash", status.merkle_hash);
-                localStorage.setItem("merkleProof", JSON.stringify(status.merkle_proof));
+                localStorage.setItem(
+                  "merkleProof",
+                  JSON.stringify(status.merkle_proof)
+                );
 
                 // Send the transaction to the blockchain
                 const txResponse = await sendToBlockchain(wallet, signer);
@@ -318,6 +332,7 @@ const SignupForm = ({
 
       <h2 className="text-center text-2xl font-bold text-primary mb-6">
         Create BLACKGATE Account
+        <p className="text-sm text-black mt-1">Balance: {balance} ETH</p>
       </h2>
 
       {isSuccess ? (
@@ -366,7 +381,7 @@ const SignupForm = ({
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-3 w-3"
                     fill="none"
-                    viewBox="0 0 24 24"
+                    viewBox="0 24 24"
                     stroke="currentColor"
                   >
                     <path
