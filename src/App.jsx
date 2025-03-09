@@ -28,7 +28,7 @@ function App() {
           element={<AdminApplications role={"admin"} />}
         />
         <Route path="/admin/users" element={<AdminUsers role={"admin"} />} />
-        <Route path="/admin/adduser" element={<AddUser role={"admin"} />} />
+        {/* <Route path="/admin/adduser" element={<AddUser role={"admin"} />} /> */}
         <Route
           path="/admin/requests"
           element={<AdminRequests role={"admin"} />}
