@@ -8,7 +8,7 @@ import AdminRequests from "./pages/admin/AdminRequests";
 import AdminUsers from "./pages/admin/AdminUsers";
 import UserActivityLogs from "./pages/admin/UserActivityLogs";
 import LoginPage from "./pages/LoginPage";
-import Onboarding from "./pages/Onboarding";
+// import Onboarding from "./pages/Onboarding";
 import UserDashboard from "./pages/user/UserDashboard";
 import UserHelp from "./pages/user/UserHelp";
 import UserProfile from "./pages/user/UserProfile";
@@ -41,10 +41,10 @@ function App() {
           path="/admin/user-activity"
           element={<UserActivityLogs role={"admin"} />}
         />
-        <Route
+        {/* <Route
           path="/admin/onboarding"
           element={<Onboarding role={"adminOnboard"} />}
-        />
+        /> */}
         <Route
           path="/admin/grafana-dashboard"
           element={<GrafanaDashboard role={"admin"} />}
