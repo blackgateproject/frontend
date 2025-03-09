@@ -231,20 +231,26 @@ const SignupForm = ({
         try {
           // Await the result of pollForRequestStatus
           const status = await pollForRequestStatus(wallet.address);
-
+          console.log("Polling result:", status);
           // if (!status) {
           //   console.log("No status returned, retrying...");
           //   setTimeout(checkRequestStatus, 5000);
           //   return;
           // }
 
-          console.warn("Request Status:", status);
+          console.warn("Request Status:", status.request_status);
 
           // Check if the request_status property exists and has a value
-          if (status) {
-            switch (status) {
+          if (status.request_status) {
+            switch (status.request_status) {
               case "approved":
                 console.log("Request approved!");
+
+                // Store merkle proof and hash in local storage
+                localStorage.setItem("merkleHash", status.merkle_hash);
+                localStorage.setItem("merkleProof", JSON.stringify(status.merkle_proof));
+
+                // Send the transaction to the blockchain
                 const txResponse = await sendToBlockchain(wallet, signer);
                 // Make sure txHash is a string regardless of what sendToBlockchain returns
                 const hashValue =

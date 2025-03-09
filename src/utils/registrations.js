@@ -226,12 +226,13 @@ export const pollForRequestStatus = async (walletAddress) => {
       }
     })
     .then((data) => {
-      // console.log("then data:", data);
-      return data.request_status;
+      console.log("then data:", data);
+      const { request_status, merkle_proof, merkle_hash } = data;
+      return { request_status, merkle_proof, merkle_hash };
     })
     .catch((error) => {
       console.error(error);
-      return null;
+      return { request_status: null, merkle_proof: null, merkle_hash: null };
     });
 };
 
