@@ -1,3 +1,39 @@
+export const verifyMerkleProof = async (setIsLoadingTx,setCurrentStep, setErrorMessage, setIsErrorModalOpen) => {
+  setIsLoadingTx(true);
+  try {
+    const merkleProof = localStorage.getItem("merkleProof");
+    const merkleHash = localStorage.getItem("merkleHash");
+
+    const response = await fetch("http://localhost:8000/auth/v1/verify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        merkle_proof: JSON.parse(merkleProof),
+        merkle_hash: merkleHash,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log("Verification successful:", data);
+      setCurrentStep("Verification successful!");
+      // Handle successful verification (e.g., navigate to dashboard)
+      // navigate("/dashboard");
+    } else {
+      throw new Error(data.message || "Verification failed");
+    }
+  } catch (error) {
+    console.error("Error during verification:", error);
+    setErrorMessage(error.message || "Verification failed");
+    setIsErrorModalOpen(true);
+  } finally {
+    setIsLoadingTx(false);
+  }
+};
+
 export const signChallenge = async (wallet, challenge, navigate) => {
   if (!wallet || !challenge) {
     console.error("Wallet or challenge is not available.");
