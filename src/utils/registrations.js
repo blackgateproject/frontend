@@ -213,6 +213,28 @@ export const sendToConnector = async (wallet, selectedRole) => {
   }
 };
 
+export const pollForRequestStatus = (walletAddress) => {
+  console.log("Polling for request status...");
+
+  return fetch(`http://localhost:8000/auth/v1/poll/${walletAddress}`)
+    .then(response => {
+      if (response.ok) {
+        console.log("Data (response.json): ", response);
+        return response.json();
+      } else {
+        throw new Error("Failed to fetch request status");
+      }
+    })
+    .then(data => {
+      console.log("then data:", data);
+      return data.request_status;
+    })
+    .catch(error => {
+      console.error(error);
+      return null;
+    });
+}
+
 export const sendToBlockchain = async (wallet, signer) => {
   console.log("Registeration Processs BEGIN!");
   console.log("Fetching Network Info");

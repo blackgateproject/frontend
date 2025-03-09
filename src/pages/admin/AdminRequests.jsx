@@ -232,7 +232,7 @@ const Requests = () => {
       const response = await fetch(
         `http://127.0.0.1:8000/admin/v1/requests/${requestId}/reject`,
         {
-          method: "DELETE",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,

@@ -3,7 +3,7 @@ import { KeySquare, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
 import { createNewWallet, loadWallet } from "../utils/contractInteractions";
-import { sendToConnector } from "../utils/registrations";
+import { pollForRequestStatus, sendToConnector } from "../utils/registrations";
 
 const SignupForm = ({
   onClose,
@@ -32,6 +32,7 @@ const SignupForm = ({
   const [isLoadingWallet, setIsLoadingWallet] = useState(false);
   const [wallet, setWalletLocal] = useState(null);
   const [signer, setSignerLocal] = useState(null);
+  const [isRejected, setIsRejected] = useState(false);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -157,11 +158,11 @@ const SignupForm = ({
     const newErrors = {};
 
     if (!formData.did) {
-      newErrors.did = "DID is required";
+      newErrors.did = "Wallet needs to be unlocked/generated";
     }
 
     if (!formData.publicKey) {
-      newErrors.publicKey = "Public key is required";
+      newErrors.publicKey = "Wallet needs to be unlocked/generated";
     }
 
     if (selectedRole === "device") {
@@ -195,6 +196,7 @@ const SignupForm = ({
           "Wallet not initialized. Please generate or unlock keys first."
         );
       }
+
       // Call sendToConnector with required parameters
       await sendToConnector(wallet, selectedRole);
 
@@ -203,15 +205,85 @@ const SignupForm = ({
         role: selectedRole,
       });
 
-      // setIsSuccess(true);
-      setTimeout(() => {
-        if (onClose) onClose();
-      }, 2000);
+      // Set up polling for request status
+      console.log("Starting polling for request status...");
+
+      // Maximum polling attempts (30 attempts * 5 seconds = 150 seconds total)
+      const maxAttempts = 30;
+      let attempts = 0;
+
+      const checkRequestStatus = async () => {
+        if (attempts >= maxAttempts) {
+          setErrorMessage("Request timed out. Please try again later.");
+          setIsErrorModalOpen(true);
+          setIsLoading(false);
+          return;
+        }
+
+        attempts++;
+        console.log(`Polling attempt ${attempts}/${maxAttempts}`);
+
+        try {
+          // Await the result of pollForRequestStatus
+          const status = await pollForRequestStatus(wallet.address);
+
+          // if (!status) {
+          //   console.log("No status returned, retrying...");
+          //   setTimeout(checkRequestStatus, 5000);
+          //   return;
+          // }
+
+          console.warn("Request Status:", status);
+
+          // Check if the request_status property exists and has a value
+          if (status) {
+            switch (status) {
+              case "approved":
+                console.log("Request approved!");
+                setIsSuccess(true);
+                setIsLoading(false);
+                // If there's an onClose callback, call it after a delay
+                if (onClose) {
+                  setTimeout(onClose, 2000);
+                }
+                break;
+
+              case "rejected":
+                console.log("Request rejected");
+                setIsRejected(true); // Set rejection state to true
+                setIsLoading(false);
+                break;
+
+              case "pending":
+                console.log("Request still pending, continuing to poll...");
+                setTimeout(checkRequestStatus, 5000);
+                break;
+
+              default:
+                console.log(`Unknown status: ${status}`);
+                setErrorMessage(`Unexpected status: ${status}`);
+                setIsErrorModalOpen(true);
+                setIsLoading(false);
+            }
+          } else {
+            // If status exists but doesn't have request_status property
+            console.log("Invalid status response format:", status);
+            setTimeout(checkRequestStatus, 5000);
+          }
+        } catch (error) {
+          console.error("Error polling for status:", error);
+
+          // Continue polling despite errors, up to the maximum attempts
+          setTimeout(checkRequestStatus, 5000);
+        }
+      };
+
+      // Start the polling process
+      checkRequestStatus();
     } catch (error) {
       console.error("Error submitting form:", error);
       setErrorMessage(error.message || "Failed to register with connector");
       setIsErrorModalOpen(true);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -252,6 +324,37 @@ const SignupForm = ({
             Account Created Successfully
           </h3>
           <p className="text-gray-600">You can now login to your account</p>
+        </div>
+      ) : isRejected ? (
+        <div className="text-center py-8 animate-fadeIn">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-8 w-8 text-red-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">
+            Registration Request Rejected
+          </h3>
+          <p className="text-gray-600">
+            Your account registration was not approved.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="btn btn-outline mt-4"
+          >
+            Try Again
+          </button>
         </div>
       ) : (
         <>
