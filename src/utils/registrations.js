@@ -3,16 +3,26 @@ import { Buffer } from "buffer";
 import { ethers, SigningKey } from "ethers";
 import { contractInstance } from "./contractInteractions";
 import { logUserInfo } from "./secUtils";
+import { useVeramo } from "@veramo-community/veramo-react"
+import {useQuery} from "@tanstack/react-query"
+
 
 export const getDIDandVC = async (wallet, role) => {
+  // Check for wallet
   if (!wallet) {
     console.error("Wallet is not loaded.");
     return;
   }
+
+  // Generate a DID String
   const did = "did:ethr:" + wallet.address;
   console.log("DID:", did);
+
+  // Resolve a DID Document
   const didDoc = await resolveDID(String(did), "{}");
   console.log("DID Document:", didDoc);
+
+  // Issue a Credential
   const credential = JSON.stringify({
     "@context": ["https://www.w3.org/2018/credentials/v1"],
     type: ["VerifiableCredential"],
@@ -29,6 +39,7 @@ export const getDIDandVC = async (wallet, role) => {
 
   console.log("Proof Options:", proof_options);
 
+  // Public key parsing from wallet
   let newUncompPubKey = SigningKey.computePublicKey(wallet.privateKey, false);
   // console.log("New Uncompressed Public Key:", newUncompPubKey);
   if (newUncompPubKey instanceof Uint8Array) {
@@ -54,6 +65,8 @@ export const getDIDandVC = async (wallet, role) => {
     .replace(/\//g, "_");
   // console.log("X Public Key:", xPubKey);
   // console.log("Y Public Key:", yPubKey);
+
+  // Create JWK (JSON Web Key)
   const jwk = JSON.stringify({
     kty: "EC",
     crv: "secp256k1",
@@ -75,6 +88,8 @@ export const getDIDandVC = async (wallet, role) => {
   // const jwk = await exportJWK(Uint8ArrayKey)
 
   console.log("JWK:", jwk);
+
+  // Sign the credential
   const signed_vc = await issueCredential(
     credential,
     proof_options,
