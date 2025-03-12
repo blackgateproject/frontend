@@ -39,6 +39,7 @@
     "react-qr-code": "^2.0.15",
     "react-qrcode-logo": "^3.0.0",
     "react-router-dom": "^6.26.2",
+    "uuid": "^11.1.0",
     "web-did-resolver": "^2.0.29",
     "zksync-ethers": "^6.16.1",
     "zksync-web3": "^0.17.1"

@@ -2,16 +2,13 @@ import { ethers } from "ethers";
 import { KeySquare, Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import logo from "../assets/logo.png";
+import { useVeramoOperations } from "../hooks/useVeramoOperations";
 import {
   createNewWallet,
   fetchBalance,
   loadWallet,
 } from "../utils/contractInteractions";
-import {
-  pollForRequestStatus,
-  sendToBlockchain,
-  sendToConnector,
-} from "../utils/registrations";
+import { pollForRequestStatus, sendToBlockchain } from "../utils/registrations";
 
 const SignupForm = ({
   onClose,
@@ -44,6 +41,7 @@ const SignupForm = ({
   const [isRejected, setIsRejected] = useState(false);
   const [txHash, setTxHash] = useState("");
   const [balance, setBalance] = useState("---"); // Add balance state
+  const { performSendToConnector } = useVeramoOperations();
 
   // Add useEffect to fetch balance
   useEffect(() => {
@@ -213,8 +211,8 @@ const SignupForm = ({
         );
       }
 
-      // Call sendToConnector with required parameters
-      await sendToConnector(wallet, selectedRole);
+      // Call performSendToConnector with required parameters
+      await performSendToConnector(wallet, selectedRole);
 
       console.log("Form submitted:", {
         ...formData,

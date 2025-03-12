@@ -2,7 +2,6 @@ import { createAgent, IDIDManager, IKeyManager, IResolver } from "@veramo/core";
 import { ICredentialIssuer } from "@veramo/credential-w3c";
 import { DIDManager, MemoryDIDStore } from "@veramo/did-manager";
 import { EthrDIDProvider } from "@veramo/did-provider-ethr";
-import { getDidKeyResolver } from "@veramo/did-provider-key";
 import { DIDResolverPlugin } from "@veramo/did-resolver";
 import {
   KeyManager,
@@ -20,6 +19,7 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+export const MY_CUSTOM_CONTEXT_URI = "https://blackgate.com/custom/context";
 
 const INFURA_PROJECT_ID = import.meta.env.VITE_INFURA_PROJECT_ID || null;
 console.log("Loaded INFURA_PROJECT_ID:", INFURA_PROJECT_ID);
@@ -51,19 +51,17 @@ export const localAgent = createAgent<
     new DIDResolverPlugin({
       resolver: new Resolver({
         ...ethrDidResolver({ infuraProjectId: INFURA_PROJECT_ID }),
-        ...getDidKeyResolver(),
       }),
     }),
-    // new CredentialIssuer(),
-    // new CredentialIssuerLD({
-    //   contextMaps: [LdDefaultContexts, extraContexts],
-    //   suites: [
-    //     new VeramoEd25519Signature2018(),
-    //     new VeramoEcdsaSecp256k1RecoverySignature2020(), //needed for did:ethr
-    //   ],
-    // }),
+    //   new CredentialIssuer(),
+    //   new CredentialIssuerLD({
+    //     contextMaps: [LdDefaultContexts, extraContexts],
+    //     suites: [
+    //       new VeramoEd25519Signature2018(),
+    //       new VeramoEcdsaSecp256k1RecoverySignature2020(), //needed for did:ethr
+        // ],
+      // }),
   ],
-
 });
 
 // import { createAgent, IResolver } from "@veramo/core";

@@ -22,7 +22,7 @@ const LoginPage = () => {
   const [isLoadingDID, setIsLoadingDID] = useState(false);
   const [isWalletLoaded, setIsWalletLoaded] = useState(false);
   const [isLoadingTx, setIsLoadingTx] = useState(false);
-  const [showSignupForm, setShowSignupForm] = useState(false);
+  const [showSignupForm, setShowSignupForm] = useState(true);
   const [hasVerificationData, setHasVerificationData] = useState(false);
   const navigate = useNavigate();
 
