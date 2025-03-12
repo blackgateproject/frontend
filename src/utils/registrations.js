@@ -14,92 +14,22 @@ export const getDIDandVC = async (wallet, role) => {
     return;
   }
 
-  // Generate a DID String
-  const did = "did:ethr:" + wallet.address;
-  console.log("DID:", did);
+  // Instantiate Veramo agent
+  // const { agent } = useVeramo<IDIDManager>();
+  const { agent } = useVeramo();
 
-  // Resolve a DID Document
-  const didDoc = await resolveDID(String(did), "{}");
-  console.log("DID Document:", didDoc);
+
+  // Generate a DID String
+  // const identifier = await agent.
+  // Issue DID based on wallet private key
 
   // Issue a Credential
-  const credential = JSON.stringify({
-    "@context": ["https://www.w3.org/2018/credentials/v1"],
-    type: ["VerifiableCredential"],
-    issuer: did,
-    credentialSubject: { id: "did:example:123" },
-    issuanceDate: new Date().toISOString(),
-  });
 
-  console.log("Credential:", credential);
-  const proof_options = JSON.stringify({
-    proofPurpose: "assertionMethod",
-    verificationMethod: `${did}#controller`,
-  });
+  // Public key parsing from wallet, use compressed key
 
-  console.log("Proof Options:", proof_options);
-
-  // Public key parsing from wallet
-  let newUncompPubKey = SigningKey.computePublicKey(wallet.privateKey, false);
-  // console.log("New Uncompressed Public Key:", newUncompPubKey);
-  if (newUncompPubKey instanceof Uint8Array) {
-    newUncompPubKey = hexlify(newUncompPubKey);
-  }
-
-  // Remove the '0x04' prefix
-  const rawPubKey = newUncompPubKey.startsWith("0x04")
-    ? newUncompPubKey.slice(4)
-    : newUncompPubKey;
-  const newRawPubKey = "0x" + rawPubKey;
-  // console.log("Public Key with 0x prefix:", newRawPubKey);
-
-  const xPubKey = Buffer.from(newRawPubKey.slice(2, 66), "hex")
-    .toString("base64")
-    .replace(/=+$/, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
-  const yPubKey = Buffer.from(newRawPubKey.slice(66), "hex")
-    .toString("base64")
-    .replace(/=+$/, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
-  // console.log("X Public Key:", xPubKey);
-  // console.log("Y Public Key:", yPubKey);
-
-  // Create JWK (JSON Web Key)
-  const jwk = JSON.stringify({
-    kty: "EC",
-    crv: "secp256k1",
-    d: Buffer.from(wallet.privateKey.slice(2), "hex")
-      .toString("base64")
-      .replace(/=+$/, "")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_"),
-    x: xPubKey,
-    y: yPubKey,
-    // y: Buffer.from(wallet.publicKey.slice(32), "hex")
-    // .toString("base64")
-    // .replace(/=+$/, "")
-    // .replace(/\+/g, "-")
-    // .replace(/\//g, "_"),
-  });
-  // console.log("Wallet Private Key:", wallet.privateKey);
-  // const Uint8ArrayKey = new Uint8Array(Buffer.from(wallet.privateKey.slice(2), "hex"));
-  // const jwk = await exportJWK(Uint8ArrayKey)
-
-  console.log("JWK:", jwk);
+  // Slice public key into X & Y components
 
   // Sign the credential
-  const signed_vc = await issueCredential(
-    credential,
-    proof_options,
-    jwk
-    // "{}",
-    // "{}",
-    // String(wallet.privateKey)
-    // "{}"
-  );
-  console.log("Signed VC:", signed_vc);
 
   return {
     did,

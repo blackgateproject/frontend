@@ -28,7 +28,6 @@ function App() {
           element={<AdminApplications role={"admin"} />}
         />
         <Route path="/admin/users" element={<AdminUsers role={"admin"} />} />
-        {/* <Route path="/admin/adduser" element={<AddUser role={"admin"} />} /> */}
         <Route
           path="/admin/requests"
           element={<AdminRequests role={"admin"} />}
@@ -41,10 +40,6 @@ function App() {
           path="/admin/user-activity"
           element={<UserActivityLogs role={"admin"} />}
         />
-        {/* <Route
-          path="/admin/onboarding"
-          element={<Onboarding role={"adminOnboard"} />}
-        /> */}
         <Route
           path="/admin/grafana-dashboard"
           element={<GrafanaDashboard role={"admin"} />}
@@ -59,10 +54,6 @@ function App() {
         <Route path="/user/help" element={<UserHelp role={"user"} />} />
         <Route path="/user/profile" element={<UserProfile role={"user"} />} />
 
-        {/* <Route
-          path="/user/onboarding"
-          element={<Onboarding role={"userOnboard"} />}
-        /> */}
       </Routes>
     </Router>
   );

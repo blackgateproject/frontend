@@ -1,134 +1,22 @@
+import { motion } from "framer-motion";
 import {
-  Search,
-  TicketIcon,
   AlertCircle,
   CheckCircle,
-  XCircle,
-  MapPin,
   Globe,
-  Monitor,
   Info,
+  MapPin,
+  Monitor,
+  Search,
+  TicketIcon,
+  XCircle,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Loader from "../../components/Loader";
 import Modal from "../../components/Modal";
 import Sidebar from "../../components/Sidebar";
-import { motion } from "framer-motion";
 
 const Requests = () => {
-
-
-  // Preprocess the data to generate role-specific arrays
-  // const processedData = (() => {
-  //   const allData = dummyData.all;
-  //   const result = { all: allData };
-
-  //   // Group by role
-  //   result.admin = allData.filter((item) => item.role === "admin");
-  //   result.user = allData.filter((item) => item.role === "user");
-  //   result.device = allData.filter((item) => item.role === "device");
-
-  //   return result;
-  // })();
-
-  // // Load dummy data based on selected role and status
-  // useEffect(() => {
-  //   loadDummyData(selectedRole, selectedStatus);
-  //   // Reset to page 1 when filters change
-  //   setCurrentPage(1);
-  // }, [selectedRole, selectedStatus]);
-
-  // // For demo purposes - uses dummy data instead of API calls
-  // const loadDummyData = (role, status) => {
-  //   setLoading(true);
-  //   // Simulate network delay
-  //   setTimeout(() => {
-  //     try {
-  //       let filteredData = processedData[role] || [];
-
-  //       // Filter by status if not "all"
-  //       if (status !== "all") {
-  //         filteredData = filteredData.filter((item) => item.status === status);
-  //       }
-
-  //       setRequests(
-  //         filteredData.map((request) => ({
-  //           id: request.id,
-  //           walletAddr: request.wallet_addr,
-  //           userNetworkInfo: request.usernetwork_info,
-  //           date: new Date(request.created_at),
-  //           role: request.role,
-  //           status: request.status,
-  //         }))
-  //       );
-
-  //       showNotification(`Loaded ${filteredData.length} requests`, "success");
-  //     } catch (error) {
-  //       console.error("Error:", error);
-  //       showNotification("Failed to load requests", "error");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }, 800); // Simulate loading delay
-  // };
-
-  // // For demo purposes - simulates approve action using dummy data
-  // const handleApprove = async (requestId) => {
-  //   setLoading(true);
-  //   // Simulate network delay
-  //   setTimeout(() => {
-  //     try {
-  //       // Update the status of the request to approved
-  //       setRequests((prev) =>
-  //         prev.map((request) =>
-  //           request.id === requestId
-  //             ? { ...request, status: "approved" }
-  //             : request
-  //         )
-  //       );
-  //       showNotification(
-  //         `Request #${requestId} approved successfully`,
-  //         "success"
-  //       );
-  //     } catch (error) {
-  //       console.error("Error:", error);
-  //       showNotification("Failed to approve request", "error");
-  //     } finally {
-  //       setLoading(false);
-  //       closeModal();
-  //     }
-  //   }, 1000);
-  // };
-
-  // // For demo purposes - simulates reject action using dummy data
-  // const handleReject = async (requestId) => {
-  //   setLoading(true);
-  //   // Simulate network delay
-  //   setTimeout(() => {
-  //     try {
-  //       // Update the status of the request to rejected
-  //       setRequests((prev) =>
-  //         prev.map((request) =>
-  //           request.id === requestId
-  //             ? { ...request, status: "rejected" }
-  //             : request
-  //         )
-  //       );
-  //       showNotification(
-  //         `Request #${requestId} rejected successfully`,
-  //         "success"
-  //       );
-  //     } catch (error) {
-  //       console.error("Error:", error);
-  //       showNotification("Failed to reject request", "error");
-  //     } finally {
-  //       setLoading(false);
-  //       closeModal();
-  //     }
-  //   }, 1000);
-  // };
-
-
+  // Preprocess the data to generat
 
   // State variables
   const [requests, setRequests] = useState([]);
@@ -184,7 +72,7 @@ const Requests = () => {
           isApproved: request.isApproved,
           isRegistered: request.isRegistered,
           status: request.request_status,
-          role: request.requested_role
+          role: request.requested_role,
         }))
       );
     } catch (error) {
@@ -254,104 +142,104 @@ const Requests = () => {
     }
   };
 
-    // Show notification
-    const showNotification = (message, type) => {
-      setNotification({
-        show: true,
-        message,
-        type,
-      });
-  
-      // Auto hide after 3 seconds
-      setTimeout(() => {
-        setNotification((prev) => ({ ...prev, show: false }));
-      }, 3000);
-    };
-  
-    // Open confirmation modal
-    const openModal = (type, requestId) => {
-      setConfirmModal({
-        open: true,
-        type,
-        requestId,
-      });
-    };
-  
-    // Close modal
-    const closeModal = () => {
-      setConfirmModal({
-        open: false,
-        type: "",
-        requestId: null,
-      });
-    };
-  
-    // Open details modal
-    const openDetailsModal = (request) => {
-      // Ensure we have the full data including extended fields
-      // This is needed because our display objects might not have all the fields
-      const fullRequestData = processedData.all.find(
-        (item) => item.id === request.id
-      );
-  
-      if (fullRequestData) {
-        setDetailsModal({
-          open: true,
-          request: {
-            ...request,
-            userNetworkInfo: {
-              ...request.userNetworkInfo,
-              // Add any missing fields from the original data
-              city: fullRequestData.usernetwork_info.city,
-              country: fullRequestData.usernetwork_info.country,
-              isp: fullRequestData.usernetwork_info.isp,
-              timezone: fullRequestData.usernetwork_info.timezone,
-              connection_type: fullRequestData.usernetwork_info.connection_type,
-            },
-          },
-        });
-      } else {
-        // Fallback if we 't find full data
-        setDetailsModal({
-          open: true,
-          request,
-        });
-      }
-    };
-  
-    // Close details modal
-    const closeDetailsModal = () => {
-      setDetailsModal({
-        open: false,
-        request: null,
-      });
-    };
-    // Get badge color based on status
-    const getStatusBadgeColor = (status) => {
-      switch (status) {
-        case "approved":
-          return "badge-success";
-        case "rejected":
-          return "badge-error";
-        case "pending":
-        default:
-          return "badge-warning";
-      }
-    };
+  // Show notification
+  const showNotification = (message, type) => {
+    setNotification({
+      show: true,
+      message,
+      type,
+    });
 
-    // Get role badge color
-    const getRoleBadgeColor = (role) => {
-      switch (role) {
-        // case "admin":
-        //   return "bg-blue-500";
-        // case "user":
-        //   return "bg-purple-500";
-        // case "device":
-        //   return "bg-cyan-500";
-        default:
-          return "bg-gray-500";
-      }
-    };
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+      setNotification((prev) => ({ ...prev, show: false }));
+    }, 3000);
+  };
+
+  // Open confirmation modal
+  const openModal = (type, requestId) => {
+    setConfirmModal({
+      open: true,
+      type,
+      requestId,
+    });
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setConfirmModal({
+      open: false,
+      type: "",
+      requestId: null,
+    });
+  };
+
+  // Open details modal
+  const openDetailsModal = (request) => {
+    // Ensure we have the full data including extended fields
+    // This is needed because our display objects might not have all the fields
+    const fullRequestData = processedData.all.find(
+      (item) => item.id === request.id
+    );
+
+    if (fullRequestData) {
+      setDetailsModal({
+        open: true,
+        request: {
+          ...request,
+          userNetworkInfo: {
+            ...request.userNetworkInfo,
+            // Add any missing fields from the original data
+            city: fullRequestData.usernetwork_info.city,
+            country: fullRequestData.usernetwork_info.country,
+            isp: fullRequestData.usernetwork_info.isp,
+            timezone: fullRequestData.usernetwork_info.timezone,
+            connection_type: fullRequestData.usernetwork_info.connection_type,
+          },
+        },
+      });
+    } else {
+      // Fallback if we 't find full data
+      setDetailsModal({
+        open: true,
+        request,
+      });
+    }
+  };
+
+  // Close details modal
+  const closeDetailsModal = () => {
+    setDetailsModal({
+      open: false,
+      request: null,
+    });
+  };
+  // Get badge color based on status
+  const getStatusBadgeColor = (status) => {
+    switch (status) {
+      case "approved":
+        return "badge-success";
+      case "rejected":
+        return "badge-error";
+      case "pending":
+      default:
+        return "badge-warning";
+    }
+  };
+
+  // Get role badge color
+  const getRoleBadgeColor = (role) => {
+    switch (role) {
+      // case "admin":
+      //   return "bg-blue-500";
+      // case "user":
+      //   return "bg-purple-500";
+      // case "device":
+      //   return "bg-cyan-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
 
   // Filter and sort requests
   const filteredRequests = requests
@@ -369,7 +257,7 @@ const Requests = () => {
         return b.date - a.date;
       }
     });
-    
+
   // Pagination logic
   const indexOfLastRequest = currentPage * requestsPerPage;
   const indexOfFirstRequest = indexOfLastRequest - requestsPerPage;
