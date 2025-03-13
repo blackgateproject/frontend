@@ -34,8 +34,7 @@ export async function createEthrDID(
 export async function importEthrDID(
   agent: TAgent<IDIDManager>,
   privateKeyHex: string,
-  publicKeyHex: string,
-  address: string
+  publicKeyHex: string
 ): Promise<IIdentifier> {
   //   console.log("Importing DID with address: ", address);
   //   console.log("Importing DID with privateKeyHex: ", privateKeyHex);
@@ -93,7 +92,7 @@ export async function createLDCredential(
     "@context": [MY_CUSTOM_CONTEXT_URI],
     issuer: issuer.did,
     credentialSubject: {
-      nothing: "else matters", // the `nothing` property is defined in the custom context (See ./setup.ts)
+      nothing: "else matters",
     },
   };
   const verifiableCredential = await agent.createVerifiableCredential({
@@ -104,13 +103,14 @@ export async function createLDCredential(
 }
 export async function createLDCredentialWithEthrIssuer(
   issuer: IIdentifier,
-  agent: TAgent<ICredentialIssuer>
+  agent: TAgent<ICredentialIssuer>,
+  role: string
 ): Promise<VerifiableCredential> {
   const credential: CredentialPayload = {
     "@context": [MY_CUSTOM_CONTEXT_URI],
     issuer: issuer.did,
     credentialSubject: {
-      nothing: "blackkkkgate", // the `nothing` property is defined in the custom context (See ./setup.ts)
+      role: role, 
     },
   };
   const verifiableCredential = await agent.createVerifiableCredential({

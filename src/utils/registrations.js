@@ -27,8 +27,7 @@ export const getDIDandVC = async (wallet, role, agent) => {
   const didDoc = await importEthrDID(
     agent,
     wallet.privateKey.slice(2),
-    newUncompPubKey,
-    wallet.address
+    newUncompPubKey
   );
 
   console.log("Issuer:", didDoc);
@@ -43,9 +42,21 @@ export const getDIDandVC = async (wallet, role, agent) => {
     console.error("DID Document is invalid.");
   }
 
-  // Issue Credential
+  // Issue Credential, figure out a way to pass return the VC with Supabase's JWT
   console.warn("Issuing Credential...");
-  const signed_vc = await createLDCredentialWithEthrIssuer(didDoc, agent);
+  const signed_vc = await createLDCredentialWithEthrIssuer(didDoc, agent, role);
+
+  // Verify Credential
+  console.warn("Verifying Credential...");
+  const verified_vc = await agent.verifyCredential({
+    credential: signed_vc,
+  });
+  if (verified_vc) {
+    console.log("Credential is valid.", verified_vc);
+  } else {
+    console.error("Credential is invalid.");
+  }
+
   return {
     did,
     signed_vc,
