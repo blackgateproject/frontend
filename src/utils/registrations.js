@@ -1,9 +1,10 @@
-import { ethers, SigningKey } from "ethers";
-import { contractInstance } from "./contractInteractions";
+import { SigningKey } from "ethers";
 import { logUserInfo } from "./secUtils";
-import { importEthrDID, resolveDID } from "./veramo";
-import { useQuery } from "@tanstack/react-query";
-import { useVeramo } from "@veramo-community/veramo-react";
+import {
+  createLDCredentialWithEthrIssuer,
+  importEthrDID,
+  verifyDIDDoc,
+} from "./veramo";
 // Modified to accept agent as a parameter instead of calling useVeramo() inside
 export const getDIDandVC = async (wallet, role, agent) => {
   // Check for wallet
@@ -35,18 +36,16 @@ export const getDIDandVC = async (wallet, role, agent) => {
 
   console.warn("Got DID & DID Document\n\nVerifying DID Document...");
   // Verify DID Document via Resolution
-  const resolvedDid = await resolveDID(agent, did);
+  const resolvedDid = await verifyDIDDoc(agent, did);
   if (resolvedDid) {
-    console.log("DID Document is valid.", resolvedDid);
+    console.log("DID Document is valid.");
   } else {
     console.error("DID Document is invalid.");
-    
   }
 
-
-
   // Issue Credential
-
+  console.warn("Issuing Credential...");
+  const signed_vc = await createLDCredentialWithEthrIssuer(didDoc, agent);
   return {
     did,
     signed_vc,
@@ -139,4 +138,3 @@ export const pollForRequestStatus = async (walletAddress) => {
       return { request_status: null, merkle_proof: null, merkle_hash: null };
     });
 };
-

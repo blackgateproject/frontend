@@ -1,9 +1,22 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import wasm from 'vite-plugin-wasm'
-import toplevelAwait from 'vite-plugin-top-level-await'
-
+import react from "@vitejs/plugin-react";
+import { createRequire } from "node:module";
+import { defineConfig } from "vite";
+import toplevelAwait from "vite-plugin-top-level-await";
+import wasm from "vite-plugin-wasm";
 // https://vitejs.dev/config/
+
+const require = createRequire(import.meta.url);
+
 export default defineConfig({
   plugins: [react(), wasm(), toplevelAwait()],
-})
+  resolve: {
+    alias: {
+      "@digitalcredentials/open-badges-context": require.resolve(
+        "@digitalcredentials/open-badges-context"
+      ),
+    },
+    optimizeDeps: {
+      include: ["@digitalcredentials/open-badges-context"],
+    },
+  },
+});

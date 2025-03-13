@@ -8,7 +8,7 @@ import {
   fetchBalance,
   loadWallet,
 } from "../utils/contractInteractions";
-import { pollForRequestStatus, sendToBlockchain } from "../utils/registrations";
+import { pollForRequestStatus } from "../utils/registrations";
 
 const SignupForm = ({
   onClose,
@@ -263,13 +263,13 @@ const SignupForm = ({
                 );
 
                 // Send the transaction to the blockchain
-                const txResponse = await sendToBlockchain(wallet, signer);
-                // Make sure txHash is a string regardless of what sendToBlockchain returns
-                const hashValue =
-                  typeof txResponse === "object" && txResponse.txHash
-                    ? txResponse.txHash
-                    : String(txResponse);
-                setTxHash(hashValue);
+                // const txResponse = await sendToBlockchain(wallet, signer);
+                // // Make sure txHash is a string regardless of what sendToBlockchain returns
+                // const hashValue =
+                //   typeof txResponse === "object" && txResponse.txHash
+                //     ? txResponse.txHash
+                //     : String(txResponse);
+                // setTxHash(hashValue);
                 setIsSuccess(true);
                 setIsLoading(false);
                 // If there's an onClose callback, call it after a delay

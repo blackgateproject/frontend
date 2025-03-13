@@ -3,7 +3,6 @@ import { useCallback } from "react";
 import {
   getDIDandVC,
   pollForRequestStatus,
-  sendToBlockchain,
   sendToConnector,
 } from "../utils/registrations";
 
@@ -35,15 +34,10 @@ export function useVeramoOperations() {
     return pollForRequestStatus(walletAddress);
   }, []);
 
-  const performSendToBlockchain = useCallback(async (wallet, signer) => {
-    return sendToBlockchain(wallet, signer);
-  }, []);
-
   return {
     performGetDIDandVC,
     performSendToConnector,
     performPollForRequestStatus,
-    performSendToBlockchain,
     agent,
   };
 }

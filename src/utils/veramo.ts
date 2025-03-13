@@ -8,8 +8,8 @@ import {
   VerifiableCredential,
 } from "@veramo/core";
 import { ICredentialIssuer } from "@veramo/credential-w3c";
+import { v4 as uuidv4 } from "uuid";
 import { MY_CUSTOM_CONTEXT_URI } from "../veramo/create-agent";
-import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Create a managed DID using the `defaultProvider` configured in ./setup.ts (did:key)
@@ -37,46 +37,41 @@ export async function importEthrDID(
   publicKeyHex: string,
   address: string
 ): Promise<IIdentifier> {
-//   console.log("Importing DID with address: ", address);
-//   console.log("Importing DID with privateKeyHex: ", privateKeyHex);
-//   console.log("Importing DID with publicKey: ", publicKeyHex);
+  //   console.log("Importing DID with address: ", address);
+  //   console.log("Importing DID with privateKeyHex: ", privateKeyHex);
+  //   console.log("Importing DID with publicKey: ", publicKeyHex);
 
-const data = {
+  const data = {
     did: `did:ethr:sepolia:${publicKeyHex}`,
     alias: uuidv4().slice(0, 6),
     provider: "did:ethr:sepolia",
     keys: [
-        {
-            kid: publicKeyHex.slice(2),
-            publicKeyHex: publicKeyHex.slice(2),
-            privateKeyHex: privateKeyHex,
-            kms: "local",
-            type: "Secp256k1" as TKeyType,
-        },
+      {
+        kid: publicKeyHex.slice(2),
+        publicKeyHex: publicKeyHex.slice(2),
+        privateKeyHex: privateKeyHex,
+        kms: "local",
+        type: "Secp256k1" as TKeyType,
+      },
     ],
-};
-    
-    console.log("Importing DID with data: \n", data);
+  };
+
+  console.log("Importing DID with data: \n", data);
 
   const identifier = await agent.didManagerImport(data);
   return identifier;
 }
 
-export async function resolveDID(
-    agent: TAgent<IResolver>,
-    did: string
-): Promise<IIdentifier | undefined> {
-    const didResolutionResult = await agent.resolveDid({ "didUrl": did });
-    if (didResolutionResult.didDocument) {
-        const identifier: IIdentifier = {
-            did: didResolutionResult.didDocument.id,
-            provider: '', // Add appropriate provider if available
-            keys: [], // Map keys from didDocument if available
-            services: [] // Map services from didDocument if available
-        };
-        return identifier;
-    }
-    return undefined;
+export async function verifyDIDDoc(
+  agent: TAgent<IResolver>,
+  did: string
+): Promise<any | undefined> {
+  const didResolutionResult = await agent.resolveDid({ didUrl: did });
+  if (didResolutionResult.didDocument) {
+    console.log("DID Document: ", didResolutionResult);
+    return didResolutionResult;
+  }
+  return undefined;
 }
 
 /**
@@ -115,12 +110,12 @@ export async function createLDCredentialWithEthrIssuer(
     "@context": [MY_CUSTOM_CONTEXT_URI],
     issuer: issuer.did,
     credentialSubject: {
-      nothing: "else matters", // the `nothing` property is defined in the custom context (See ./setup.ts)
+      nothing: "blackkkkgate", // the `nothing` property is defined in the custom context (See ./setup.ts)
     },
   };
   const verifiableCredential = await agent.createVerifiableCredential({
     credential,
-    proofFormat: "lds", // use LD Signatures as proof
+    proofFormat: "jwt", // use LD Signatures as proof
   });
   return verifiableCredential;
 }
