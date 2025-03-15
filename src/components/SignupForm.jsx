@@ -103,7 +103,7 @@ const SignupForm = ({
         const address = walletObj.address;
         setFormData({
           ...formData,
-          did: `did:ethr:${address}`,
+          did: `did:ethr:${walletObj.publicKey}`,
           publicKey: walletObj.publicKey || `0x${address.substring(2)}`,
         });
 
@@ -136,7 +136,7 @@ const SignupForm = ({
         // Set the DID and public key
         setFormData({
           ...formData,
-          did: `did:ethr:${randomWallet.address}`,
+          did: `did:ethr:${randomWallet.publicKey}`,
           publicKey: randomWallet.publicKey,
         });
 

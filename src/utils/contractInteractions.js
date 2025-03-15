@@ -1,6 +1,12 @@
 import { ethers } from "ethers";
 import { Provider, Wallet } from "zksync-web3";
-import ContractABI from "../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json";
+
+{ /*
+  Make sure ContractABI points to the contract ABI, 
+  for dev, it is created+stored in the blockchain repo after contract compiles+deploys
+  for prod, it will be stored in the /contracts folder
+  */}
+import ContractABI from "../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/Merkle.sol/Merkle.json";
 
 
 export const providerInstance = async (providerType) => {
