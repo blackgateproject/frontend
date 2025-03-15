@@ -9,7 +9,7 @@ import {
 } from "@veramo/core";
 import { ICredentialIssuer } from "@veramo/credential-w3c";
 import { v4 as uuidv4 } from "uuid";
-import { MY_CUSTOM_CONTEXT_URI } from "../veramo/create-agent";
+// import { MY_CUSTOM_CONTEXT_URI } from "../veramo/create-agent";
 
 /**
  * Create a managed DID using the `defaultProvider` configured in ./setup.ts (did:key)
@@ -89,7 +89,7 @@ export async function createLDCredential(
   agent: TAgent<ICredentialIssuer>
 ): Promise<VerifiableCredential> {
   const credential: CredentialPayload = {
-    "@context": [MY_CUSTOM_CONTEXT_URI],
+    // "@context": [MY_CUSTOM_CONTEXT_URI],
     issuer: issuer.did,
     credentialSubject: {
       nothing: "else matters",
@@ -107,7 +107,7 @@ export async function createLDCredentialWithEthrIssuer(
   role: string
 ): Promise<VerifiableCredential> {
   const credential: CredentialPayload = {
-    "@context": [MY_CUSTOM_CONTEXT_URI],
+    // "@context": [MY_CUSTOM_CONTEXT_URI],
     issuer: issuer.did,
     credentialSubject: {
       role: role, 

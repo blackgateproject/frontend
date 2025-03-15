@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "resolveJsonModule": true,
+  },
+  "include": ["src", "vite-env.d.ts"]
+}
