@@ -15,7 +15,8 @@ import { KeyManagementSystem } from "@veramo/kms-local";
 import { Resolver } from "did-resolver";
 import { getResolver as ethrDidResolver } from "ethr-did-resolver";
 
-import ContractABI from "../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/Merkle.sol/Merkle.json" with { type: "json" };
+import ContractABI from "../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json" with { type: "json" };
+import { JsonRpcProvider } from "ethers";
 
 
 {/*
@@ -55,35 +56,42 @@ export const localAgent = createAgent<
       },
     }),
     new DIDManager({
+      store: new MemoryDIDStore(),
+      defaultProvider: "blackgate",
       providers: {
-        "did:ethr:sepolia": new EthrDIDProvider({
+        // "did:ethr:sepolia": new EthrDIDProvider({
+        //   defaultKms: "local",
+        //   network: "sepolia",
+        //   rpcUrl: "https://sepolia.infura.io/v3/" + INFURA_PROJECT_ID,
+        //   gas: 100000,
+        //   ttl: 60 * 60 * 24 * 30 * 12 + 1,
+        // }),
+        "did:ethr:blackgate": new EthrDIDProvider({
           defaultKms: "local",
-          network: "sepolia",
-          rpcUrl: "https://sepolia.infura.io/v3/" + INFURA_PROJECT_ID,
-          gas: 100000,
-          ttl: 60 * 60 * 24 * 30 * 12 + 1,
-        }),
-        "did:ethr": new EthrDIDProvider({
-          defaultKms: "local",
-          rpcUrl: "https://sepolia.era.zksync.dev",
-          registry: ContractABI.entries[0].address,
           networks: [
             {
-              name: "zkSyncSepoliaTestnet",
-              chainId: 300,
+              name: "blackgate",
+              // rpcUrl: `https://zksync-sepolia.infura.io/v3/${INFURA_PROJECT_ID}`,
+              // chainId: 300,
+              provider: new JsonRpcProvider(
+                `https://zksync-sepolia.infura.io/v3/${INFURA_PROJECT_ID}`, 300),
               registry: ContractABI.entries[0].address,
-              rpcUrl: "https://sepolia.era.zksync.dev",
             }
               
           ]
         }),
       },
-      store: new MemoryDIDStore(),
-      defaultProvider: "did:ethr:sepolia",
     }),
     new DIDResolverPlugin({
       resolver: new Resolver({
-        ...ethrDidResolver({ infuraProjectId: INFURA_PROJECT_ID }),
+        ...ethrDidResolver({
+          // infuraProjectId: INFURA_PROJECT_ID,
+          // provider: 
+          provider: new JsonRpcProvider("https://zksync-sepolia.infura.io/v3/" + INFURA_PROJECT_ID) as any,
+          registry: ContractABI.entries[0].address,
+          chainId: 300,
+          name: "blackgate",
+        }) // Add other resolvers if needed
       }),
     }),
     new CredentialPlugin(),

@@ -39,7 +39,7 @@ export const getDIDandVC = async (wallet, role, agent) => {
   if (resolvedDid) {
     console.log("DID Document is valid.");
   } else {
-    console.error("DID Document is invalid.");
+    console.error("DID Document is invalid.\n", resolvedDid);
   }
 
   // Issue Credential, figure out a way to pass return the VC with Supabase's JWT
@@ -51,10 +51,10 @@ export const getDIDandVC = async (wallet, role, agent) => {
   const verified_vc = await agent.verifyCredential({
     credential: signed_vc,
   });
-  if (verified_vc) {
-    console.log("Credential is valid.", verified_vc);
+  if (!verified_vc || verified_vc.verified === false) {
+    console.error("Credential is invalid.\n", verified_vc);
   } else {
-    console.error("Credential is invalid.");
+    console.log("Credential is valid.", verified_vc);
   }
 
   return {

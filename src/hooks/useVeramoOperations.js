@@ -5,9 +5,11 @@ import {
   pollForRequestStatus,
   sendToConnector,
 } from "../utils/registrations";
+// import { localAgent } from "../utils/veramo";
 
 export function useVeramoOperations() {
   const { agent } = useVeramo();
+  // const { agent } = localAgent;
 
   const performGetDIDandVC = useCallback(
     async (wallet, role) => {

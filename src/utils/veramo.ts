@@ -26,7 +26,7 @@ export async function createEthrDID(
   agent: TAgent<IDIDManager>
 ): Promise<IIdentifier> {
   const identifier = await agent.didManagerCreate({
-    provider: "did:ethr:sepolia",
+    provider: "did:ethr",
   });
   return identifier;
 }
@@ -39,11 +39,11 @@ export async function importEthrDID(
   //   console.log("Importing DID with address: ", address);
   //   console.log("Importing DID with privateKeyHex: ", privateKeyHex);
   //   console.log("Importing DID with publicKey: ", publicKeyHex);
-
+  console.log("List of Providers to agent: ", await agent.didManagerGetProviders());
   const data = {
-    did: `did:ethr:sepolia:${publicKeyHex}`,
+    did: `did:ethr:blackgate:${publicKeyHex}`,
     alias: uuidv4().slice(0, 6),
-    provider: "did:ethr:sepolia",
+    provider: "did:ethr:blackgate",
     keys: [
       {
         kid: publicKeyHex.slice(2),
