@@ -24,6 +24,9 @@ const LoginPage = () => {
   const [isLoadingTx, setIsLoadingTx] = useState(false);
   const [showSignupForm, setShowSignupForm] = useState(true);
   const [hasVerificationData, setHasVerificationData] = useState(false);
+  
+  const [showAuthButtons, setShowAuthButtons] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
   const navigate = useNavigate();
 
   // Check if merkle proof and hash exist in local storage
@@ -33,7 +36,21 @@ const LoginPage = () => {
     setHasVerificationData(!!merkleProof && !!merkleHash);
   }, []);
 
+
+  useEffect(()=> {
+    if(isErrorModalOpen) {
+      document.getElementById("error-modal").showModal()
+    } else {
+      document.getElementById("error-modal").close()
+    }
+  }, [isErrorModalOpen])
+
+
   const handleButtonClick = () => {
+   if(localStorage.getItem("encryptedWallet")) {
+     setShowAuthButtons(true)
+   } else {
+    //old logic here
     if (hasVerificationData) {
       // Handle verification
       verifyMerkleProof(setIsLoadingTx, setCurrentStep, setErrorMessage, setIsErrorModalOpen);
@@ -41,6 +58,7 @@ const LoginPage = () => {
       // Regular registration flow
       setShowSignupForm(true);
     }
+   }
   };
 
   return (
@@ -66,6 +84,23 @@ const LoginPage = () => {
           </h2>
 
           <div className=" text-center">
+           {showAuthButtons ? 
+           <div className="flex flex-col ">
+            {/** show two buttons namely auth1 and auth2 */}
+            <button
+              onClick={() => navigate("/auth1")}
+              className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-4`}
+            >
+              Auth 1
+            </button>
+            <button
+              onClick={() => navigate("/auth2")}
+              className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-1`}
+            >
+              Auth 2
+            </button>
+          </div>
+            :
             <button
               onClick={handleButtonClick}
               className={`btn w-full ${
@@ -83,9 +118,9 @@ const LoginPage = () => {
               ) : hasVerificationData ? (
                 "Verify"
               ) : (
-                "Register"
+                localStorage.getItem("encryptedWallet") ? "Login" : "Register"
               )}
-            </button>
+            </button>}
           </div>
           {currentStep && (
             <div className="mt-4 text-center text-white">
@@ -99,7 +134,10 @@ const LoginPage = () => {
           )}
         </div>
       )}
-      <dialog id="error-modal" className="modal" open={isErrorModalOpen}>
+    
+
+
+      <dialog id="error-modal" className="modal" >
         <div className="modal-box">
           <h3 className="font-bold text-lg">Error</h3>
           <p className="py-4">{errorMessage}</p>

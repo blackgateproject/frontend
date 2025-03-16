@@ -20,6 +20,7 @@ const SignupForm = ({
   setErrorMessage,
   setIsErrorModalOpen,
   wallet,
+  isSetupPage = false,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState("user");
@@ -524,9 +525,9 @@ const SignupForm = ({
                       value={selectedRole}
                       onChange={(e) => setSelectedRole(e.target.value)}
                     >
-                      <option value="user">User</option>
+                     {!isSetupPage && <option value="user">User</option>}
                       <option value="admin">Admin</option>
-                      <option value="device">Device</option>
+                     {!isSetupPage && <option value="device">Device</option>}
                     </select>
                   </div>
                   <button

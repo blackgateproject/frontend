@@ -29,6 +29,7 @@ export const verifyMerkleProof = async (setIsLoadingTx,setCurrentStep, setErrorM
     console.error("Error during verification:", error);
     setErrorMessage(error.message || "Verification failed");
     setIsErrorModalOpen(true);
+    document.getElementById("error-modal").showModal()
   } finally {
     setIsLoadingTx(false);
   }
