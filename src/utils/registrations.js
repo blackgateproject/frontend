@@ -86,45 +86,29 @@ export const sendToConnector = async (wallet, selectedRole, agent) => {
   console.log("Data:", data);
 
   // Send didStr, VC and wallet address to connector at localhost:8000/auth/v1/register
-  // const response = await fetch("http://localhost:8000/auth/v1/register", {
-  //   method: "POST",
-  //   headers: {
-  //     "content-type": "application/json",
-  //   },
-  //   body: JSON.stringify(data),
-  // });
+  const response = await fetch("http://localhost:8000/auth/v1/register", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
 
   console.log("Attempting to send data to connector");
 
-  // if (response.ok) {
-  //   const data = await response.json();
-  //   console.log("Registration finalized:", data);
-  //   // navigate("/dashboard");
-  // } else if (response.status === 500) {
-  //   const errorLog = await response.json();
-  //   // console.log("Server Error:", errorLog.error);
-  //   console.error("Server Error:", errorLog.error);
-  //   alert(`Server Error: ${errorLog.error}`);
-  // } else {
-  //   console.error("Failed to finalize registration");
-  // }
-  // const contract = await contractInstance();
-
-  // const tx = await contract
-  //   .connect(signer)
-  //   .changeOwner(wallet.address, wallet.address);
-  // const txResponse = await tx.getTransaction();
-  // const txReceipt = await txResponse.wait();
-  // console.log("Transaction Receipt:", txReceipt);
-  // console.log("Transaction Logs:", txReceipt.logs);
-  // console.log("Transaction Hash:", txReceipt.transactionHash);
-  // console.log("Transaction Status:", txReceipt.status);
-  // console.log("Transaction Confirmations:", txReceipt.confirmations);
-  // console.log("Transaction Events:", txReceipt.events);
-
-  // console.log("Registeration Processs End!");
-  // Send Transaction ID and DID for verification
-  // }
+  if (response.ok) {
+    const data = await response.json();
+    console.log("Registration finalized:", data);
+    // navigate("/dashboard");
+  } else if (response.status === 500) {
+    const errorLog = await response.json();
+    // console.log("Server Error:", errorLog.error);
+    console.error("Server Error:", errorLog.error);
+    alert(`Server Error: ${errorLog.error}`);
+  } else {
+    console.error("Failed to finalize registration");
+  }
+  console.log("Registeration Processs End!");
 };
 
 export const pollForRequestStatus = async (walletAddress) => {
@@ -140,12 +124,37 @@ export const pollForRequestStatus = async (walletAddress) => {
       }
     })
     .then((data) => {
-      console.log("then data:", data);
-      const { request_status, merkle_proof, merkle_hash } = data;
-      return { request_status, merkle_proof, merkle_hash };
+      if (data) {
+        console.log("then data:", data);
+        const {
+          message,
+          merkle_hash,
+          merkle_proof,
+          merkle_root,
+          tx_hash,
+          request_status,
+        } = data;
+        return {
+          message,
+          merkle_hash,
+          merkle_proof,
+          merkle_root,
+          tx_hash,
+          request_status,
+        };
+      } else {
+        throw new Error("Received null data");
+      }
     })
     .catch((error) => {
       console.error(error);
-      return { request_status: null, merkle_proof: null, merkle_hash: null };
+      return {
+        message: "Error occurred while polling",
+        request_status: null,
+        merkle_proof: null,
+        merkle_hash: null,
+        merkle_root: null,
+        tx_hash: null,
+      };
     });
 };

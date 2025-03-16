@@ -242,16 +242,10 @@ const SignupForm = ({
           // Await the result of pollForRequestStatus
           const status = await pollForRequestStatus(wallet.address);
           console.log("Polling result:", status);
-          // if (!status) {
-          //   console.log("No status returned, retrying...");
-          //   setTimeout(checkRequestStatus, 5000);
-          //   return;
-          // }
 
-          console.warn("Request Status:", status.request_status);
+          if (status && status.request_status) {
+            console.warn("Request Status:", status.request_status);
 
-          // Check if the request_status property exists and has a value
-          if (status.request_status) {
             switch (status.request_status) {
               case "approved":
                 console.log("Request approved!");
@@ -263,17 +257,8 @@ const SignupForm = ({
                   JSON.stringify(status.merkle_proof)
                 );
 
-                // Send the transaction to the blockchain
-                // const txResponse = await sendToBlockchain(wallet, signer);
-                // // Make sure txHash is a string regardless of what sendToBlockchain returns
-                // const hashValue =
-                //   typeof txResponse === "object" && txResponse.txHash
-                //     ? txResponse.txHash
-                //     : String(txResponse);
-                // setTxHash(hashValue);
                 setIsSuccess(true);
                 setIsLoading(false);
-                // If there's an onClose callback, call it after a delay
                 if (onClose) {
                   setTimeout(onClose, 2000);
                 }
@@ -281,7 +266,7 @@ const SignupForm = ({
 
               case "rejected":
                 console.log("Request rejected");
-                setIsRejected(true); // Set rejection state to true
+                setIsRejected(true);
                 setIsLoading(false);
                 break;
 
@@ -297,14 +282,11 @@ const SignupForm = ({
                 setIsLoading(false);
             }
           } else {
-            // If status exists but doesn't have request_status property
             console.log("Invalid status response format:", status);
             setTimeout(checkRequestStatus, 5000);
           }
         } catch (error) {
           console.error("Error polling for status:", error);
-
-          // Continue polling despite errors, up to the maximum attempts
           setTimeout(checkRequestStatus, 5000);
         }
       };
@@ -525,9 +507,9 @@ const SignupForm = ({
                       value={selectedRole}
                       onChange={(e) => setSelectedRole(e.target.value)}
                     >
-                     {!isSetupPage && <option value="user">User</option>}
-                            <option value="admin">Admin</option>
-                     {!isSetupPage && <option value="device">Device</option>}
+                      {!isSetupPage && <option value="user">User</option>}
+                      <option value="admin">Admin</option>
+                      {!isSetupPage && <option value="device">Device</option>}
                     </select>
                   </div>
                   <button
