@@ -526,7 +526,7 @@ const SignupForm = ({
                       onChange={(e) => setSelectedRole(e.target.value)}
                     >
                      {!isSetupPage && <option value="user">User</option>}
-                      <option value="admin">Admin</option>
+                            <option value="admin">Admin</option>
                      {!isSetupPage && <option value="device">Device</option>}
                     </select>
                   </div>
