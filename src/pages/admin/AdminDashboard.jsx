@@ -1,9 +1,9 @@
-import { ActivityIcon, CheckSquare, Search, Ticket, Users } from "lucide-react";
+import { ActivityIcon, CheckSquare, Search, Users } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import UserActivity from "../../components/UserActivity";
-
+import { connectorHost, connectorPort } from "../../utils/readEnv";
 const Dashboard = () => {
   const accessToken = sessionStorage.getItem("access_token") || "";
   const [stats, setStats] = useState({
@@ -21,7 +21,7 @@ const Dashboard = () => {
       setLoading(true);
       try {
         const response = await fetch(
-          "http://localhost:8000/admin/v1/dashboard",
+          `http://${connectorHost}:${connectorPort}/admin/v1/dashboard`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

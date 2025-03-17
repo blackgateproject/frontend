@@ -11,6 +11,7 @@ import {
 import React, { useEffect, useState } from "react";
 import sampleQR from "../../assets/sample-QR.png";
 import Sidebar from "../../components/Sidebar";
+import { connectorHost, connectorPort } from "../../utils/readEnv";
 
 const AdminProfile = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,13 +36,16 @@ const AdminProfile = () => {
       const accessToken = sessionStorage.getItem("access_token") || "";
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/admin/v1/profile", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        const response = await fetch(
+          `http://${connectorHost}:${connectorPort}/admin/v1/profile`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
         if (response.status === 401) {
           console.log("Redirecting to:", "/");
           window.location.href = "/";
@@ -100,7 +104,7 @@ const AdminProfile = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "http://localhost:8000/admin/v1/updateProfile",
+        `http://${connectorHost}:${connectorPort}/admin/v1/updateProfile`,
         {
           method: "POST",
           headers: {
@@ -141,7 +145,7 @@ const AdminProfile = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "http://localhost:8000/admin/v1/updateAuth",
+        `http://${connectorHost}:${connectorPort}/admin/v1/updateAuth`,
         {
           method: "POST",
           headers: {
@@ -256,7 +260,11 @@ const AdminProfile = () => {
         </div>
       </dialog>
 
-      <dialog id="password-modal" className="modal backdrop-brightness-75" open={isPasswordModalOpen}>
+      <dialog
+        id="password-modal"
+        className="modal backdrop-brightness-75"
+        open={isPasswordModalOpen}
+      >
         <form className="modal-box" onSubmit={handleSubmit}>
           <h3 className="font-bold text-lg">Enter Wallet Password</h3>
           <input

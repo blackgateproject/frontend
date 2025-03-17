@@ -2,7 +2,6 @@ import {
   ChartArea,
   ChevronLeft,
   ChevronRight,
-  HelpCircle,
   Home,
   LogOut,
   Menu,
@@ -14,6 +13,14 @@ import {
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/logo.png";
+import { connectorHost, connectorPort } from "../utils/readEnv";
+// interface ImportMetaEnv {
+//   readonly VITE_INFURA_PROJECT_ID: string;
+// }
+
+// interface ImportMeta {
+//   readonly env: ImportMetaEnv;
+// }
 
 const Sidebar = ({ role, children }) => {
   const location = useLocation();
@@ -40,7 +47,7 @@ const Sidebar = ({ role, children }) => {
     const accessToken = sessionStorage.getItem("access_token");
     const uuid = sessionStorage.getItem("uuid");
     if (accessToken) {
-      await fetch("http://localhost:8000/auth/v1/logout", {
+      await fetch(`http://${connectorHost}:${connectorPort}/auth/v1/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

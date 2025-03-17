@@ -9,7 +9,7 @@ import React, { useEffect, useState } from "react";
 import Loader from "../../components/Loader";
 import Modal from "../../components/Modal";
 import Sidebar from "../../components/Sidebar";
-
+import { connectorHost, connectorPort } from "../../utils/readEnv";
 const Tickets = () => {
   // State variables
   const [tickets, setTickets] = useState([]);
@@ -31,11 +31,14 @@ const Tickets = () => {
     try {
       const accessToken = sessionStorage.getItem("access_token") || "";
 
-      const response = await fetch("http://127.0.0.1:8000/admin/v1/tickets", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `http://${connectorHost}:${connectorPort}/admin/v1/tickets`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
       if (response.status === 401) {
         console.log("Redirecting to:", "/");
         window.location.href = "/";
@@ -67,7 +70,7 @@ const Tickets = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/admin/v1/tickets/${ticketId}/complete`,
+        `http://${connectorHost}:${connectorPort}/admin/v1/tickets/{ticketId}/complete`,
         {
           method: "POST",
           headers: {

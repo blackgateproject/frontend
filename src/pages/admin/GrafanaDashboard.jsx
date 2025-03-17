@@ -1,5 +1,6 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar";
+import { grafanaPort } from "../../utils/readEnv";
 const GrafanaDashboard = () => {
   // Get the Grafana token and scanId (modify as per your auth mechanism)
   // const bearerToken = sessionStorage.getItem("access_token") || "";
@@ -12,7 +13,7 @@ const GrafanaDashboard = () => {
   // Abdullah grafana
   // const grafanaUrl = `http://localhost:3000/public-dashboards/5c6de844c29a4783a657cb4d8021fe44?orgId=2`
   // Awais grafana
-  const grafanaUrl = `http://localhost:3000/public-dashboards/2f6d020c730c45fc8878c2a2cade0539`;
+  const grafanaUrl = `http://${grafanaUrl}:${grafanaPort}/public-dashboards/2f6d020c730c45fc8878c2a2cade0539`;
   return (
     <Sidebar role={"admin"}>
       {/* Main Content */}

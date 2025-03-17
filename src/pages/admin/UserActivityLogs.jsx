@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import UserActivity from "../../components/UserActivity";
-
+import { connectorHost, connectorPort } from "../../utils/readEnv";
 const UserActivityLogs = () => {
   const accessToken = sessionStorage.getItem("access_token") || "";
 
@@ -15,7 +15,7 @@ const UserActivityLogs = () => {
     const fetchUserActivities = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8000/admin/v1/user-activity-logs",
+          `http://${connectorHost}:${connectorPort}/admin/v1/user-activity-logs`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -31,7 +31,7 @@ const UserActivityLogs = () => {
         const activities = await response.json();
 
         const userResponse = await fetch(
-          "http://localhost:8000/admin/v1/getAllUsers",
+          `http://${connectorHost}:${connectorPort}/admin/v1/getAllUsers`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

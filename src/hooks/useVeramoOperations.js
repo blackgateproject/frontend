@@ -1,74 +1,44 @@
 import { useVeramo } from "@veramo-community/veramo-react";
 import { useCallback } from "react";
 import {
-  generateDID,
-  issueVC,
+  getDIDandVC,
   pollForRequestStatus,
-  resolveDID,
-  submitDIDVC,
-  validateVC,
+  sendToConnector,
 } from "../utils/registrations";
+// import { localAgent } from "../utils/veramo";
 
 export function useVeramoOperations() {
   const { agent } = useVeramo();
+  // const { agent } = localAgent;
 
-  const performGenerateDID = useCallback(
-    async (wallet) => {
+  const performGetDIDandVC = useCallback(
+    async (wallet, role) => {
       if (!agent) {
         throw new Error("Veramo agent not initialized");
       }
-      return generateDID(wallet, agent);
+      return getDIDandVC(wallet, role, agent);
     },
     [agent]
   );
 
-  const performResolveDID = useCallback(
-    async (did) => {
+  const performSendToConnector = useCallback(
+    async (wallet, selectedRole) => {
       if (!agent) {
         throw new Error("Veramo agent not initialized");
       }
-      return resolveDID(agent, did);
+      return sendToConnector(wallet, selectedRole, agent);
     },
     [agent]
   );
 
-  const performIssueVC = useCallback(
-    async (didDoc, role) => {
-      if (!agent) {
-        throw new Error("Veramo agent not initialized");
-      }
-      return issueVC(didDoc, agent, role);
-    },
-    [agent]
-  );
-
-  const performValidateVC = useCallback(
-    async (signed_vc) => {
-      if (!agent) {
-        throw new Error("Veramo agent not initialized");
-      }
-      return validateVC(agent, signed_vc);
-    },
-    [agent]
-  );
-
-  const performSubmitDIDVC = useCallback(
-    async (wallet, did, signed_vc, selectedRole) => {
-      return submitDIDVC(wallet, did, signed_vc, selectedRole);
-    },
-    []
-  );
-
+  // Wrapper for other registration functions that don't need the agent
   const performPollForRequestStatus = useCallback(async (walletAddress) => {
     return pollForRequestStatus(walletAddress);
   }, []);
 
   return {
-    performGenerateDID,
-    performResolveDID,
-    performIssueVC,
-    performValidateVC,
-    performSubmitDIDVC,
+    performGetDIDandVC,
+    performSendToConnector,
     performPollForRequestStatus,
     agent,
   };
