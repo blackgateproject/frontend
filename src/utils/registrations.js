@@ -6,15 +6,14 @@ import {
   verifyDIDDoc,
 } from "./veramo";
 import { connectorHost, connectorPort } from "./readEnv";
-// Modified to accept agent as a parameter instead of calling useVeramo() inside
-export const getDIDandVC = async (wallet, role, agent) => {
-  // Check for wallet
+
+// Generate DID
+export const generateDID = async (wallet, agent) => {
   if (!wallet) {
     console.error("Wallet is not loaded.");
     return;
   }
 
-  // Use the agent that was passed in instead of calling useVeramo() here
   if (!agent) {
     console.error("Veramo agent is not provided");
     throw new Error("Veramo agent is required");
@@ -24,7 +23,7 @@ export const getDIDandVC = async (wallet, role, agent) => {
   if (newUncompPubKey instanceof Uint8Array) {
     newUncompPubKey = hexlify(newUncompPubKey);
   }
-  // console.log("New Uncompressed Public Key:", newUncompPubKey);
+
   const didDoc = await importEthrDID(
     agent,
     wallet.privateKey.slice(2),
@@ -32,22 +31,30 @@ export const getDIDandVC = async (wallet, role, agent) => {
   );
 
   console.log("Issuer:", didDoc);
-  const did = didDoc.did;
+  return didDoc;
+};
 
-  console.warn("Got DID & DID Document\n\nVerifying DID Document...");
-  // Verify DID Document via Resolution
+// Resolve DID
+export const resolveDID = async (agent, did) => {
+  console.warn("Verifying DID Document...");
   const resolvedDid = await verifyDIDDoc(agent, did);
   if (resolvedDid) {
     console.log("DID Document is valid.");
   } else {
     console.error("DID Document is invalid.\n", resolvedDid);
   }
+  return resolvedDid;
+};
 
-  // Issue Credential, figure out a way to pass return the VC with Supabase's JWT
+// Issue VC
+export const issueVC = async (didDoc, agent, role) => {
   console.warn("Issuing Credential...");
   const signed_vc = await createLDCredentialWithEthrIssuer(didDoc, agent, role);
+  return signed_vc;
+};
 
-  // Verify Credential
+// Validate VC
+export const validateVC = async (agent, signed_vc) => {
   console.warn("Verifying Credential...");
   const verified_vc = await agent.verifyCredential({
     credential: signed_vc,
@@ -57,25 +64,15 @@ export const getDIDandVC = async (wallet, role, agent) => {
   } else {
     console.log("Credential is valid.", verified_vc);
   }
-
-  return {
-    did,
-    signed_vc,
-  };
+  return verified_vc;
 };
 
-// Modified to accept agent as a parameter
-export const sendToConnector = async (wallet, selectedRole, agent) => {
+// Submit DID + VC
+export const submitDIDVC = async (wallet, did, signed_vc, selectedRole) => {
   console.log("Registeration Processs BEGIN!");
   console.log("Fetching Network Info");
 
-  // Fetch Network based Identifiers
   const networkInfo = await logUserInfo();
-
-  // Pass the agent to getDIDandVC
-  const { did, signed_vc } = await getDIDandVC(wallet, selectedRole, agent);
-  console.log("DID:", did);
-  console.log("Signed VC:", signed_vc);
 
   const data = {
     wallet_address: wallet.address,
@@ -86,7 +83,6 @@ export const sendToConnector = async (wallet, selectedRole, agent) => {
   };
   console.log("Data:", data);
 
-  // Send didStr, VC and wallet address to connector at ${connectorHost}:${connectorPort}/auth/v1/register
   const response = await fetch(`http://${connectorHost}:${connectorPort}/auth/v1/register`, {
     method: "POST",
     headers: {
@@ -100,10 +96,8 @@ export const sendToConnector = async (wallet, selectedRole, agent) => {
   if (response.ok) {
     const data = await response.json();
     console.log("Registration finalized:", data);
-    // navigate("/dashboard");
   } else if (response.status === 500) {
     const errorLog = await response.json();
-    // console.log("Server Error:", errorLog.error);
     console.error("Server Error:", errorLog.error);
     alert(`Server Error: ${errorLog.error}`);
   } else {
@@ -112,25 +106,50 @@ export const sendToConnector = async (wallet, selectedRole, agent) => {
   console.log("Registeration Processs End!");
 };
 
+// Poll for request status
 export const pollForRequestStatus = async (walletAddress) => {
   console.log("Polling for request status...");
 
-  return fetch(`http://${connectorHost}:${connectorPort}/auth/v1/poll/${walletAddress}`)
+  return fetch(`http://${connectorHost}:${connectorPort}/auth/v1/poll${walletAddress}`)
     .then((response) => {
       if (response.ok) {
-        // console.log("Data (response.json): ", response);
         return response.json();
       } else {
         throw new Error("Failed to fetch request status");
       }
     })
     .then((data) => {
-      console.log("then data:", data);
-      const { request_status, merkle_proof, merkle_hash } = data;
-      return { request_status, merkle_proof, merkle_hash };
+      if (data) {
+        console.log("then data:", data);
+        const {
+          message,
+          merkle_hash,
+          merkle_proof,
+          merkle_root,
+          tx_hash,
+          request_status,
+        } = data;
+        return {
+          message,
+          merkle_hash,
+          merkle_proof,
+          merkle_root,
+          tx_hash,
+          request_status,
+        };
+      } else {
+        throw new Error("Received null data");
+      }
     })
     .catch((error) => {
       console.error(error);
-      return { request_status: null, merkle_proof: null, merkle_hash: null };
+      return {
+        message: "Error occurred while polling",
+        request_status: null,
+        merkle_proof: null,
+        merkle_hash: null,
+        merkle_root: null,
+        tx_hash: null,
+      };
     });
 };
