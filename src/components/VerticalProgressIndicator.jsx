@@ -98,7 +98,6 @@ const VerticalProgressIndicator = () => {
     }
 
     return {
-      transform: `translateY(${translateY}px) scale(${scale})`,
       opacity,
       fontSize,
       fontWeight: stepNumber === currentStep ? "bold" : "normal",
