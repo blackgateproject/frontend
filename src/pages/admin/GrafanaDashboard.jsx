@@ -1,7 +1,9 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar";
-import { grafanaHost,grafanaPort, grafanaDashboard 
-  
+import {
+  grafanaDashboard,
+  grafanaHost,
+  grafanaPort,
 } from "../../utils/readEnv";
 const GrafanaDashboard = () => {
   // Get the Grafana token and scanId (modify as per your auth mechanism)
