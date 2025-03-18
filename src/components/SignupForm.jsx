@@ -54,12 +54,12 @@ const SignupForm = ({
   const [showProgress, setShowProgress] = useState(false); // State to show progress indicator
   const [currentStep, setCurrentStep] = useState(0); // Add currentStep state
   const steps = [
-    "Generate DID",
-    "Resolve DID",
-    "Issue VC",
-    "Validate VC",
-    "Submit DID + VC",
-    "Check Request Status",
+    "Generate DID📝",
+    "Resolve DID ✅",
+    "Issue VC📝",
+    "Validate VC ✅",
+    "Submit DID + VC📤",
+    "Pending Approval 🕒",
   ]; // Define steps
 
   // Add useEffect to fetch balance
@@ -294,7 +294,10 @@ const SignupForm = ({
                   "merkleProof",
                   JSON.stringify(status.merkle_proof)
                 );
+                localStorage.setItem("merkleRoot", status.merkle_root);
+                localStorage.setItem("VC", JSON.stringify(signed_vc));
 
+                setShowProgress(false); // Hide progress indicator
                 setIsSuccess(true);
                 setIsLoading(false);
                 if (onClose) {
@@ -304,6 +307,7 @@ const SignupForm = ({
 
               case "rejected":
                 console.log("Request rejected");
+                setShowProgress(false); // Hide progress indicator
                 setIsRejected(true);
                 setIsLoading(false);
                 break;
