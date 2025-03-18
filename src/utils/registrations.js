@@ -110,7 +110,7 @@ export const submitDIDVC = async (wallet, did, signed_vc, selectedRole) => {
 export const pollForRequestStatus = async (walletAddress) => {
   console.log("Polling for request status...");
 
-  return fetch(`http://${connectorHost}:${connectorPort}/auth/v1/poll${walletAddress}`)
+  return fetch(`http://${connectorHost}:${connectorPort}/auth/v1/poll/${walletAddress}`)
     .then((response) => {
       if (response.ok) {
         return response.json();
