@@ -1,13 +1,9 @@
 import { ethers } from "ethers";
 import { KeySquare, Loader2 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import logo from "../assets/logo.png";
 import { useVeramoOperations } from "../hooks/useVeramoOperations";
-import {
-  createNewWallet,
-  fetchBalance,
-  loadWallet,
-} from "../utils/contractInteractions";
+import { createNewWallet, loadWallet } from "../utils/contractInteractions";
 import { pollForRequestStatus } from "../utils/registrations";
 import VerticalProgressIndicator from "./VerticalProgressIndicator"; // Import the progress indicator
 
@@ -27,7 +23,8 @@ const SignupForm = ({
   const [selectedRole, setSelectedRole] = useState("user");
   const [formData, setFormData] = useState({
     did: "",
-    publicKey: "",
+    alias: "",
+    // publicKey: "",
     deviceId: "",
     firmwareVersion: "",
   });
@@ -41,8 +38,6 @@ const SignupForm = ({
   const [walletLocal, setWalletLocal] = useState(null);
   const [signer, setSignerLocal] = useState(null);
   const [isRejected, setIsRejected] = useState(false);
-  const [txHash, setTxHash] = useState("");
-  const [balance, setBalance] = useState("---"); // Add balance state
   const {
     performSendToConnector,
     performGenerateDID,
@@ -62,14 +57,10 @@ const SignupForm = ({
     "Pending Approval 🕒",
   ]; // Define steps
 
-  // Add useEffect to fetch balance
-  useEffect(() => {
-    fetchBalance(wallet || walletLocal, setBalance);
-  }, [wallet, walletLocal]);
-
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
+    console.log(`Handling Change for ${name}: value is ${value}`)
     setFormData({
       ...formData,
       [name]: value,
@@ -119,11 +110,11 @@ const SignupForm = ({
         setSignerLocal(signerObj);
 
         // Get wallet address and use it to create DID
-        const address = walletObj.address;
+        // const address = walletObj.address;
         setFormData({
           ...formData,
           did: `did:ethr:${walletObj.publicKey}`,
-          publicKey: walletObj.publicKey || `0x${address.substring(2)}`,
+          // publicKey: walletObj.publicKey || `0x${address.substring(2)}`,
         });
 
         setShowWalletPasswordModal(false);
@@ -156,7 +147,7 @@ const SignupForm = ({
         setFormData({
           ...formData,
           did: `did:ethr:${randomWallet.publicKey}`,
-          publicKey: randomWallet.publicKey,
+          // publicKey: randomWallet.publicKey,
         });
 
         // Create encrypted wallet
@@ -194,8 +185,10 @@ const SignupForm = ({
       newErrors.did = "Wallet needs to be unlocked/generated";
     }
 
-    if (!formData.publicKey) {
-      newErrors.publicKey = "Wallet needs to be unlocked/generated";
+
+    if (!formData.alias) {
+      console.warn("Alias is empty");
+      newErrors.alias = "Alias cannot be empty";
     }
 
     if (selectedRole === "device") {
@@ -215,8 +208,9 @@ const SignupForm = ({
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log("Form Submitted");
     if (!validateForm()) {
+      console.log("Validation Failed");
       return;
     }
 
@@ -251,7 +245,7 @@ const SignupForm = ({
 
       // Submit DID + VC
       setCurrentStep(5);
-      await performSubmitDIDVC(wallet, did, signed_vc, selectedRole);
+      await performSubmitDIDVC(wallet, did, signed_vc, selectedRole, formData.alias);
 
       console.log("Form submitted:", {
         ...formData,
@@ -360,7 +354,6 @@ const SignupForm = ({
 
       <h2 className="text-center text-2xl font-bold text-primary mb-6">
         Create BLACKGATE Account
-        <p className="text-sm text-black mt-1">Balance: {balance} ETH</p>
       </h2>
 
       {showProgress ? (
@@ -389,58 +382,6 @@ const SignupForm = ({
                 Account Created Successfully
               </h3>
               <p className="text-gray-600">You can now login to your account</p>
-
-              {txHash && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 mb-1">
-                    Transaction Hash:
-                  </p>
-                  <div className="flex items-center justify-center">
-                    <p className="text-xs bg-gray-100 p-2 rounded-md max-w-full overflow-x-auto">
-                      {/* Make sure we're rendering a string */}
-                      {typeof txHash === "string"
-                        ? txHash
-                        : JSON.stringify(txHash)}
-                    </p>
-                    <button
-                      onClick={() =>
-                        copyToClipboard(
-                          typeof txHash === "string"
-                            ? txHash
-                            : JSON.stringify(txHash)
-                        )
-                      }
-                      className="ml-2 btn btn-xs btn-square"
-                      title="Copy to clipboard"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-3 w-3"
-                        fill="none"
-                        viewBox="0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                  <a
-                    href={`https://sepolia.explorer.zksync.io/tx/${
-                      typeof txHash === "string" ? txHash : ""
-                    }`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary text-xs mt-2 inline-block hover:underline"
-                  >
-                    View on Etherscan
-                  </a>
-                </div>
-              )}
             </div>
           ) : isRejected ? (
             <div className="text-center py-8 animate-fadeIn">
@@ -589,9 +530,29 @@ const SignupForm = ({
                       </button>
                     </div>
                   </div>
+                  <div className="space-y-4 animate-fadeIn">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Alias
+                      </label>
+                      <input
+                        type="text"
+                        name="alias"
+                        value={formData.alias}
+                        onChange={handleChange}
+                        placeholder="Enter a temp name"
+                        className={`input input-bordered w-full ${
+                          errors.alias ? "input-error" : ""
+                        }`}
+                      />
+                      {errors.alias && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.alias}
+                        </p>
+                      )}
+                    </div>
 
-                  {/* DID and Public Key */}
-                  <div className="space-y-4">
+                    {/* DID */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         DID
@@ -634,52 +595,6 @@ const SignupForm = ({
                       {errors.did && (
                         <p className="mt-1 text-sm text-red-500">
                           {errors.did}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Public Key
-                      </label>
-                      <div className="flex">
-                        <input
-                          type="text"
-                          name="publicKey"
-                          value={formData.publicKey}
-                          placeholder="0x..."
-                          className={`input input-bordered w-full ${
-                            errors.publicKey ? "input-error" : ""
-                          } bg-gray-100`}
-                          readOnly={true}
-                        />
-                        {formData.publicKey && (
-                          <button
-                            type="button"
-                            className="btn btn-square btn-sm ml-2"
-                            onClick={() => copyToClipboard(formData.publicKey)}
-                            title="Copy to clipboard"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5"
-                              fill="none"
-                              viewBox="0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
-                              />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                      {errors.publicKey && (
-                        <p className="mt-1 text-sm text-red-500">
-                          {errors.publicKey}
                         </p>
                       )}
                     </div>
