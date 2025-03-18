@@ -294,7 +294,7 @@ const SignupForm = ({
                   "merkleProof",
                   JSON.stringify(status.merkle_proof)
                 );
-                localStorage.setItem("merkleRoot", status.merkle_root);
+                // localStorage.setItem("merkleRoot", status.merkle_root);
                 localStorage.setItem(
                   "verifiableCredential",
                   JSON.stringify(signed_vc)

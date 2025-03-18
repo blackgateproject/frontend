@@ -39,17 +39,18 @@ const LoginPage = () => {
     const checkLocalStorage = () => {
       const merkleProof = localStorage.getItem("merkleProof");
       const merkleHash = localStorage.getItem("merkleHash");
-      const merkleRoot = localStorage.getItem("merkleRoot");
+      // const merkleRoot = localStorage.getItem("merkleRoot");
       const verifiableCredential = localStorage.getItem("verifiableCredential");
 
       console.log("LocalStorage data:", {
         merkleProof: !!merkleProof,
         merkleHash: !!merkleHash,
-        merkleRoot: !!merkleRoot,
+        // merkleRoot: !!merkleRoot,
         verifiableCredential: !!verifiableCredential,
       });
 
-      setHasVerificationData(!!merkleProof && !!merkleHash && !!merkleRoot);
+      setHasVerificationData(!!merkleProof && !!merkleHash );
+      // setHasVerificationData(!!merkleProof && !!merkleHash && !!merkleRoot);
       setHasVC(!!verifiableCredential);
     };
 
@@ -85,7 +86,7 @@ const LoginPage = () => {
     const verifiableCredential = localStorage.getItem("verifiableCredential");
     const merkleProof = localStorage.getItem("merkleProof");
     const merkleHash = localStorage.getItem("merkleHash");
-    const merkleRoot = localStorage.getItem("merkleRoot");
+    // const merkleRoot = localStorage.getItem("merkleRoot");
 
     if (encryptedWallet) {
       if (verifiableCredential) {
@@ -96,7 +97,8 @@ const LoginPage = () => {
         setCurrentPage("signup");
       }
     } else {
-      if (merkleProof && merkleHash && merkleRoot) {
+      if (merkleProof && merkleHash ) {
+      // if (merkleProof && merkleHash && merkleRoot) {
         // Handle verification
         verifyMerkleProof(
           setIsLoadingTx,
