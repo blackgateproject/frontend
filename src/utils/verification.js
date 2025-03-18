@@ -3,36 +3,76 @@ export const verifyMerkleProof = async (
   setIsLoadingTx,
   setCurrentStep,
   setErrorMessage,
-  setIsErrorModalOpen
+  setIsErrorModalOpen, navigate
 ) => {
   setIsLoadingTx(true);
   try {
     const merkleProof = localStorage.getItem("merkleProof");
     const merkleHash = localStorage.getItem("merkleHash");
+    const did = localStorage.getItem("did");
 
+    const creds = {
+      merkleProof: JSON.parse(merkleProof),
+      merkleHash: merkleHash,
+      did: did,
+    };
+    // console.log("sending data:", creds);
     const response = await fetch(
-      `http://${connectorHost}:${connectorPort}}/auth/v1/verify`,
+      `http://${connectorHost}:${connectorPort}/auth/v1/verify`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          merkle_proof: JSON.parse(merkleProof),
-          merkle_hash: merkleHash,
-        }),
+        body: JSON.stringify(creds),
       }
     );
 
     const data = await response.json();
 
     if (response.ok) {
-      console.log("Verification successful:", data);
-      setCurrentStep("Verification successful!");
-      // Handle successful verification (e.g., navigate to dashboard)
-      // navigate("/dashboard");
+      console.log("Got response", data);
+      // setCurrentStep(data.message);
+      // Check the results object if both valid-Offchain and valid-Onchain are true then verification is successful
+      if (data.results.valid_Offchain && data.results.valid_Onchain) {
+        localStorage.setItem("access_token", data.access_token || "");
+        localStorage.setItem("refresh_token", data.refresh_token || "");
+        
+        try {
+          const verifiableCredential = localStorage.getItem(
+            "verifiableCredential"
+          );
+          if (!verifiableCredential) {
+            throw new Error("verifiableCredential not found in localStorage");
+          }
+          
+          const parsedCredential = JSON.parse(verifiableCredential);
+          if (
+            !parsedCredential.credentialSubject ||
+            !parsedCredential.credentialSubject.role
+          ) {
+            throw new Error("Invalid credential structure");
+          }
+          
+          const role = parsedCredential.credentialSubject.role;
+          console.log("Role:", role);
+
+          navigate(`/${role}/dashboard`)
+
+          console.log("Verification successful");
+          setCurrentStep("Verification successful");
+        } catch (error) {
+          console.error("Error:", error.message);
+        }
+      } else {
+        console.log(data.message);
+        setCurrentStep(data.message);
+        setErrorMessage(data.message);
+        setIsErrorModalOpen(true);
+        document.getElementById("error-modal").showModal();
+      }
     } else {
-      throw new Error(data.message || "Verification failed");
+      throw new Error(data.message || "Verification failed, Server Error");
     }
   } catch (error) {
     console.error("Error during verification:", error);

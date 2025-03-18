@@ -40,16 +40,19 @@ const LoginPage = () => {
       const merkleProof = localStorage.getItem("merkleProof");
       const merkleHash = localStorage.getItem("merkleHash");
       // const merkleRoot = localStorage.getItem("merkleRoot");
+      const did = localStorage.getItem("did");
       const verifiableCredential = localStorage.getItem("verifiableCredential");
 
-      console.log("LocalStorage data:", {
-        merkleProof: !!merkleProof,
-        merkleHash: !!merkleHash,
-        // merkleRoot: !!merkleRoot,
-        verifiableCredential: !!verifiableCredential,
-      });
+      //Debug line
+      // console.log("LocalStorage data:", {
+      //   merkleProof: !!merkleProof,
+      //   merkleHash: !!merkleHash,
+      //   did: !!did,
+      //   // merkleRoot: !!merkleRoot,
+      //   verifiableCredential: !!verifiableCredential,
+      // });
 
-      setHasVerificationData(!!merkleProof && !!merkleHash );
+      setHasVerificationData(!!merkleProof && !!merkleHash && !!did);
       // setHasVerificationData(!!merkleProof && !!merkleHash && !!merkleRoot);
       setHasVC(!!verifiableCredential);
     };
@@ -86,6 +89,7 @@ const LoginPage = () => {
     const verifiableCredential = localStorage.getItem("verifiableCredential");
     const merkleProof = localStorage.getItem("merkleProof");
     const merkleHash = localStorage.getItem("merkleHash");
+    const did = localStorage.getItem("did");
     // const merkleRoot = localStorage.getItem("merkleRoot");
 
     if (encryptedWallet) {
@@ -97,14 +101,14 @@ const LoginPage = () => {
         setCurrentPage("signup");
       }
     } else {
-      if (merkleProof && merkleHash ) {
-      // if (merkleProof && merkleHash && merkleRoot) {
+      if (merkleProof && merkleHash && did) {
+        // if (merkleProof && merkleHash && merkleRoot) {
         // Handle verification
         verifyMerkleProof(
           setIsLoadingTx,
           setCurrentStep,
           setErrorMessage,
-          setIsErrorModalOpen
+          setIsErrorModalOpen, navigate
         );
       } else {
         // Regular registration flow
@@ -157,7 +161,41 @@ const LoginPage = () => {
           <h2 className="text-center text-3xl font-bold text-primary">
             Verify via ZKP
           </h2>
-          {/* Add your ZKP verification component or logic here */}
+          <p className="text-center mt-4">
+            Click below to verify using zero-knowledge proof.
+          </p>
+          <button
+            onClick={() => {
+              verifyMerkleProof(
+                setIsLoadingTx,
+                setCurrentStep,
+                setErrorMessage,
+                setIsErrorModalOpen, navigate
+              );
+            }}
+            className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-4`}
+            disabled={isLoadingTx}
+          >
+            {isLoadingTx ? (
+              <div className="flex items-center justify-center">
+                <Loader2 className="animate-spin mr-2" />
+                Processing...
+              </div>
+            ) : (
+              "Verify Now"
+            )}
+          </button>
+          {currentStep && (
+            <div className="mt-4 text-center text-black">
+              <p>{currentStep}</p>
+            </div>
+          )}
+          {isLoadingTx && !currentStep && (
+            <div className="mt-4 text-center">
+              <Loader2 className="animate-spin mx-auto" />
+              <p className="mt-2">Verifying...</p>
+            </div>
+          )}
         </div>
       ) : currentPage === "auth2" ? (
         <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
