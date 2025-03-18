@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import SignupForm from "../components/SignupForm";
 import { verifyMerkleProof } from "../utils/verification";
-import { connectorHost, connectorPort } from "../utils/readEnv";
 
 const LoginPage = () => {
   // non state
@@ -25,8 +24,9 @@ const LoginPage = () => {
   const [isLoadingTx, setIsLoadingTx] = useState(false);
   const [showSignupForm, setShowSignupForm] = useState(false);
   const [hasVerificationData, setHasVerificationData] = useState(false);
+  const [hasVC, setHasVC] = useState(false);
   const [isBackendInSetupMode, setIsBackendInSetupMode] = useState(false);
-  const [isCheckingBackendStatus, setIsCheckingBackendStatus] = useState(false);  // Set to true to enable setup mode
+  const [isCheckingBackendStatus, setIsCheckingBackendStatus] = useState(false); // Set to true to enable setup mode
 
   const [showAuthButtons, setShowAuthButtons] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
@@ -34,39 +34,42 @@ const LoginPage = () => {
   const [currentPage, setCurrentPage] = useState("main");
   const navigate = useNavigate();
 
-  // Check backend status once on startup
-  // useEffect(() => {
-  //   const checkBackendStatus = async () => {
-  //     try {
-  //       setIsCheckingBackendStatus(true);
-  //       const response = await fetch(
-  //         `http://${connectorHost}:${connectorPort}/setup/v1/getStatus`
-  //       );
-  //       const data = await response.json();
-
-  //       if (data.setupMode === true) {
-  //         setIsBackendInSetupMode(true);
-  //         navigate("/setup");
-  //       }
-  //     } catch (error) {
-  //       console.error("Failed to check backend status:", error);
-  //       setErrorMessage(
-  //         "Failed to connect to backend. Please try again later."
-  //       );
-  //       setIsErrorModalOpen(true);
-  //     } finally {
-  //       setIsCheckingBackendStatus(false);
-  //     }
-  //   };
-
-  //   checkBackendStatus();
-  // }, [navigate]);
-
   // Check if merkle proof and hash exist in local storage
   useEffect(() => {
-    const merkleProof = localStorage.getItem("merkleProof");
-    const merkleHash = localStorage.getItem("merkleHash");
-    setHasVerificationData(!!merkleProof && !!merkleHash);
+    const checkLocalStorage = () => {
+      const merkleProof = localStorage.getItem("merkleProof");
+      const merkleHash = localStorage.getItem("merkleHash");
+      const merkleRoot = localStorage.getItem("merkleRoot");
+      const verifiableCredential = localStorage.getItem("verifiableCredential");
+
+      console.log("LocalStorage data:", {
+        merkleProof: !!merkleProof,
+        merkleHash: !!merkleHash,
+        merkleRoot: !!merkleRoot,
+        verifiableCredential: !!verifiableCredential,
+      });
+
+      setHasVerificationData(!!merkleProof && !!merkleHash && !!merkleRoot);
+      setHasVC(!!verifiableCredential);
+    };
+
+    // Check initially
+    checkLocalStorage();
+
+    // Set up event listener for storage changes
+    window.addEventListener("storage", checkLocalStorage);
+
+    // Create custom listener for in-page storage updates
+    const originalSetItem = localStorage.setItem;
+    localStorage.setItem = function () {
+      originalSetItem.apply(this, arguments);
+      checkLocalStorage();
+    };
+
+    return () => {
+      window.removeEventListener("storage", checkLocalStorage);
+      localStorage.setItem = originalSetItem;
+    };
   }, []);
 
   useEffect(() => {
@@ -78,11 +81,22 @@ const LoginPage = () => {
   }, [isErrorModalOpen]);
 
   const handleButtonClick = () => {
-    if (localStorage.getItem("encryptedWallet")) {
-      setShowAuthButtons(true);
+    const encryptedWallet = localStorage.getItem("encryptedWallet");
+    const verifiableCredential = localStorage.getItem("verifiableCredential");
+    const merkleProof = localStorage.getItem("merkleProof");
+    const merkleHash = localStorage.getItem("merkleHash");
+    const merkleRoot = localStorage.getItem("merkleRoot");
+
+    if (encryptedWallet) {
+      if (verifiableCredential) {
+        setShowAuthButtons(true);
+      } else {
+        // Wallet exists but no VC, go to signup to complete registration
+        setShowSignupForm(true);
+        setCurrentPage("signup");
+      }
     } else {
-      //old logic here
-      if (hasVerificationData) {
+      if (merkleProof && merkleHash && merkleRoot) {
         // Handle verification
         verifyMerkleProof(
           setIsLoadingTx,
@@ -163,10 +177,12 @@ const LoginPage = () => {
             <div>
               <p className="text-black mb-4">
                 {walletExists
-                  ? "Wallet detected! Please choose a verification method to continue."
+                  ? hasVC
+                    ? "Please choose a verification method to continue."
+                    : "Wallet detected, but registration is incomplete. Please complete your registration."
                   : "To get started, please create a wallet."}
               </p>
-              {hasVerificationData ? (
+              {hasVerificationData && hasVC ? (
                 <div className="flex flex-col ">
                   <button
                     onClick={() => {
@@ -198,6 +214,9 @@ const LoginPage = () => {
                       <Loader2 className="animate-spin mr-2" />
                       Processing...
                     </div>
+                  ) : localStorage.getItem("encryptedWallet") &&
+                    !localStorage.getItem("verifiableCredential") ? (
+                    "Complete Registration"
                   ) : localStorage.getItem("encryptedWallet") ? (
                     "Login"
                   ) : (

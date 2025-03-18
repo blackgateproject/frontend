@@ -295,7 +295,10 @@ const SignupForm = ({
                   JSON.stringify(status.merkle_proof)
                 );
                 localStorage.setItem("merkleRoot", status.merkle_root);
-                localStorage.setItem("VC", JSON.stringify(signed_vc));
+                localStorage.setItem(
+                  "verifiableCredential",
+                  JSON.stringify(signed_vc)
+                );
 
                 setShowProgress(false); // Hide progress indicator
                 setIsSuccess(true);
