@@ -10,7 +10,7 @@ import {
   User,
   Users,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { connectorHost, connectorPort } from "../utils/readEnv";
@@ -45,21 +45,23 @@ const Sidebar = ({ role, children }) => {
 
   const handleLogout = async () => {
     const accessToken = sessionStorage.getItem("access_token");
-    const uuid = sessionStorage.getItem("uuid");
+    const did = localStorage.getItem("did");
+    console.warn("Logging out\n", did)
     if (accessToken) {
       await fetch(`http://${connectorHost}:${connectorPort}/auth/v1/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ access_token: accessToken, uuid: uuid }),
+        body: JSON.stringify({ access_token: accessToken, did: did}),
       });
       sessionStorage.removeItem("access_token");
       sessionStorage.removeItem("refresh_token");
-      sessionStorage.removeItem("uuid");
+      // sessionStorage.removeItem("uuid");
     }
     window.location.href = logoutPath;
   };
+
 
   return (
     <>
