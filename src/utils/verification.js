@@ -1,4 +1,5 @@
 import { connectorHost, connectorPort } from "./readEnv";
+
 export const verifyMerkleProof = async (
   setIsLoadingTx,
   setCurrentStep,
@@ -35,8 +36,8 @@ export const verifyMerkleProof = async (
       // setCurrentStep(data.message);
       // Check the results object if both valid-Offchain and valid-Onchain are true then verification is successful
       if (data.results.valid_Offchain && data.results.valid_Onchain) {
-        localStorage.setItem("access_token", data.access_token || "");
-        localStorage.setItem("refresh_token", data.refresh_token || "");
+        sessionStorage.setItem("access_token", data.access_token || "");
+        sessionStorage.setItem("refresh_token", data.refresh_token || "");
         
         try {
           const verifiableCredential = localStorage.getItem(
