@@ -47,9 +47,9 @@ export const resolveDID = async (agent, did) => {
 };
 
 // Issue VC
-export const issueVC = async (didDoc, agent, role) => {
+export const issueVC = async (didDoc, agent, role, alias) => {
   console.warn("Issuing Credential...");
-  const signed_vc = await createLDCredentialWithEthrIssuer(didDoc, agent, role);
+  const signed_vc = await createLDCredentialWithEthrIssuer(didDoc, agent, role, alias);
   return signed_vc;
 };
 
@@ -68,13 +68,14 @@ export const validateVC = async (agent, signed_vc) => {
 };
 
 // Submit DID + VC
-export const submitDIDVC = async (wallet, did, signed_vc, selectedRole) => {
+export const submitDIDVC = async (wallet, did, signed_vc, selectedRole, alias) => {
   console.log("Registeration Processs BEGIN!");
   console.log("Fetching Network Info");
 
   const networkInfo = await logUserInfo();
 
   const data = {
+    alias: alias,
     wallet_address: wallet.address,
     didStr: did,
     verifiableCredential: signed_vc,

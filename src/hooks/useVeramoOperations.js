@@ -53,8 +53,8 @@ export function useVeramoOperations() {
   );
 
   const performSubmitDIDVC = useCallback(
-    async (wallet, did, signed_vc, selectedRole) => {
-      return submitDIDVC(wallet, did, signed_vc, selectedRole);
+    async (wallet, did, signed_vc, selectedRole, alias) => {
+      return submitDIDVC(wallet, did, signed_vc, selectedRole, alias);
     },
     []
   );

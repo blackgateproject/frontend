@@ -104,13 +104,15 @@ export async function createLDCredential(
 export async function createLDCredentialWithEthrIssuer(
   issuer: IIdentifier,
   agent: TAgent<ICredentialIssuer>,
-  role: string
+  role: string,
+  alias: string
 ): Promise<VerifiableCredential> {
   const credential: CredentialPayload = {
     // "@context": [MY_CUSTOM_CONTEXT_URI],
     issuer: issuer.did,
     credentialSubject: {
       role: role, 
+      alias: alias,
     },
   };
   const verifiableCredential = await agent.createVerifiableCredential({
