@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import SignupForm from "../components/SignupForm";
 import { verifyMerkleProof } from "../utils/verification";
+import { connectorHost, connectorPort } from "../utils/readEnv";
 
 const LoginPage = () => {
   // non state
@@ -22,12 +23,44 @@ const LoginPage = () => {
   const [isLoadingDID, setIsLoadingDID] = useState(false);
   const [isWalletLoaded, setIsWalletLoaded] = useState(false);
   const [isLoadingTx, setIsLoadingTx] = useState(false);
-  const [showSignupForm, setShowSignupForm] = useState(true);
+  const [showSignupForm, setShowSignupForm] = useState(false);
   const [hasVerificationData, setHasVerificationData] = useState(false);
-  
+  const [isBackendInSetupMode, setIsBackendInSetupMode] = useState(false);
+  const [isCheckingBackendStatus, setIsCheckingBackendStatus] = useState(false);  // Set to true to enable setup mode
+
   const [showAuthButtons, setShowAuthButtons] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
+  const [previousPage, setPreviousPage] = useState(null);
+  const [currentPage, setCurrentPage] = useState("main");
   const navigate = useNavigate();
+
+  // Check backend status once on startup
+  // useEffect(() => {
+  //   const checkBackendStatus = async () => {
+  //     try {
+  //       setIsCheckingBackendStatus(true);
+  //       const response = await fetch(
+  //         `http://${connectorHost}:${connectorPort}/setup/v1/getStatus`
+  //       );
+  //       const data = await response.json();
+
+  //       if (data.setupMode === true) {
+  //         setIsBackendInSetupMode(true);
+  //         navigate("/setup");
+  //       }
+  //     } catch (error) {
+  //       console.error("Failed to check backend status:", error);
+  //       setErrorMessage(
+  //         "Failed to connect to backend. Please try again later."
+  //       );
+  //       setIsErrorModalOpen(true);
+  //     } finally {
+  //       setIsCheckingBackendStatus(false);
+  //     }
+  //   };
+
+  //   checkBackendStatus();
+  // }, [navigate]);
 
   // Check if merkle proof and hash exist in local storage
   useEffect(() => {
@@ -36,34 +69,63 @@ const LoginPage = () => {
     setHasVerificationData(!!merkleProof && !!merkleHash);
   }, []);
 
-
-  useEffect(()=> {
-    if(isErrorModalOpen) {
-      document.getElementById("error-modal").showModal()
+  useEffect(() => {
+    if (isErrorModalOpen) {
+      document.getElementById("error-modal").showModal();
     } else {
-      document.getElementById("error-modal").close()
+      document.getElementById("error-modal").close();
     }
-  }, [isErrorModalOpen])
-
+  }, [isErrorModalOpen]);
 
   const handleButtonClick = () => {
-   if(localStorage.getItem("encryptedWallet")) {
-     setShowAuthButtons(true)
-   } else {
-    //old logic here
-    if (hasVerificationData) {
-      // Handle verification
-      verifyMerkleProof(setIsLoadingTx, setCurrentStep, setErrorMessage, setIsErrorModalOpen);
+    if (localStorage.getItem("encryptedWallet")) {
+      setShowAuthButtons(true);
     } else {
-      // Regular registration flow
-      setShowSignupForm(true);
+      //old logic here
+      if (hasVerificationData) {
+        // Handle verification
+        verifyMerkleProof(
+          setIsLoadingTx,
+          setCurrentStep,
+          setErrorMessage,
+          setIsErrorModalOpen
+        );
+      } else {
+        // Regular registration flow
+        setShowSignupForm(true);
+        setCurrentPage("signup");
+      }
     }
-   }
   };
+
+  const handleBackButtonClick = () => {
+    setCurrentPage("main");
+    setShowSignupForm(false);
+    setShowAuthButtons(false);
+  };
+
+  if (isCheckingBackendStatus) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-400 to-black">
+        <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 text-center">
+          <Loader2 className="animate-spin mx-auto" size={32} />
+          <p className="mt-4">Connecting to backend...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-400 to-black">
-      {showSignupForm ? (
+      {currentPage !== "main" && (
+        <button
+          onClick={handleBackButtonClick}
+          className="absolute top-4 left-4 btn bg-primary/75 hover:bg-primary text-base-100 rounded-2xl"
+        >
+          Back
+        </button>
+      )}
+      {currentPage === "signup" ? (
         <SignupForm
           walletExists={walletExists}
           setWalletExists={setWalletExists}
@@ -74,6 +136,20 @@ const LoginPage = () => {
           setIsErrorModalOpen={setIsErrorModalOpen}
           wallet={wallet} // Pass wallet to SignupForm
         />
+      ) : currentPage === "auth1" ? (
+        <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
+          <h2 className="text-center text-3xl font-bold text-primary">
+            Verify via ZKP
+          </h2>
+          {/* Add your ZKP verification component or logic here */}
+        </div>
+      ) : currentPage === "auth2" ? (
+        <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
+          <h2 className="text-center text-3xl font-bold text-primary">
+            Verify via VC
+          </h2>
+          {/* Add your VC verification component or logic here */}
+        </div>
       ) : (
         <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
           <div className="flex justify-center items-center mb-4">
@@ -84,43 +160,52 @@ const LoginPage = () => {
           </h2>
 
           <div className=" text-center">
-           {showAuthButtons ? 
-           <div className="flex flex-col ">
-            {/** show two buttons namely auth1 and auth2 */}
-            <button
-              onClick={() => navigate("/auth1")}
-              className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-4`}
-            >
-              Auth 1
-            </button>
-            <button
-              onClick={() => navigate("/auth2")}
-              className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-1`}
-            >
-              Auth 2
-            </button>
-          </div>
-            :
-            <button
-              onClick={handleButtonClick}
-              className={`btn w-full ${
-                hasVerificationData
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-primary/75 hover:bg-primary"
-              } text-base-100 rounded-2xl mt-4`}
-              disabled={isLoadingTx}
-            >
-              {isLoadingTx ? (
-                <div className="flex items-center justify-center">
-                  <Loader2 className="animate-spin mr-2" />
-                  Processing...
+            <div>
+              <p className="text-black mb-4">
+                {walletExists
+                  ? "Wallet detected! Please choose a verification method to continue."
+                  : "To get started, please create a wallet."}
+              </p>
+              {hasVerificationData ? (
+                <div className="flex flex-col ">
+                  <button
+                    onClick={() => {
+                      setPreviousPage("main");
+                      setCurrentPage("auth1");
+                    }}
+                    className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-4`}
+                  >
+                    Verify via ZKP
+                  </button>
+                  <button
+                    onClick={() => {
+                      setPreviousPage("main");
+                      setCurrentPage("auth2");
+                    }}
+                    className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-1`}
+                  >
+                    Verify via VC
+                  </button>
                 </div>
-              ) : hasVerificationData ? (
-                "Verify"
               ) : (
-                localStorage.getItem("encryptedWallet") ? "Login" : "Register"
+                <button
+                  onClick={handleButtonClick}
+                  className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-4`}
+                  disabled={isLoadingTx}
+                >
+                  {isLoadingTx ? (
+                    <div className="flex items-center justify-center">
+                      <Loader2 className="animate-spin mr-2" />
+                      Processing...
+                    </div>
+                  ) : localStorage.getItem("encryptedWallet") ? (
+                    "Login"
+                  ) : (
+                    "Register"
+                  )}
+                </button>
               )}
-            </button>}
+            </div>
           </div>
           {currentStep && (
             <div className="mt-4 text-center text-white">
@@ -134,10 +219,8 @@ const LoginPage = () => {
           )}
         </div>
       )}
-    
 
-
-      <dialog id="error-modal" className="modal" >
+      <dialog id="error-modal" className="modal">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Error</h3>
           <p className="py-4">{errorMessage}</p>
