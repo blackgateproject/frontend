@@ -4,13 +4,14 @@ import {
   ChevronRight,
   Home,
   LogOut,
+  LucideDatabase,
   Menu,
   Shapes,
   Ticket,
   User,
   Users,
 } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { connectorHost, connectorPort } from "../utils/readEnv";
@@ -28,6 +29,11 @@ const Sidebar = ({ role, children }) => {
 
   const adminLinks = [
     { name: "Dashboard", path: "/admin/dashboard", icon: <ChartArea /> },
+    {
+      name: "GrafanaDashboard",
+      path: "/admin/grafana-dashboard",
+      icon: <LucideDatabase />,
+    },
     { name: "Applications", path: "/admin/applications", icon: <Shapes /> },
     { name: "Users", path: "/admin/users", icon: <Users /> },
     { name: "Requests", path: "/admin/requests", icon: <Ticket /> },
@@ -46,14 +52,14 @@ const Sidebar = ({ role, children }) => {
   const handleLogout = async () => {
     const accessToken = sessionStorage.getItem("access_token");
     const did = localStorage.getItem("did");
-    console.warn("Logging out\n", did)
+    console.warn("Logging out\n", did);
     if (accessToken) {
       await fetch(`http://${connectorHost}:${connectorPort}/auth/v1/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ access_token: accessToken, did: did}),
+        body: JSON.stringify({ access_token: accessToken, did: did }),
       });
       sessionStorage.removeItem("access_token");
       sessionStorage.removeItem("refresh_token");
@@ -61,7 +67,6 @@ const Sidebar = ({ role, children }) => {
     }
     window.location.href = logoutPath;
   };
-
 
   return (
     <>
