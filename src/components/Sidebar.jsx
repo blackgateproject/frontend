@@ -5,6 +5,7 @@ import {
   Home,
   LogOut,
   LucideDatabase,
+  LucideNotepadTextDashed,
   Menu,
   Shapes,
   Ticket,
@@ -44,7 +45,11 @@ const Sidebar = ({ role, children }) => {
     { name: "Profile", path: "/device/profile", icon: <User /> },
   ];
 
-  const links = role === "admin" ? adminLinks : role === "device" ? devicelinks : userLinks;
+  const testlinks = [
+    {name: "Dashboard", path: "/test/home", icon: <LucideNotepadTextDashed />}
+  ]
+
+  const links = role === "admin" ? adminLinks : role === "device" ? devicelinks : role === "test" ? testlinks : userLinks 
   const logoutPath = role === "admin" ? "/" : "/";
 
   const handleLogout = async () => {

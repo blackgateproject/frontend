@@ -242,7 +242,7 @@ const SignupForm = ({
 
       // Resolve DID
       setCurrentStep(2);
-      await performResolveDID(did);
+      await performResolveDID(didDoc.did);
 
       // Issue VC
       setCurrentStep(3);
@@ -254,7 +254,7 @@ const SignupForm = ({
 
       // Submit DID + VC
       setCurrentStep(5);
-      await performSubmitDIDVC(wallet, did, signed_vc, updatedFormData);
+      await performSubmitDIDVC(wallet, didDoc.did, signed_vc, updatedFormData);
 
       console.log("Form submitted:", {
         ...formData,
