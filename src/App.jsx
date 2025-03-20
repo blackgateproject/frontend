@@ -16,7 +16,7 @@ import UserHelp from "./pages/user/UserHelp";
 import UserProfile from "./pages/user/UserProfile";
 import UserGrafana from "./pages/user/GrafanaDashboard";
 import DeviceGrafana from "./pages/device/GrafanaDashboard";
-import DeviceProfile from "./pages/device/GrafanaDashboard";
+import DeviceProfile from "./pages/device/Profile";
 
 function App() {
   return (

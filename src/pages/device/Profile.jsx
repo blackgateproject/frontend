@@ -240,7 +240,7 @@ const AdminProfile = () => {
   };
 
   return (
-    <Sidebar role={"admin"}>
+    <Sidebar role={"device"}>
       <dialog id="qr-modal" className="modal backdrop-brightness-75">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Connect with your mobile app</h3>

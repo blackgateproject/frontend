@@ -16,7 +16,7 @@ const GrafanaDashboard = () => {
   // Awais grafana
   const grafanaUrl = `http://${grafanaHost}:${grafanaPort}/public-dashboards/${grafanaDashboard}`;
   return (
-    <Sidebar role={"admin"}>
+    <Sidebar role={"user"}>
       {/* Main Content */}
       <div className="col-span-12 p-6">
         {/* Heading */}
