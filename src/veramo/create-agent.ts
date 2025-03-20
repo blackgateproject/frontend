@@ -15,7 +15,8 @@ import { KeyManagementSystem } from "@veramo/kms-local";
 import { Resolver } from "did-resolver";
 import { getResolver as ethrDidResolver } from "ethr-did-resolver";
 
-import ContractABI from "../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json" with { type: "json" };
+// import ContractABI from "../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json" with { type: "json" };
+import ContractABI from "../../../blockchain/deployments-zk/dockerizedNode/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json" with { type: "json" };
 import { JsonRpcProvider } from "ethers";
 
 
@@ -38,8 +39,9 @@ interface ImportMeta {
 //     nothing: "https://example.com/custom/context",
 //   },
 // };
-const INFURA_PROJECT_ID = import.meta.env.VITE_INFURA_PROJECT_ID || null;
-console.log("Loaded INFURA_PROJECT_ID:", INFURA_PROJECT_ID);
+const BLOCKCHAIN_RPC_PROVIDER = import.meta.env.VITE_BLOCKCHAIN_RPC_PROVIDER || null;
+const CHAIN_ID = import.meta.env.VITE_CHAIN_ID || null;
+console.log("Loaded BLOCKCHAIN_RPC_PROVIDER:", BLOCKCHAIN_RPC_PROVIDER);
 
 export const localAgent = createAgent<
   IResolver &
@@ -71,10 +73,13 @@ export const localAgent = createAgent<
           networks: [
             {
               name: "blackgate",
-              // rpcUrl: `https://zksync-sepolia.infura.io/v3/${INFURA_PROJECT_ID}`,
-              // chainId: 300,
+              // [NOTE::] Use this for external zksync
+              // provider: new JsonRpcProvider(
+              //   BLOCKCHAIN_RPC_PROVIDER, 300),
+              // registry: ContractABI.entries[0].address,
+              // // [NOTE::] Use this for dokcerized zksync
               provider: new JsonRpcProvider(
-                `https://zksync-sepolia.infura.io/v3/${INFURA_PROJECT_ID}`, 300),
+                BLOCKCHAIN_RPC_PROVIDER, CHAIN_ID),
               registry: ContractABI.entries[0].address,
             }
               
@@ -87,9 +92,13 @@ export const localAgent = createAgent<
         ...ethrDidResolver({
           // infuraProjectId: INFURA_PROJECT_ID,
           // provider: 
-          provider: new JsonRpcProvider("https://zksync-sepolia.infura.io/v3/" + INFURA_PROJECT_ID) as any,
+          // provider: new JsonRpcProvider("https://zksync-sepolia.infura.io/v3/" + INFURA_PROJECT_ID) as any,
+          // registry: ContractABI.entries[0].address,
+          // chainId: 300,
+          // name: "blackgate",
+          provider: new JsonRpcProvider(BLOCKCHAIN_RPC_PROVIDER) as any,
           registry: ContractABI.entries[0].address,
-          chainId: 300,
+          chainId: CHAIN_ID,
           name: "blackgate",
         }) // Add other resolvers if needed
       }),

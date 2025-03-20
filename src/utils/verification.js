@@ -8,8 +8,9 @@ export const verifyMerkleProof = async (
 ) => {
   setIsLoadingTx(true);
   try {
-    const merkleProof = localStorage.getItem("merkleProof");
+    // const merkleProof = localStorage.getItem("merkleProof");
     const merkleHash = localStorage.getItem("merkleHash");
+    const merkleProof = localStorage.getItem("merkleProof");
     const did = localStorage.getItem("did");
 
     const creds = {
@@ -17,7 +18,7 @@ export const verifyMerkleProof = async (
       merkleHash: merkleHash,
       did: did,
     };
-    // console.log("sending data:", creds);
+    console.log("sending data:", creds);
     const response = await fetch(
       `http://${connectorHost}:${connectorPort}/auth/v1/verify`,
       {
