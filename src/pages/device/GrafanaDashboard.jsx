@@ -1,6 +1,10 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar";
-import { grafanaHost, grafanaPort } from "../../utils/readEnv";
+import {
+  grafanaDashboard,
+  grafanaHost,
+  grafanaPort,
+} from "../../utils/readEnv";
 const GrafanaDashboard = () => {
   // Get the Grafana token and scanId (modify as per your auth mechanism)
   // const bearerToken = sessionStorage.getItem("access_token") || "";
@@ -10,21 +14,14 @@ const GrafanaDashboard = () => {
   // Abdullah grafana
   // const grafanaUrl = `http://localhost:3000/public-dashboards/5c6de844c29a4783a657cb4d8021fe44?orgId=2`
   // Awais grafana
-  const did = localStorage.getItem("did");
-  if (!did) {
-    console.error("DID not found in localStorage");
-    return <div>Error: DID not found</div>;
-  }
-  const grafanaUrl = `http://${grafanaHost}:${grafanaPort}/d/aeg8k8xe3vmrkf/blackgate?orgId=1&from=now-6h&to=now&timezone=browser&var-query0=${did}&refresh=5s&kiosk`;
-  // const grafanaUrl = `http://${grafanaHost}:${grafanaPort}/public-dashboards/${grafanaDashboard}?var-query0=${did}`;
-  // http://localhost:3000/public-dashboards/4cfe527e24b14ea7981f0216bff5046f?var-query0=did:ethr:blackgate:0x02b68a7089375398902d830d76f1df427e81f060e7e4f4784e4d0accfbd660bc86
+  const grafanaUrl = `http://${grafanaHost}:${grafanaPort}/public-dashboards/${grafanaDashboard}`;
   return (
     <Sidebar role={"admin"}>
       {/* Main Content */}
       <div className="col-span-12 p-6">
         {/* Heading */}
         <h1 className="text-3xl font-bold text-[#333333] mb-4">
-          Statistics Dashboard
+          Dashboard
         </h1>
 
         {/* Grafana Dashboard Embed */}

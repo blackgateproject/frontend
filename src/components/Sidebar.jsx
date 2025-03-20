@@ -23,11 +23,7 @@ const Sidebar = ({ role, children }) => {
 
   const adminLinks = [
     { name: "Dashboard", path: "/admin/dashboard", icon: <ChartArea /> },
-    {
-      name: "GrafanaDashboard",
-      path: "/admin/grafana-dashboard",
-      icon: <LucideDatabase />,
-    },
+    { name: "Statistics", path: "/admin/grafana-dashboard", icon: <LucideDatabase />,},
     { name: "Applications", path: "/admin/applications", icon: <Shapes /> },
     { name: "Users", path: "/admin/users", icon: <Users /> },
     { name: "Requests", path: "/admin/requests", icon: <Ticket /> },
@@ -35,12 +31,20 @@ const Sidebar = ({ role, children }) => {
   ];
 
   const userLinks = [
-    { name: "Home", path: "/user/dashboard", icon: <Home /> },
+    { name: "Dashboard", path: "/user/grafana-dashboard", icon: <LucideDatabase /> },
+    { name: "Applications", path: "/user/dashboard", icon: <Home /> },
     // { name: "Help", path: "/user/help", icon: <HelpCircle /> },
     { name: "Profile", path: "/user/profile", icon: <User /> },
   ];
 
-  const links = role === "admin" ? adminLinks : userLinks;
+  const devicelinks = [
+    { name: "Dashboard", path: "/device/grafana-dashboard", icon: <LucideDatabase /> },
+    // { name: "Applications", path: "/device/dashboard", icon: <Home /> },
+    // { name: "Help", path: "/user/help", icon: <HelpCircle /> },
+    { name: "Profile", path: "/device/profile", icon: <User /> },
+  ];
+
+  const links = role === "admin" ? adminLinks : role === "device" ? devicelinks : userLinks;
   const logoutPath = role === "admin" ? "/" : "/";
 
   const handleLogout = async () => {
