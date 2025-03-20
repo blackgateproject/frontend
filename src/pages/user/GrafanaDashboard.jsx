@@ -1,10 +1,6 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar";
-import {
-  grafanaDashboard,
-  grafanaHost,
-  grafanaPort,
-} from "../../utils/readEnv";
+import { grafanaHost, grafanaPort } from "../../utils/readEnv";
 const GrafanaDashboard = () => {
   // Get the Grafana token and scanId (modify as per your auth mechanism)
   // const bearerToken = sessionStorage.getItem("access_token") || "";
@@ -14,15 +10,16 @@ const GrafanaDashboard = () => {
   // Abdullah grafana
   // const grafanaUrl = `http://localhost:3000/public-dashboards/5c6de844c29a4783a657cb4d8021fe44?orgId=2`
   // Awais grafana
-  const grafanaUrl = `http://${grafanaHost}:${grafanaPort}/public-dashboards/${grafanaDashboard}`;
+  // const grafanaUrl = `http://${grafanaHost}:${grafanaPort}/public-dashboards/${grafanaDashboard}`;
+  const did = localStorage.getItem("did");
+  const grafanaUrl = `http://${grafanaHost}:${grafanaPort}/d/aeg8k8xe3vmrkf/blackgate?orgId=1&from=now-6h&to=now&timezone=browser&var-query0=${did}&refresh=5s&kiosk`;
+
   return (
     <Sidebar role={"user"}>
       {/* Main Content */}
       <div className="col-span-12 p-6">
         {/* Heading */}
-        <h1 className="text-3xl font-bold text-[#333333] mb-4">
-          Dashboard
-        </h1>
+        <h1 className="text-3xl font-bold text-[#333333] mb-4">Dashboard</h1>
 
         {/* Grafana Dashboard Embed */}
         <iframe

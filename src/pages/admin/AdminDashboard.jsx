@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import UserActivity from "../../components/UserActivity";
 import { connectorHost, connectorPort } from "../../utils/readEnv";
+const grafanaUrl = `http://localhost:3000/d/cegcehlfn4740c/admin-dash-stats?orgId=1&from=2025-03-18T17:00:00.000Z&to=2025-03-19T07:00:00.000Z&timezone=browser&kiosk&refresh=5s`;
 const Dashboard = () => {
   const accessToken = sessionStorage.getItem("access_token") || "";
   const [stats, setStats] = useState({
@@ -99,6 +100,20 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Grafana Dashboard Embed */}
+        <div className="col-span-12 p-6">
+          {/* Heading */}
+          {/* <h1 className="text-3xl font-bold text-[#333333] mb-4">Dashboard</h1> */}
+
+          <iframe
+            title="grafana-dashboard"
+            // src="http://arborjs.org"
+            src={grafanaUrl}
+            width="100%"
+            height="900px"
+            frameBorder="0"
+          />
+        </div>
         {/* User Activity Section */}
         <div className="bg-base-300 rounded-2xl shadow-md max-h-[34rem] overflow-y-scroll p-6 mb-4">
           <div className="w-full flex justify-between items-center my-3 mb-5">

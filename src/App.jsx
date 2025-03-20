@@ -18,6 +18,8 @@ import UserGrafana from "./pages/user/GrafanaDashboard";
 import DeviceGrafana from "./pages/device/GrafanaDashboard";
 import DeviceProfile from "./pages/device/Profile";
 
+import TestDashbaord from "./pages/test/Home";
+
 function App() {
   return (
     <Router>
@@ -64,6 +66,11 @@ function App() {
         <Route path="/device">
           <Route path="grafana-dashboard" element={<DeviceGrafana role={"device"} />} />
           <Route path="profile" element={<DeviceProfile role={"device"} />} />
+        </Route>
+
+        {/* Test Routes */}
+        <Route path="/test">
+          <Route path="home" element={<TestDashbaord role={"device"} />} />
         </Route>
 
 

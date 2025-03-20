@@ -14,7 +14,8 @@ const GrafanaDashboard = () => {
   // Abdullah grafana
   // const grafanaUrl = `http://localhost:3000/public-dashboards/5c6de844c29a4783a657cb4d8021fe44?orgId=2`
   // Awais grafana
-  const grafanaUrl = `http://${grafanaHost}:${grafanaPort}/public-dashboards/${grafanaDashboard}`;
+  const did = localStorage.getItem("did");
+  const grafanaUrl = `http://${grafanaHost}:${grafanaPort}/d/aeg8k8xe3vmrkf/auth-times?orgId=1&from=now-6h&to=now&timezone=browser&var-query0=${did}&refresh=5s&kiosk`;
   return (
     <Sidebar role={"device"}>
       {/* Main Content */}

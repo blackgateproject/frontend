@@ -15,7 +15,8 @@ const GrafanaDashboard = () => {
     console.error("DID not found in localStorage");
     return <div>Error: DID not found</div>;
   }
-  const grafanaUrl = `http://${grafanaHost}:${grafanaPort}/d/aeg8k8xe3vmrkf/blackgate?orgId=1&from=now-6h&to=now&timezone=browser&var-query0=${did}&refresh=5s&kiosk`;
+  const grafanaUrl = `http://localhost:3000/d/aeg8k8xe3vmrkf/auth-times?orgId=1&from=now-6h&to=now&timezone=browser&var-query0=${did}&refresh=5s&kiosk`;
+  // const grafanaUrl = `http://localhost:3000/d/cegcehlfn4740c/admin-dash-stats?orgId=1&from=2025-03-18T17:00:00.000Z&to=2025-03-19T07:00:00.000Z&timezone=browser&kiosk`;
   // const grafanaUrl = `http://${grafanaHost}:${grafanaPort}/public-dashboards/${grafanaDashboard}?var-query0=${did}`;
   // http://localhost:3000/public-dashboards/4cfe527e24b14ea7981f0216bff5046f?var-query0=did:ethr:blackgate:0x02b68a7089375398902d830d76f1df427e81f060e7e4f4784e4d0accfbd660bc86
   return (
