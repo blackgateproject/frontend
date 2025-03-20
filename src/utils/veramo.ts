@@ -39,7 +39,10 @@ export async function importEthrDID(
   //   console.log("Importing DID with address: ", address);
   //   console.log("Importing DID with privateKeyHex: ", privateKeyHex);
   //   console.log("Importing DID with publicKey: ", publicKeyHex);
-  console.log("List of Providers to agent: ", await agent.didManagerGetProviders());
+  console.log(
+    "List of Providers to agent: ",
+    await agent.didManagerGetProviders()
+  );
   const data = {
     did: `did:ethr:blackgate:${publicKeyHex}`,
     alias: uuidv4().slice(0, 6),
@@ -104,17 +107,23 @@ export async function createLDCredential(
 export async function createLDCredentialWithEthrIssuer(
   issuer: IIdentifier,
   agent: TAgent<ICredentialIssuer>,
-  role: string,
-  alias: string
+  formData: any
 ): Promise<VerifiableCredential> {
+  const credentialSubject: any = {};
+
+  // Filter out keys with no values and add the rest to credentialSubject
+  Object.entries(formData).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      credentialSubject[key] = value;
+    }
+  });
+
   const credential: CredentialPayload = {
     // "@context": [MY_CUSTOM_CONTEXT_URI],
     issuer: issuer.did,
-    credentialSubject: {
-      role: role, 
-      alias: alias,
-    },
+    credentialSubject,
   };
+
   const verifiableCredential = await agent.createVerifiableCredential({
     credential,
     proofFormat: "jwt", // use LD Signatures as proof

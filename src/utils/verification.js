@@ -4,17 +4,18 @@ export const verifyMerkleProof = async (
   setIsLoadingTx,
   setCurrentStep,
   setErrorMessage,
-  setIsErrorModalOpen, navigate
+  setIsErrorModalOpen,
+  navigate
 ) => {
   setIsLoadingTx(true);
   try {
     // const merkleProof = localStorage.getItem("merkleProof");
     const merkleHash = localStorage.getItem("merkleHash");
-    const merkleProof = localStorage.getItem("merkleProof");
+    // const merkleProof = localStorage.getItem("merkleProof");
     const did = localStorage.getItem("did");
 
     const creds = {
-      merkleProof: JSON.parse(merkleProof),
+      // merkleProof: JSON.parse(merkleProof),
       merkleHash: merkleHash,
       did: did,
     };
@@ -39,27 +40,29 @@ export const verifyMerkleProof = async (
       if (data.results.valid_Offchain && data.results.valid_Onchain) {
         sessionStorage.setItem("access_token", data.access_token || "");
         sessionStorage.setItem("refresh_token", data.refresh_token || "");
-        
+
         try {
           const verifiableCredential = localStorage.getItem(
             "verifiableCredential"
           );
           if (!verifiableCredential) {
-            throw new Error("verifiableCredential not found in localStorage");
+            throw new Error(
+              "[VC Verify ERR]: verifiableCredential not found in localStorage"
+            );
           }
-          
+
           const parsedCredential = JSON.parse(verifiableCredential);
           if (
             !parsedCredential.credentialSubject ||
-            !parsedCredential.credentialSubject.role
+            !parsedCredential.credentialSubject.selectedRole
           ) {
-            throw new Error("Invalid credential structure");
+            throw new Error("[VC Verify ERR]: Invalid credential structure");
           }
-          
-          const role = parsedCredential.credentialSubject.role;
+
+          const role = parsedCredential.credentialSubject.selectedRole;
           console.log("Role:", role);
 
-          navigate(`/${role}/dashboard`)
+          navigate(`/${role}/dashboard`);
 
           console.log("Verification successful");
           setCurrentStep("Verification successful");

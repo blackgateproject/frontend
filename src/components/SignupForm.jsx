@@ -25,7 +25,7 @@ const SignupForm = ({
     did: "",
     alias: "",
     // publicKey: "",
-    deviceId: "",
+    selectedRole: "",
     firmwareVersion: "",
   });
   const [errors, setErrors] = useState({});
@@ -60,7 +60,7 @@ const SignupForm = ({
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Handling Change for ${name}: value is ${value}`)
+    // console.log(`Handling Change for ${name}: value is ${value}`)
     setFormData({
       ...formData,
       [name]: value,
@@ -192,9 +192,9 @@ const SignupForm = ({
     }
 
     if (selectedRole === "device") {
-      if (!formData.deviceId) {
-        newErrors.deviceId = "Device ID is required";
-      }
+      // if (!formData.deviceId) {
+      //   newErrors.deviceId = "Device ID is required";
+      // }
 
       if (!formData.firmwareVersion) {
         newErrors.firmwareVersion = "Firmware version is required";
@@ -226,6 +226,15 @@ const SignupForm = ({
         );
       }
 
+      const updatedFormData = {
+        // test: "extra-role-got added",
+        selectedRole: selectedRole,
+        alias: formData.alias,
+        firmwareVersion: formData.firmwareVersion,
+      };
+
+      console.warn("Form Data:", updatedFormData);
+      
       // Generate DID
       setCurrentStep(1);
       const didDoc = await performGenerateDID(wallet);
@@ -237,7 +246,7 @@ const SignupForm = ({
 
       // Issue VC
       setCurrentStep(3);
-      const signed_vc = await performIssueVC(didDoc, selectedRole);
+      const signed_vc = await performIssueVC(didDoc, updatedFormData);
 
       // Validate VC
       setCurrentStep(4);
@@ -245,11 +254,12 @@ const SignupForm = ({
 
       // Submit DID + VC
       setCurrentStep(5);
-      await performSubmitDIDVC(wallet, did, signed_vc, selectedRole, formData.alias);
+      await performSubmitDIDVC(wallet, did, signed_vc, updatedFormData);
 
       console.log("Form submitted:", {
         ...formData,
         role: selectedRole,
+        firmwareVersion: formData.firmwareVersion,
       });
 
       // Set up polling for request status
@@ -284,10 +294,10 @@ const SignupForm = ({
 
                 // Store merkle proof and hash in local storage
                 localStorage.setItem("merkleHash", status.merkle_hash);
-                localStorage.setItem(
-                  "merkleProof",
-                  JSON.stringify(status.merkle_proof)
-                );
+                // localStorage.setItem(
+                //   "merkleProof",
+                //   JSON.stringify(status.merkle_proof)
+                // );
                 // localStorage.setItem("merkleRoot", status.merkle_root);
                 localStorage.setItem("did", did);
                 localStorage.setItem(
@@ -603,7 +613,7 @@ const SignupForm = ({
                   {/* Device-specific fields */}
                   {selectedRole === "device" && (
                     <div className="space-y-4 animate-fadeIn">
-                      <div>
+                      {/* <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Device ID
                         </label>
@@ -622,7 +632,7 @@ const SignupForm = ({
                             {errors.deviceId}
                           </p>
                         )}
-                      </div>
+                      </div> */}
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">

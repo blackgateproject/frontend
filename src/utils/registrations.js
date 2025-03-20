@@ -1,11 +1,11 @@
 import { SigningKey } from "ethers";
+import { connectorHost, connectorPort } from "./readEnv";
 import { logUserInfo } from "./secUtils";
 import {
   createLDCredentialWithEthrIssuer,
   importEthrDID,
   verifyDIDDoc,
 } from "./veramo";
-import { connectorHost, connectorPort } from "./readEnv";
 
 // Generate DID
 export const generateDID = async (wallet, agent) => {
@@ -47,9 +47,14 @@ export const resolveDID = async (agent, did) => {
 };
 
 // Issue VC
-export const issueVC = async (didDoc, agent, role, alias) => {
+export const issueVC = async (didDoc, agent, formData) => {
   console.warn("Issuing Credential...");
-  const signed_vc = await createLDCredentialWithEthrIssuer(didDoc, agent, role, alias);
+  console.log("formData:", formData);
+  const signed_vc = await createLDCredentialWithEthrIssuer(
+    didDoc,
+    agent,
+    formData
+  );
   return signed_vc;
 };
 
@@ -68,29 +73,32 @@ export const validateVC = async (agent, signed_vc) => {
 };
 
 // Submit DID + VC
-export const submitDIDVC = async (wallet, did, signed_vc, selectedRole, alias) => {
+export const submitDIDVC = async (wallet, did, signed_vc, formData) => {
   console.log("Registeration Processs BEGIN!");
   console.log("Fetching Network Info");
 
   const networkInfo = await logUserInfo();
 
   const data = {
-    alias: alias,
+    alias: formData.alias,
     wallet_address: wallet.address,
     didStr: did,
     verifiableCredential: signed_vc,
     usernetwork_info: networkInfo,
-    requested_role: selectedRole,
+    requested_role: formData.selectedRole,
   };
   console.log("Data:", data);
 
-  const response = await fetch(`http://${connectorHost}:${connectorPort}/auth/v1/register`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+  const response = await fetch(
+    `http://${connectorHost}:${connectorPort}/auth/v1/register`,
+    {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }
+  );
 
   console.log("Attempting to send data to connector");
 
@@ -111,7 +119,9 @@ export const submitDIDVC = async (wallet, did, signed_vc, selectedRole, alias) =
 export const pollForRequestStatus = async (walletAddress) => {
   console.log("Polling for request status...");
 
-  return fetch(`http://${connectorHost}:${connectorPort}/auth/v1/poll/${walletAddress}`)
+  return fetch(
+    `http://${connectorHost}:${connectorPort}/auth/v1/poll/${walletAddress}`
+  )
     .then((response) => {
       if (response.ok) {
         return response.json();
@@ -125,7 +135,7 @@ export const pollForRequestStatus = async (walletAddress) => {
         const {
           message,
           merkle_hash,
-          merkle_proof,
+          // merkle_proof,
           merkle_root,
           tx_hash,
           request_status,
@@ -133,7 +143,7 @@ export const pollForRequestStatus = async (walletAddress) => {
         return {
           message,
           merkle_hash,
-          merkle_proof,
+          // merkle_proof,
           merkle_root,
           tx_hash,
           request_status,
@@ -147,7 +157,7 @@ export const pollForRequestStatus = async (walletAddress) => {
       return {
         message: "Error occurred while polling",
         request_status: null,
-        merkle_proof: null,
+        // merkle_proof: null,
         merkle_hash: null,
         merkle_root: null,
         tx_hash: null,

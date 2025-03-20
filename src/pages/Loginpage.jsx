@@ -37,7 +37,7 @@ const LoginPage = () => {
   // Check if merkle proof and hash exist in local storage
   useEffect(() => {
     const checkLocalStorage = () => {
-      const merkleProof = localStorage.getItem("merkleProof");
+      // const merkleProof = localStorage.getItem("merkleProof");
       const merkleHash = localStorage.getItem("merkleHash");
       // const merkleRoot = localStorage.getItem("merkleRoot");
       const did = localStorage.getItem("did");
@@ -52,7 +52,8 @@ const LoginPage = () => {
       //   verifiableCredential: !!verifiableCredential,
       // });
 
-      setHasVerificationData(!!merkleProof && !!merkleHash && !!did);
+      setHasVerificationData(!!merkleHash && !!did);
+      // setHasVerificationData(!!merkleProof && !!merkleHash && !!did);
       // setHasVerificationData(!!merkleProof && !!merkleHash && !!merkleRoot);
       setHasVC(!!verifiableCredential);
     };
@@ -87,7 +88,7 @@ const LoginPage = () => {
   const handleButtonClick = () => {
     const encryptedWallet = localStorage.getItem("encryptedWallet");
     const verifiableCredential = localStorage.getItem("verifiableCredential");
-    const merkleProof = localStorage.getItem("merkleProof");
+    // const merkleProof = localStorage.getItem("merkleProof")
     const merkleHash = localStorage.getItem("merkleHash");
     const did = localStorage.getItem("did");
     // const merkleRoot = localStorage.getItem("merkleRoot");
@@ -101,7 +102,8 @@ const LoginPage = () => {
         setCurrentPage("signup");
       }
     } else {
-      if (merkleProof && merkleHash && did) {
+      if (merkleHash && did) {
+      // if (merkleProof && merkleHash && did) {
         // if (merkleProof && merkleHash && merkleRoot) {
         // Handle verification
         verifyMerkleProof(

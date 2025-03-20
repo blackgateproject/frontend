@@ -33,11 +33,11 @@ export function useVeramoOperations() {
   );
 
   const performIssueVC = useCallback(
-    async (didDoc, role) => {
+    async (didDoc, formData) => {
       if (!agent) {
         throw new Error("Veramo agent not initialized");
       }
-      return issueVC(didDoc, agent, role);
+      return issueVC(didDoc, agent, formData);
     },
     [agent]
   );
@@ -53,8 +53,8 @@ export function useVeramoOperations() {
   );
 
   const performSubmitDIDVC = useCallback(
-    async (wallet, did, signed_vc, selectedRole, alias) => {
-      return submitDIDVC(wallet, did, signed_vc, selectedRole, alias);
+    async (wallet, did, signed_vc, formData) => {
+      return submitDIDVC(wallet, did, signed_vc, formData);
     },
     []
   );
