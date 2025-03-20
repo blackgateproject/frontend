@@ -15,13 +15,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { connectorHost, connectorPort } from "../utils/readEnv";
-// interface ImportMetaEnv {
-//   readonly VITE_INFURA_PROJECT_ID: string;
-// }
 
-// interface ImportMeta {
-//   readonly env: ImportMetaEnv;
-// }
 
 const Sidebar = ({ role, children }) => {
   const location = useLocation();
