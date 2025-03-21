@@ -80,7 +80,8 @@ export const submitDIDVC = async (wallet, did, signed_vc, formData) => {
   const networkInfo = await logUserInfo();
 
   //If the user is in test mode, we need randomized networkInfo
-  if (formData.testMode) {
+  const testMode = signed_vc.credentialSubject?.testMode || false;
+  if (testMode) {
     networkInfo.location_lat = Math.random() * 180 - 90; // Random latitude
     networkInfo.location_long = Math.random() * 360 - 180; // Random longitude
     // Random Global IPv4 Address X.X.X.X
@@ -92,8 +93,8 @@ export const submitDIDVC = async (wallet, did, signed_vc, formData) => {
       Math.floor(Math.random() * 256).toString() +
       "." +
       Math.floor(Math.random() * 256).toString();
+    networkInfo.user_agent = "This is a test user agent";
   }
-  networkInfo.user_agent = "This is a test user agent";
   // Randomly select from a list of languages
   const languages = ["en-US", "es-ES", "fr-FR", "de-DE", "zh-CN"];
   networkInfo.user_language =

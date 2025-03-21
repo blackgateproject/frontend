@@ -201,9 +201,9 @@ const LoginPage = () => {
         </div>
       ) : currentPage === "auth2" ? (
         <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
-          <h2 className="text-center text-3xl font-bold text-primary">
+          {/* <h2 className="text-center text-3xl font-bold text-primary">
             Verify via VC
-          </h2>
+          </h2> */}
           {/* Add your VC verification component or logic here */}
         </div>
       ) : (
@@ -235,7 +235,7 @@ const LoginPage = () => {
                   >
                     Verify via ZKP
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => {
                       setPreviousPage("main");
                       setCurrentPage("auth2");
@@ -243,7 +243,7 @@ const LoginPage = () => {
                     className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-1`}
                   >
                     Verify via VC
-                  </button>
+                  </button> */}
                 </div>
               ) : (
                 <button

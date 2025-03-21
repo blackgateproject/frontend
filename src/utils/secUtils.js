@@ -40,8 +40,9 @@ export const logUserInfo = async () => {
   } catch (error) {
     console.error("Error fetching IP address:", error);
   }
+  // userInfo.ip_address = ""
 
-  console.log("Network Info:", JSON.stringify(userInfo, null, 2));
+  // console.log("Network Info:", JSON.stringify(userInfo, null, 2));
 
   return userInfo
 };

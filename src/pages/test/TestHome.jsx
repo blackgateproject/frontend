@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import { useVeramoOperations } from "../../hooks/useVeramoOperations";
 import { connectorHost, connectorPort } from "../../utils/readEnv";
+import FileSaver from "file-saver";
 
 const TestDashboard = () => {
   const {
@@ -162,10 +163,16 @@ const TestDashboard = () => {
     let longestTime = 0;
 
     const usersToVerify = Math.min(verifyUsers, users.length);
+    const selectedUsers = [];
 
     for (let i = 0; i < usersToVerify; i++) {
+      const randomIndex = Math.floor(Math.random() * users.length);
+      selectedUsers.push(users[randomIndex]);
+    }
+
+    for (let i = 0; i < selectedUsers.length; i++) {
       const startTime = performance.now();
-      const user = users[i];
+      const user = selectedUsers[i];
       console.log(`Verifying user ${i + 1}:`);
       console.log(
         `User Data: \nMerkle Hash: ${user.merkle_hash}\nDID: ${user.did}`
@@ -188,7 +195,8 @@ const TestDashboard = () => {
 
         if (!response.ok) {
           throw new Error(
-            `Verification failed with status: ${response.status}`
+            `Verification failed with status: ${response.status}\n${response.statusText}` +
+              `\nResponse: ${await response.text()}`
           );
         }
 
@@ -196,8 +204,8 @@ const TestDashboard = () => {
         console.log("Verification response:", sessionData);
 
         setUsers((prevUsers) =>
-          prevUsers.map((u, index) => {
-            if (index === i) {
+          prevUsers.map((u) => {
+            if (u.did === user.did) {
               return {
                 ...u,
                 session: {
@@ -215,11 +223,14 @@ const TestDashboard = () => {
 
         setSuccessfulVerifications((prevCount) => prevCount + 1);
       } catch (error) {
-        console.error(`Error verifying user ${user.alias}:`, error);
+        console.error(
+          `Error verifying user ${user.alias} (DID: ${user.did}):`,
+          error
+        );
 
         setUsers((prevUsers) =>
-          prevUsers.map((u, index) => {
-            if (index === i) {
+          prevUsers.map((u) => {
+            if (u.did === user.did) {
               return {
                 ...u,
                 session: {
@@ -247,6 +258,25 @@ const TestDashboard = () => {
     setLongestVerifyTime(longestTime);
 
     console.log("Verification complete. Updated users:", users);
+  };
+
+  const handleSaveUsers = () => {
+    const blob = new Blob([JSON.stringify(users, null, 2)], {
+      type: "application/json",
+    });
+    FileSaver.saveAs(blob, "users.json");
+  };
+
+  const handleLoadUsers = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const loadedUsers = JSON.parse(event.target.result);
+      setUsers(loadedUsers);
+    };
+    reader.readAsText(file);
   };
 
   const avgRegisterTime = totalRegisterTime / generateUsers;
@@ -385,6 +415,24 @@ const TestDashboard = () => {
               </span>
             </p>
           </div>
+        </div>
+
+        <div className="p-6 bg-white rounded-lg shadow-sm">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">
+            Save/Load Users
+          </h2>
+          <button
+            onClick={handleSaveUsers}
+            className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
+          >
+            Save Users
+          </button>
+          <input
+            type="file"
+            accept=".json"
+            onChange={handleLoadUsers}
+            className="mt-4"
+          />
         </div>
       </div>
     </Sidebar>
