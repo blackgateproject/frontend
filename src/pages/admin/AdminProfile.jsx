@@ -11,6 +11,7 @@ import {
 import React, { useEffect, useState } from "react";
 import sampleQR from "../../assets/sample-QR.png";
 import Sidebar from "../../components/Sidebar";
+import { connectorHost, connectorPort } from "../../utils/readEnv";
 
 const AdminProfile = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,13 +36,16 @@ const AdminProfile = () => {
       const accessToken = sessionStorage.getItem("access_token") || "";
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/admin/v1/profile", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        const response = await fetch(
+          `http://${connectorHost}:${connectorPort}/admin/v1/profile`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
         if (response.status === 401) {
           console.log("Redirecting to:", "/");
           window.location.href = "/";
@@ -100,7 +104,7 @@ const AdminProfile = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "http://localhost:8000/admin/v1/updateProfile",
+        `http://${connectorHost}:${connectorPort}/admin/v1/updateProfile`,
         {
           method: "POST",
           headers: {
@@ -141,7 +145,7 @@ const AdminProfile = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "http://localhost:8000/admin/v1/updateAuth",
+        `http://${connectorHost}:${connectorPort}/admin/v1/updateAuth`,
         {
           method: "POST",
           headers: {
@@ -237,7 +241,7 @@ const AdminProfile = () => {
 
   return (
     <Sidebar role={"admin"}>
-      <dialog id="qr-modal" className="modal">
+      <dialog id="qr-modal" className="modal backdrop-brightness-75">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Connect with your mobile app</h3>
           <p className="py-4">
@@ -247,7 +251,7 @@ const AdminProfile = () => {
           <img src={sampleQR} alt="QR Code" className="w-48 h-48 mx-auto" />
           <div className="modal-action">
             <button
-              className="btn"
+              className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
               onClick={() => document.getElementById("qr-modal").close()}
             >
               Done
@@ -256,7 +260,11 @@ const AdminProfile = () => {
         </div>
       </dialog>
 
-      <dialog id="password-modal" className="modal" open={isPasswordModalOpen}>
+      <dialog
+        id="password-modal"
+        className="modal backdrop-brightness-75"
+        open={isPasswordModalOpen}
+      >
         <form className="modal-box" onSubmit={handleSubmit}>
           <h3 className="font-bold text-lg">Enter Wallet Password</h3>
           <input
@@ -269,8 +277,8 @@ const AdminProfile = () => {
           />
           <div className="modal-action">
             <button
-              type="button"
-              className="btn"
+              type="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
+              className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
               onClick={() => {
                 setIsPasswordModalOpen(false);
                 setWalletPassword("");
@@ -280,7 +288,7 @@ const AdminProfile = () => {
             </button>
             <button
               type="submit"
-              className="btn btn-primary"
+              className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
               disabled={isLoadingWallet}
             >
               {isLoadingWallet ? (
@@ -305,7 +313,7 @@ const AdminProfile = () => {
             <input
               type="text"
               placeholder="Search"
-              className="input input-bordered w-60 pl-10 rounded-2xl bg-[#ffffff] text-gray-500 border-none shadow-sm"
+              className="input input-bordered w-60 pl-10 rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
             />
           </div>
         </div>
@@ -318,7 +326,7 @@ const AdminProfile = () => {
               {editingPersonal ? (
                 <div className="space-x-2">
                   <button
-                    className="btn bg-gray-500 hover:bg-gray-600 text-base-100 p-2 rounded-2xl px-4"
+                    className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
                     onClick={() => {
                       setEditingPersonal(false);
                       setEditForm({ ...profile });
@@ -464,7 +472,7 @@ const AdminProfile = () => {
               {editingAuth ? (
                 <div className="space-x-2">
                   <button
-                    className="btn bg-gray-500 hover:bg-gray-600 text-base-100 p-2 rounded-2xl px-4"
+                    className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
                     onClick={() => {
                       setEditingAuth(false);
                       setAuthForm({

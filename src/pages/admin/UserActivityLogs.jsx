@@ -2,7 +2,7 @@ import { Search } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import UserActivity from "../../components/UserActivity";
-
+import { connectorHost, connectorPort } from "../../utils/readEnv";
 const UserActivityLogs = () => {
   const accessToken = sessionStorage.getItem("access_token") || "";
 
@@ -15,7 +15,7 @@ const UserActivityLogs = () => {
     const fetchUserActivities = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8000/admin/v1/user-activity-logs",
+          `http://${connectorHost}:${connectorPort}/admin/v1/user-activity-logs`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -31,7 +31,7 @@ const UserActivityLogs = () => {
         const activities = await response.json();
 
         const userResponse = await fetch(
-          "http://localhost:8000/admin/v1/getAllUsers",
+          `http://${connectorHost}:${connectorPort}/admin/v1/getAllUsers`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -103,7 +103,7 @@ const UserActivityLogs = () => {
           <select
             value={filterType}
             onChange={handleFilterTypeChange}
-            className="select select-bordered rounded-2xl bg-white text-gray-500 border-none shadow-sm"
+            className="select select-bordered rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
           >
             <option value="All">All Types</option>
             <option value="Login">Login</option>
@@ -121,10 +121,12 @@ const UserActivityLogs = () => {
           <select
             value={sortOrder}
             onChange={handleSortOrderChange}
-            className="select select-bordered rounded-2xl bg-white text-gray-500 border-none shadow-sm"
+            className="select select-bordered rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
           >
             <option value="desc">Newest First</option>
             <option value="asc">Oldest First</option>
+            <option value="Last 24 hrs">Last 24 hrs</option>
+            <option value="Last 30 Days">Last 30 Days</option>
           </select>
 
           {/* Search Input */}
@@ -138,7 +140,7 @@ const UserActivityLogs = () => {
               placeholder="Search"
               value={searchQuery}
               onChange={handleSearchChange}
-              className="input input-bordered lg:w-60 w-full pl-10 rounded-2xl bg-white text-gray-500 border-none shadow-sm"
+              className="input input-bordered lg:w-60 w-full pl-10 rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
             />
           </div>
         </div>

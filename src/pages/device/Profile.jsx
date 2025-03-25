@@ -9,38 +9,18 @@ import {
   X,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { QRCode } from "react-qrcode-logo";
-import { useNavigate } from "react-router-dom";
+import sampleQR from "../../assets/sample-QR.png";
 import Sidebar from "../../components/Sidebar";
 import { connectorHost, connectorPort } from "../../utils/readEnv";
-const UserProfile = () => {
-  const navigate = useNavigate();
+
+const AdminProfile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [editingPersonal, setEditingPersonal] = useState(false);
   const [editingAuth, setEditingAuth] = useState(false);
   const [errors, setErrors] = useState({});
-  const [qrCode, setQrCode] = useState("0xScanYourPrivateKey");
   const [account, setAccount] = useState(null);
   const [didDetails, setDidDetails] = useState(null);
   const [wallet, setWallet] = useState(null);
-  const logoSize = 192;
-
-  const [profile, setProfile] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    passwordSet: true,
-    twoFactorAuth: false,
-  });
-
-  const [editForm, setEditForm] = useState({ ...profile });
-  const [authForm, setAuthForm] = useState({
-    newPassword: "",
-    confirmPassword: "",
-    twoFactorAuth: profile.twoFactorAuth,
-  });
-
   const [walletPassword, setWalletPassword] = useState("");
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isLoadingWallet, setIsLoadingWallet] = useState(false);
@@ -48,36 +28,47 @@ const UserProfile = () => {
     !!localStorage.getItem("encryptedWallet")
   );
 
+  const [profile, setProfile] = useState({});
+
   useEffect(() => {
-    const fetchUserProfile = async () => {
+    const fetchAdminProfile = async () => {
+      setIsLoading(true);
       const accessToken = sessionStorage.getItem("access_token") || "";
 
-      setIsLoading(true);
       try {
-        const response = await fetch(`http://${connectorHost}:${connectorPort}/user/v1/profile`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        const response = await fetch(
+          `http://${connectorHost}:${connectorPort}/admin/v1/profile`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
         if (response.status === 401) {
           console.log("Redirecting to:", "/");
           window.location.href = "/";
           return;
         }
-        const userData = await response.json();
-        setProfile(userData);
+        const adminData = await response.json();
+        setProfile(adminData);
       } catch (error) {
-        console.error("Error fetching user profile:", error);
-        // navigate("/");
+        console.error("Error fetching admin profile:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchUserProfile();
-  }, [navigate]);
+    fetchAdminProfile();
+  }, []);
+
+  const [editForm, setEditForm] = useState({ ...profile });
+  const [authForm, setAuthForm] = useState({
+    newPassword: "",
+    confirmPassword: "",
+    twoFactorAuth: profile.twoFactorAuth,
+  });
 
   // Validation functions
   const validatePersonal = () => {
@@ -102,6 +93,8 @@ const UserProfile = () => {
 
   // Save handlers with dummy API calls
   const handleSavePersonal = async () => {
+    const accessToken = sessionStorage.getItem("access_token") || "";
+
     const validationErrors = validatePersonal();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -110,46 +103,39 @@ const UserProfile = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`http://${connectorHost}:${connectorPort}/auth/v1/editUser`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(editForm),
-      });
-      const updatedUser = await response.json();
-      setProfile(updatedUser);
+      const response = await fetch(
+        `http://${connectorHost}:${connectorPort}/admin/v1/updateProfile`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(editForm),
+        }
+      );
+      if (response.status === 401) {
+        console.log("Redirecting to:", "/");
+        window.location.href = "/";
+        return;
+      }
+
+      if (!response.ok) throw new Error("Failed to update profile");
+
+      setProfile(editForm);
       setEditingPersonal(false);
       setErrors({});
-      window.location.reload(); // Refresh the page
     } catch (error) {
-      console.error("Error editing user:", error);
+      console.error("Error updating profile:", error);
+      setErrors({ submit: "Failed to update profile" });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleEnable2FA = async () => {
-    try {
-      const response = await fetch(`http://${connectorHost}:${connectorPort}/user/v1/enable-2fa`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
-        },
-        body: JSON.stringify({ user_id: profile.id }),
-      });
-      const data = await response.json();
-      const uuid = sessionStorage.getItem("uuid"); // Get the UUID from sessionStorage
-      console.log("2FA enabled:", data.private_key + "\n" + data.public_key);
-      setQrCode(JSON.stringify({ ...data, uuid })); // Update QR code value with UUID
-      document.getElementById("qr-modal").showModal();
-    } catch (error) {
-      console.error("Error enabling 2FA:", error);
-    }
-  };
-
   const handleSaveAuth = async () => {
+    const accessToken = sessionStorage.getItem("access_token") || "";
+
     const validationErrors = validateAuth();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -158,16 +144,25 @@ const UserProfile = () => {
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch(
+        `http://${connectorHost}:${connectorPort}/admin/v1/updateAuth`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(authForm),
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to update authentication");
+
       setProfile((prev) => ({
         ...prev,
         passwordSet: authForm.newPassword ? true : prev.passwordSet,
         twoFactorAuth: authForm.twoFactorAuth,
       }));
-      if (authForm.twoFactorAuth) {
-        await handleEnable2FA();
-      }
       setEditingAuth(false);
       setAuthForm({
         newPassword: "",
@@ -175,48 +170,11 @@ const UserProfile = () => {
         twoFactorAuth: authForm.twoFactorAuth,
       });
       setErrors({});
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleEditUser = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`http://${connectorHost}:${connectorPort}/auth/v1/editUser`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(editForm),
-      });
-      const updatedUser = await response.json();
-      setProfile(updatedUser);
-      setEditingPersonal(false);
-      setErrors({});
     } catch (error) {
-      console.error("Error editing user:", error);
+      console.error("Error updating authentication:", error);
+      setErrors({ submit: "Failed to update authentication" });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const connectWallet = async () => {
-    try {
-      if (window.ethereum) {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const signer = await provider.getSigner();
-        const address = await signer.getAddress();
-        setAccount(address);
-        console.log("Connected address:", address); // Retrieve and log the Ethereum address
-        const did = `did:ethr:${address}`;
-        console.log("Generated DID:", did); // Generate and log the DID
-      } else {
-        alert("Please install MetaMask!");
-      }
-    } catch (err) {
-      console.error("Error in connectWallet:", err);
-      alert("Failed to connect wallet.");
     }
   };
 
@@ -282,7 +240,7 @@ const UserProfile = () => {
   };
 
   return (
-    <Sidebar role={"user"}>
+    <Sidebar role={"device"}>
       <dialog id="qr-modal" className="modal backdrop-brightness-75">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Connect with your mobile app</h3>
@@ -290,20 +248,10 @@ const UserProfile = () => {
             Scan this code with the BlackGate mobile app on your phone to enable
             2-Factor Authentication.
           </p>
-          <div className="flex justify-center">
-            <QRCode
-              value={qrCode}
-              // logoImage={logo}
-              // removeQrCodeBehindLogo={true}
-              size={logoSize * 1.5}
-              // logoHeight={logoSize * 0.4}
-              // logoWidth={logoSize * 0.4}
-            />
-          </div>
-          <p className="text-center mt-4 break-words">{qrCode}</p>
+          <img src={sampleQR} alt="QR Code" className="w-48 h-48 mx-auto" />
           <div className="modal-action">
             <button
-              className="btn"
+              className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
               onClick={() => document.getElementById("qr-modal").close()}
             >
               Done
@@ -312,20 +260,24 @@ const UserProfile = () => {
         </div>
       </dialog>
 
-      <dialog id="password-modal" className="modal backdrop-brightness-75" open={isPasswordModalOpen}>
+      <dialog
+        id="password-modal"
+        className="modal backdrop-brightness-75"
+        open={isPasswordModalOpen}
+      >
         <form className="modal-box" onSubmit={handleSubmit}>
           <h3 className="font-bold text-lg">Enter Wallet Password</h3>
           <input
             id="wallet-password-input"
             type="password"
-            value={walletPassword}
+            // value={walletPassword}
             onChange={(e) => setWalletPassword(e.target.value)}
             className="input input-bordered w-full mt-4"
             placeholder="Enter your wallet password"
           />
           <div className="modal-action">
             <button
-              type="button"
+              type="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
               className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
               onClick={() => {
                 setIsPasswordModalOpen(false);
@@ -336,7 +288,7 @@ const UserProfile = () => {
             </button>
             <button
               type="submit"
-              className="btn bg-primary/75 hover:bg-primary text-base-100"
+              className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
               disabled={isLoadingWallet}
             >
               {isLoadingWallet ? (
@@ -614,14 +566,13 @@ const UserProfile = () => {
                       <input
                         type="checkbox"
                         checked={authForm.twoFactorAuth}
-                        onChange={async (e) => {
+                        onChange={(e) => {
                           setAuthForm({
                             ...authForm,
                             twoFactorAuth: e.target.checked,
                           });
-                          if (e.target.checked) {
-                            await handleEnable2FA();
-                          }
+                          if (e.target.checked)
+                            document.getElementById("qr-modal").showModal();
                         }}
                         className="checkbox checkbox-primary"
                       />
@@ -643,12 +594,6 @@ const UserProfile = () => {
                 onClick={handleOpenPasswordModal}
               >
                 {walletExists ? "Load Wallet" : "Create Wallet"}
-              </button>
-              <button
-                className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4 ml-2"
-                onClick={connectWallet}
-              >
-                Connect Wallet
               </button>
             </div>
             <div className="flex gap-2">
@@ -704,4 +649,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default AdminProfile;

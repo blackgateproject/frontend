@@ -1,19 +1,20 @@
-import { ActivityIcon, CheckSquare, Search, Ticket, Users } from "lucide-react";
+import { ActivityIcon, CheckSquare, Search, Users } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import UserActivity from "../../components/UserActivity";
-
+import { connectorHost, connectorPort } from "../../utils/readEnv";
+const grafanaUrl = `http://localhost:3000/d/cegcehlfn4740c/admin-dash-stats?orgId=1&from=2025-03-18T17:00:00.000Z&to=2025-03-19T07:00:00.000Z&timezone=browser&kiosk&refresh=5s`;
 const Dashboard = () => {
   const accessToken = sessionStorage.getItem("access_token") || "";
   const [stats, setStats] = useState({
     totalUsers: 0,
     onlineUsers: 0,
-    pendingTickets: 0,
+    // pendingrequests: 0,
   });
 
   const [loading, setLoading] = useState(true);
-  const [pendingTickets, setPendingTickets] = useState(0);
+  const [pendingrequests, setPendingrequests] = useState(0);
   const [userActivities, setUserActivities] = useState([]);
 
   useEffect(() => {
@@ -21,7 +22,7 @@ const Dashboard = () => {
       setLoading(true);
       try {
         const response = await fetch(
-          "http://localhost:8000/admin/v1/dashboard",
+          `http://${connectorHost}:${connectorPort}/admin/v1/dashboard`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -40,7 +41,7 @@ const Dashboard = () => {
         setStats({
           totalUsers: data.totalUsers,
           onlineUsers: data.onlineUsers,
-          pendingTickets: data.pendingTickets,
+          pendingrequests: data.pendingrequests,
         });
         setUserActivities(data.userActivities);
       } catch (error) {
@@ -68,7 +69,7 @@ const Dashboard = () => {
             <input
               type="text"
               placeholder="Search"
-              className="input input-bordered w-60 pl-10 rounded-2xl bg-[#FFFFFF] text-gray-500 border-none shadow-sm"
+              className="input input-bordered w-60 pl-10 rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
             />
           </div>
         </div>
@@ -97,19 +98,22 @@ const Dashboard = () => {
               <p className="text-gray-500">Users Online</p>
             </div>
           </div>
-          <div className="bg-base-100 lg:w-48 rounded-2xl shadow-md p-6 flex items-center justify-between">
-            <div>
-              <div className="flex gap-3 items-center">
-                <Ticket className="text-primary" size={30} />
-                <h2 className="text-4xl font-bold text-primary">
-                  {loading ? "..." : pendingTickets}
-                </h2>
-              </div>
-              <p className="text-gray-500">Pending Tickets</p>
-            </div>
-          </div>
         </div>
 
+        {/* Grafana Dashboard Embed */}
+        <div className="col-span-12 p-6">
+          {/* Heading */}
+          {/* <h1 className="text-3xl font-bold text-[#333333] mb-4">Dashboard</h1> */}
+
+          <iframe
+            title="grafana-dashboard"
+            // src="http://arborjs.org"
+            src={grafanaUrl}
+            width="100%"
+            height="900px"
+            frameBorder="0"
+          />
+        </div>
         {/* User Activity Section */}
         <div className="bg-base-300 rounded-2xl shadow-md max-h-[34rem] overflow-y-scroll p-6 mb-4">
           <div className="w-full flex justify-between items-center my-3 mb-5">
@@ -118,7 +122,7 @@ const Dashboard = () => {
             </h2>
             <Link
               to="/admin/user-activity"
-              className="btn btn-primary flex items-center gap-2"
+              className="btn bg-primary/75 hover:bg-primary text-base-100 flex items-center gap-2"
             >
               <ActivityIcon className="w-5 h-5" />
               View All

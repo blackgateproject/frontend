@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import React, { useState } from "react";
 import Sidebar from "../../components/Sidebar";
-
+import { connectorHost, connectorPort } from "../../utils/readEnv";
 const Help = () => {
   const [ticketTitle, setTicketTitle] = useState("");
   const [ticketDescription, setTicketDescription] = useState("");
@@ -16,7 +16,7 @@ const Help = () => {
     try {
       const accessToken = sessionStorage.getItem("access_token") || "";
 
-      const response = await fetch("http://127.0.0.1:8000/user/v1/tickets", {
+      const response = await fetch(`http://${connectorHost}:${connectorPort}/user/v1/requests`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -65,25 +65,25 @@ const Help = () => {
             <input
               type="text"
               placeholder="Search"
-              className="input input-bordered w-60 pl-10 rounded-2xl bg-[#ffffff] text-gray-500 border-none shadow-sm"
+              className="input input-bordered w-60 pl-10 rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
             />
           </div>
         </div>
 
         {/* Ticket Form Card */}
-        <div className="bg-[#F8F5F9] rounded-2xl shadow-md p-6">
+        <div className="bg-base-300 rounded-2xl shadow-md p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
               placeholder="Ticket Title"
-              className="input input-bordered w-full rounded-2xl bg-[#ffffff] text-gray-700 p-4"
+              className="input input-bordered w-full rounded-2xl bg-base-100 text-gray-700 p-4"
               value={ticketTitle}
               onChange={(e) => setTicketTitle(e.target.value)}
               required
             />
             <textarea
               placeholder="Ticket Description"
-              className="textarea textarea-bordered w-full rounded-2xl bg-[#ffffff] text-gray-700 p-4"
+              className="textarea textarea-bordered w-full rounded-2xl bg-base-100 text-gray-700 p-4"
               value={ticketDescription}
               onChange={(e) => {
                 setTicketDescription(e.target.value);

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Loader from "../../components/Loader"; // Import the Loader component
 import Modal from "../../components/Modal";
 import Sidebar from "../../components/Sidebar";
+import { connectorHost, connectorPort } from "../../utils/readEnv"; // Import the URL and port from utils
 
 const AdminUsers = () => {
   const accessToken = sessionStorage.getItem("access_token") || "";
@@ -45,15 +46,18 @@ const AdminUsers = () => {
   const getUsers = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://127.0.0.1:8000/admin/v1/getUsers", {
-        headers: {
-          "content-type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await fetch(
+        `http://${connectorHost}:${connectorPort}/admin/v1/getUsers`,
+        {
+          headers: {
+            "content-type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
       if (response.status === 401) {
         console.log("Redirecting to:", "/");
-        window.location.href = "/"
+        window.location.href = "/";
         return;
       }
       const data = await response.json();
@@ -84,7 +88,7 @@ const AdminUsers = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/admin/v1/deleteUser/${userId}`,
+        `http://${connectorHost}:${connectorPort}/admin/v1/deleteUser/${userId}`,
         {
           method: "DELETE",
           headers: {
@@ -133,14 +137,17 @@ const AdminUsers = () => {
         ...selectedUser,
         ...editForm,
       };
-      const response = await fetch("http://127.0.0.1:8000/admin/v1/editUser", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(updatedUserData),
-      });
+      const response = await fetch(
+        `http://${connectorHost}:${connectorPort}/admin/v1/editUser`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(updatedUserData),
+        }
+      );
       if (response.status === 302) {
         const redirectUrl = response.headers.get("Location");
         window.location.href = redirectUrl;
@@ -188,7 +195,7 @@ const AdminUsers = () => {
               <input
                 type="text"
                 placeholder="Search"
-                className="input input-bordered w-60 pl-10 rounded-2xl bg-[#ffffff] text-gray-500 border-none shadow-sm"
+                className="input input-bordered w-60 pl-10 rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
               />
             </div>
           </div>

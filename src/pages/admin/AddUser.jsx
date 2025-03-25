@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
+import { connectorHost, connectorPort } from "../../utils/readEnv";
 
 const AddUser = () => {
   const [form, setForm] = useState({
@@ -44,14 +45,17 @@ const AddUser = () => {
     setIsLoading(true);
     try {
       const accessToken = sessionStorage.getItem("access_token") || "";
-      const response = await fetch("http://localhost:8000/admin/v1/addUser", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(form),
-      });
+      const response = await fetch(
+        `http://${connectorHost}:${connectorPort}/admin/v1/addUser`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(form),
+        }
+      );
       if (response.status === 401) {
         console.log("Redirecting to:", "/");
         window.location.href = "/";
@@ -203,7 +207,9 @@ const AddUser = () => {
           <div>
             <button
               type="submit"
-              className={`btn btn-primary w-full ${isLoading && "loading"}`}
+              className={`btn bg-primary/75 hover:bg-primary text-base-100 w-full ${
+                isLoading && "loading"
+              }`}
               disabled={isLoading}
             >
               Add User

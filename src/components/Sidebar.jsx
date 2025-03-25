@@ -2,9 +2,10 @@ import {
   ChartArea,
   ChevronLeft,
   ChevronRight,
-  HelpCircle,
   Home,
   LogOut,
+  LucideDatabase,
+  LucideNotepadTextDashed,
   Menu,
   Shapes,
   Ticket,
@@ -14,6 +15,8 @@ import {
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/logo.png";
+import { connectorHost, connectorPort } from "../utils/readEnv";
+
 
 const Sidebar = ({ role, children }) => {
   const location = useLocation();
@@ -21,35 +24,49 @@ const Sidebar = ({ role, children }) => {
 
   const adminLinks = [
     { name: "Dashboard", path: "/admin/dashboard", icon: <ChartArea /> },
+    { name: "Statistics", path: "/admin/grafana-dashboard", icon: <LucideDatabase />,},
     { name: "Applications", path: "/admin/applications", icon: <Shapes /> },
     { name: "Users", path: "/admin/users", icon: <Users /> },
-    { name: "Tickets", path: "/admin/tickets", icon: <Ticket /> },
+    { name: "Requests", path: "/admin/requests", icon: <Ticket /> },
     { name: "Profile", path: "/admin/profile", icon: <User /> },
   ];
 
   const userLinks = [
-    { name: "Home", path: "/user/dashboard", icon: <Home /> },
-    { name: "Help", path: "/user/help", icon: <HelpCircle /> },
+    { name: "Dashboard", path: "/user/grafana-dashboard", icon: <LucideDatabase /> },
+    { name: "Applications", path: "/user/dashboard", icon: <Home /> },
+    // { name: "Help", path: "/user/help", icon: <HelpCircle /> },
     { name: "Profile", path: "/user/profile", icon: <User /> },
   ];
 
-  const links = role === "admin" ? adminLinks : userLinks;
+  const devicelinks = [
+    { name: "Dashboard", path: "/device/grafana-dashboard", icon: <LucideDatabase /> },
+    // { name: "Applications", path: "/device/dashboard", icon: <Home /> },
+    // { name: "Help", path: "/user/help", icon: <HelpCircle /> },
+    { name: "Profile", path: "/device/profile", icon: <User /> },
+  ];
+
+  const testlinks = [
+    {name: "Dashboard", path: "/test/home", icon: <LucideNotepadTextDashed />}
+  ]
+
+  const links = role === "admin" ? adminLinks : role === "device" ? devicelinks : role === "test" ? testlinks : userLinks 
   const logoutPath = role === "admin" ? "/" : "/";
 
   const handleLogout = async () => {
     const accessToken = sessionStorage.getItem("access_token");
-    const uuid = sessionStorage.getItem("uuid");
+    const did = localStorage.getItem("did");
+    console.warn("Logging out\n", did);
     if (accessToken) {
-      await fetch("http://localhost:8000/auth/v1/logout", {
+      await fetch(`http://${connectorHost}:${connectorPort}/auth/v1/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ access_token: accessToken, uuid: uuid }),
+        body: JSON.stringify({ access_token: accessToken, did: did }),
       });
       sessionStorage.removeItem("access_token");
       sessionStorage.removeItem("refresh_token");
-      sessionStorage.removeItem("uuid");
+      // sessionStorage.removeItem("uuid");
     }
     window.location.href = logoutPath;
   };

@@ -13,6 +13,8 @@ import ApplicationsGrid from '../../components/ApplicationsGrid';
 
 const Applications = () => {
   const [searchQuery, setSearchQuery] = useState('');
+
+
   // Dummy data for applications (Replace this with backend data)
   const applications = [
     { name: 'LinkedIn', icon: linkedinLogo },
@@ -25,51 +27,40 @@ const Applications = () => {
     { name: 'Microsoft Powerpoint', icon: pp }
   ];
 
-  // Filter applications based on search query
-  const filteredApplications = applications.filter((app) =>
+   // Filter applications based on search query
+   const filteredApplications = applications.filter((app) =>
     app.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <Sidebar role={"admin"}>
-
-      <dialog id="connect-new-modal" className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Connect a new app to BlackGate</h3>
-          <p className="py-4">Select an app from the list below.</p>
-
-          <div className="modal-action">
-            <button className="btn" onClick={() => document.getElementById('connect-new-modal').close()} >Cancel</button>
-            <button className="btn bg-primary/75 hover:bg-primary text-base-100" >Connect</button>
-          </div>
-        </div>
-      </dialog>
+    <Sidebar role={"user"}>
 
       {/* Main Content */}
       <div className="col-span-12">
         {/* Header Row */}
-        <div className="flex justify-between lg:flex-row flex-col lg:items-center mb-6">
-          <h1 className="text-3xl font-bold text-[#333333]">Applications</h1>
-          <div className="lg:mt-0 mt-5 flex items-center space-x-4">
-            <button className="btn bg-primary/75 hover:bg-primary text-base-100 rounded-2xl px-4" onClick={() => document.getElementById('connect-new-modal').showModal()}  >+ Add App</button>
-            <div className="relative w-full">
-              {/* Search Icon inside the input field */}
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="w-5 h-5 text-gray-500" />
-              </span>
-              <input
+        <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-[#333333]">Applications</h1>
+          <div className="flex gap-3">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                {/* Search Icon inside the input field */}
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="w-5 h-5 text-gray-500" />
+                </span>
+                <input
                   type="text"
                   placeholder="Search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="input input-bordered w-full md:w-60 pl-10 rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
+                  className="input input-bordered w-60 pl-10 rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
                 />
+              </div>
             </div>
           </div>
         </div>
 
-          {/* Applications Grid */}
-          {filteredApplications.length > 0 ? (
+        {/* Applications Grid */}
+        {filteredApplications.length > 0 ? (
           <ApplicationsGrid applications={filteredApplications} />
         ) : (
           <div className="text-center text-gray-500 mt-10">
