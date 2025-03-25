@@ -19,5 +19,4 @@ export default defineConfig({
       include: ["@digitalcredentials/open-badges-context"],
     },
   },
-  base: "/frontend/",
 });
