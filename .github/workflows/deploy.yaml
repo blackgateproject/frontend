@@ -46,4 +46,4 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       with:
         folder: dist  # Folder to deploy (Vite output folder)
-        token: ${{ secrets.all_access }}  # Uses the all_access token for deployment
+        token: ${{ secrets.GITHUB_TOKEN }}  # Uses the GitHub token for deployment
