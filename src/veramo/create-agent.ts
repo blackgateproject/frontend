@@ -1,7 +1,5 @@
 import { createAgent, IDIDManager, IKeyManager, IResolver } from "@veramo/core";
-import {
-  ICredentialIssuerLD
-} from "@veramo/credential-ld";
+import { ICredentialIssuerLD } from "@veramo/credential-ld";
 import { CredentialPlugin, ICredentialIssuer } from "@veramo/credential-w3c";
 import { DIDManager, MemoryDIDStore } from "@veramo/did-manager";
 import { EthrDIDProvider } from "@veramo/did-provider-ethr";
@@ -14,24 +12,20 @@ import {
 import { KeyManagementSystem } from "@veramo/kms-local";
 import { Resolver } from "did-resolver";
 import { getResolver as ethrDidResolver } from "ethr-did-resolver";
+import {
+  blockchainChainID,
+  blockchainHost,
+  didRegistryAddress,
+} from "../utils/readEnv.js";
 
-// import ContractABI from "../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json" with { type: "json" };
-import ContractABI from "../../deployments-zk/zkSyncSepoliaTestnet/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json" with { type: "json" };
-// import ContractABI from "../../../blockchain/deployments-zk/dockerizedNode/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json" with { type: "json" };
 import { JsonRpcProvider } from "ethers";
 
-
-{/*
+{
+  /*
   Make sure to copy both the contract ABI and the address to contract
-  */}
-
-interface ImportMetaEnv {
-  readonly VITE_INFURA_PROJECT_ID: string;
+  */
 }
 
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
 // export const MY_CUSTOM_CONTEXT_URI = "https://example.com/custom/context";
 
 // const extraContexts: Record<string, ContextDoc> = {};
@@ -40,9 +34,9 @@ interface ImportMeta {
 //     nothing: "https://example.com/custom/context",
 //   },
 // };
-const BLOCKCHAIN_RPC_PROVIDER = import.meta.env.VITE_BLOCKCHAIN_RPC_PROVIDER || null;
-const CHAIN_ID = import.meta.env.VITE_CHAIN_ID || null;
-console.log("Loaded BLOCKCHAIN_RPC_PROVIDER:", BLOCKCHAIN_RPC_PROVIDER);
+console.log("Loaded BLOCKCHAIN_RPC_PROVIDER:", blockchainHost);
+console.log("Loaded CHAIN_ID:", blockchainChainID);
+console.log("Loaded ContractAddr: ", didRegistryAddress);
 
 export const localAgent = createAgent<
   IResolver &
@@ -80,11 +74,16 @@ export const localAgent = createAgent<
               // registry: ContractABI.entries[0].address,
               // // [NOTE::] Use this for dokcerized zksync
               provider: new JsonRpcProvider(
-                BLOCKCHAIN_RPC_PROVIDER, CHAIN_ID),
-              registry: ContractABI.entries[0].address,
-            }
-              
-          ]
+                blockchainHost,
+                300
+              ),
+              // provider: new JsonRpcProvider(
+              //   blockchainHost as string,
+              //   blockchainChainID as number
+              // ),
+              registry: didRegistryAddress as string,
+            },
+          ],
         }),
       },
     }),
@@ -92,16 +91,20 @@ export const localAgent = createAgent<
       resolver: new Resolver({
         ...ethrDidResolver({
           // infuraProjectId: INFURA_PROJECT_ID,
-          // provider: 
+          // provider:
           // provider: new JsonRpcProvider("https://zksync-sepolia.infura.io/v3/" + INFURA_PROJECT_ID) as any,
           // registry: ContractABI.entries[0].address,
           // chainId: 300,
           // name: "blackgate",
-          provider: new JsonRpcProvider(BLOCKCHAIN_RPC_PROVIDER) as any,
-          registry: ContractABI.entries[0].address,
-          chainId: CHAIN_ID,
+          // provider: new JsonRpcProvider(blockchainHost as string) as any,
+          provider: new JsonRpcProvider(
+            blockchainHost as string,
+          ) as any,
+          registry: didRegistryAddress as string,
+          chainId: 300,
+          // chainId: blockchainChainID as number,
           name: "blackgate",
-        }) // Add other resolvers if needed
+        }), // Add other resolvers if needed
       }),
     }),
     new CredentialPlugin(),

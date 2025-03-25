@@ -1,14 +1,15 @@
 import { ethers } from "ethers";
 import { Provider, Wallet } from "zksync-web3";
 
-{ /*
+{
+  /*
   Make sure ContractABI points to the contract ABI, 
   for dev, it is created+stored in the blockchain repo after contract compiles+deploys
   for prod, it will be stored in the /contracts folder
-  */}
+  */
+}
 // import ContractABI from "../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/Merkle.sol/Merkle.json";
-import ContractABI from "../../deployments-zk/zkSyncSepoliaTestnet/contracts/Merkle.sol/Merkle.json";
-
+// import ContractABI from "../../deployments-zk/zkSyncSepoliaTestnet/contracts/Merkle.sol/Merkle.json";
 
 export const providerInstance = async (providerType) => {
   // Use "ethers" for Ethereum and "zksync" for zkSync
@@ -22,15 +23,15 @@ export const providerInstance = async (providerType) => {
     return provider;
   }
 };
-export const contractInstance = async () => {
-  const provider = await providerInstance("ethers");
-  const contractAddress = ContractABI.entries[0].address;
-  const contractABI = ContractABI.abi;
-  console.log("Contract Address:", contractAddress);
-  // console.log("Contract ABI:", contractABI);
-  const contract = new ethers.Contract(contractAddress, contractABI, provider);
-  return contract;
-};
+// export const contractInstance = async () => {
+//   const provider = await providerInstance("ethers");
+//   const contractAddress = merkleAddress;
+//   const contractABI = ContractABI.abi;
+//   console.log("Contract Address:", contractAddress);
+//   // console.log("Contract ABI:", contractABI);
+//   const contract = new ethers.Contract(contractAddress, contractABI, provider);
+//   return contract;
+// };
 
 export const fetchBalance = async (wallet, setBalance) => {
   if (wallet) {
@@ -43,7 +44,7 @@ export const fetchBalance = async (wallet, setBalance) => {
 export const createNewWallet = async (
   walletPassword,
   setWalletExists,
-  setWallet,
+  setWallet
   // setAccount
 ) => {
   console.log("Creating new wallet with password:", walletPassword);
