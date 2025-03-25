@@ -16,7 +16,8 @@ import { Resolver } from "did-resolver";
 import { getResolver as ethrDidResolver } from "ethr-did-resolver";
 
 // import ContractABI from "../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json" with { type: "json" };
-import ContractABI from "../../../blockchain/deployments-zk/dockerizedNode/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json" with { type: "json" };
+import ContractABI from "../../deployments-zk/zkSyncSepoliaTestnet/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json" with { type: "json" };
+// import ContractABI from "../../../blockchain/deployments-zk/dockerizedNode/contracts/EthereumDIDRegistry.sol/EthereumDIDRegistry.json" with { type: "json" };
 import { JsonRpcProvider } from "ethers";
 
 
