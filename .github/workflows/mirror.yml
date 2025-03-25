@@ -1,0 +1,22 @@
+name: Mirror to bg-frontend
+
+on:
+  push:
+    branches:
+      - "*"
+    tags:
+      - "*"
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Mirror to bg-frontend
+        run: |
+          git remote add bg-frontend https://github.com/4w4i5/bg-frontend.git
+          git push bg-frontend --all
+          git push bg-frontend --tags
