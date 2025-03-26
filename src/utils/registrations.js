@@ -6,7 +6,7 @@ import {
   importEthrDID,
   verifyDIDDoc,
 } from "./veramo";
-
+console.log(`BACKEND URL: ${connectorURL}`);
 // Generate DID
 export const generateDID = async (wallet, agent) => {
   if (!wallet) {
