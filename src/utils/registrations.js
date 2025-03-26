@@ -1,5 +1,5 @@
 import { SigningKey } from "ethers";
-import { connectorURL } from "../../utils/readEnv";
+import { connectorURL } from "../utils/readEnv";
 import { logUserInfo } from "./secUtils";
 import {
   createLDCredentialWithEthrIssuer,

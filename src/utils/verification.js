@@ -1,4 +1,4 @@
-import { connectorURL } from "../../utils/readEnv";
+import { connectorURL } from "../utils/readEnv";
 
 export const verifyMerkleProof = async (
   setIsLoadingTx,
