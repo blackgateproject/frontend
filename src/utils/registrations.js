@@ -1,5 +1,5 @@
 import { SigningKey } from "ethers";
-import { connectorHost, connectorPort } from "./readEnv";
+import { connectorURL } from "../../utils/readEnv";
 import { logUserInfo } from "./secUtils";
 import {
   createLDCredentialWithEthrIssuer,
@@ -110,16 +110,13 @@ export const submitDIDVC = async (wallet, did, signed_vc, formData) => {
   };
   console.log("Data:", data);
 
-  const response = await fetch(
-    `http://${connectorHost}:${connectorPort}/auth/v1/register`,
-    {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }
-  );
+  const response = await fetch(`${connectorURL}/auth/v1/register`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
 
   console.log("Attempting to send data to connector");
 
@@ -141,9 +138,7 @@ export const submitDIDVC = async (wallet, did, signed_vc, formData) => {
 export const pollForRequestStatus = async (walletAddress) => {
   console.log("Polling for request status...");
 
-  return fetch(
-    `http://${connectorHost}:${connectorPort}/auth/v1/poll/${walletAddress}`
-  )
+  return fetch(`${connectorURL}/auth/v1/poll/${walletAddress}`)
     .then((response) => {
       if (response.ok) {
         return response.json();

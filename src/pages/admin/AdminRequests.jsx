@@ -14,7 +14,7 @@ import React, { useEffect, useState } from "react";
 import Loader from "../../components/Loader";
 import Modal from "../../components/Modal";
 import Sidebar from "../../components/Sidebar";
-import { connectorHost, connectorPort } from "../../utils/readEnv";
+import { connectorURL } from "../../utils/readEnv";
 const Requests = () => {
   // Preprocess the data to generat
 
@@ -51,14 +51,11 @@ const Requests = () => {
     try {
       const accessToken = sessionStorage.getItem("access_token") || "";
 
-      const response = await fetch(
-        `http://${connectorHost}:${connectorPort}/admin/v1/requests`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await fetch(`${connectorURL}/admin/v1/requests`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       if (response.status === 401) {
         console.log("Redirecting to:", "/");
         window.location.href = "/";
@@ -91,7 +88,7 @@ const Requests = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://${connectorHost}:${connectorPort}/admin/v1/requests/${requestId}/approve`,
+        `${connectorURL}/admin/v1/requests/${requestId}/approve`,
         {
           method: "POST",
           headers: {
@@ -121,7 +118,7 @@ const Requests = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://${connectorHost}:${connectorPort}/admin/v1/requests/${requestId}/reject`,
+        `${connectorURL}/admin/v1/requests/${requestId}/reject`,
         {
           method: "POST",
           headers: {

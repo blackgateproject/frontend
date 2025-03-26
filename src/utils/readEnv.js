@@ -29,6 +29,11 @@ export const connectorHost = import.meta.env.VITE_CONNECTOR_HOST;
 export const connectorPort = Number(import.meta.env.VITE_CONNECTOR_PORT);
 
 /**
+ * @type {string} Public URL of connector
+ */
+export const connectorURL = import.meta.env.VITE_CONNECTOR_PUBLIC_URL;
+
+/**
  * @type {string} Host address for Grafana
  */
 export const grafanaHost = import.meta.env.VITE_GRAFANA_HOST;

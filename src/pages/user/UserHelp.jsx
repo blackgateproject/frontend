@@ -1,7 +1,8 @@
 import { Search } from "lucide-react";
 import React, { useState } from "react";
 import Sidebar from "../../components/Sidebar";
-import { connectorHost, connectorPort } from "../../utils/readEnv";
+import { connectorURL } from "../../utils/readEnv";
+
 const Help = () => {
   const [ticketTitle, setTicketTitle] = useState("");
   const [ticketDescription, setTicketDescription] = useState("");
@@ -16,7 +17,7 @@ const Help = () => {
     try {
       const accessToken = sessionStorage.getItem("access_token") || "";
 
-      const response = await fetch(`http://${connectorHost}:${connectorPort}/user/v1/requests`, {
+      const response = await fetch(`${connectorURL}/user/v1/requests`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

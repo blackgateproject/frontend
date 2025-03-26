@@ -1,4 +1,4 @@
-import { connectorHost, connectorPort } from "./readEnv";
+import { connectorURL } from "../../utils/readEnv";
 
 export const verifyMerkleProof = async (
   setIsLoadingTx,
@@ -20,16 +20,13 @@ export const verifyMerkleProof = async (
       did: did,
     };
     console.log("sending data:", creds);
-    const response = await fetch(
-      `http://${connectorHost}:${connectorPort}/auth/v1/verify`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(creds),
-      }
-    );
+    const response = await fetch(`${connectorURL}/auth/v1/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(creds),
+    });
 
     const data = await response.json();
 
@@ -99,16 +96,13 @@ export const signChallenge = async (wallet, challenge, navigate) => {
   console.log("Signed Challenge:", signature);
 
   // Send signed challenge back to Connector
-  const response = await fetch(
-    `http://${connectorHost}:${connectorPort}/connector/finalize`,
-    {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({ signature }),
-    }
-  );
+  const response = await fetch(`${connectorURL}/connector/finalize`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ signature }),
+  });
 
   if (response.ok) {
     const data = await response.json();

@@ -103,14 +103,15 @@ const LoginPage = () => {
       }
     } else {
       if (merkleHash && did) {
-      // if (merkleProof && merkleHash && did) {
+        // if (merkleProof && merkleHash && did) {
         // if (merkleProof && merkleHash && merkleRoot) {
         // Handle verification
         verifyMerkleProof(
           setIsLoadingTx,
           setCurrentStep,
           setErrorMessage,
-          setIsErrorModalOpen, navigate
+          setIsErrorModalOpen,
+          navigate
         );
       } else {
         // Regular registration flow
@@ -172,7 +173,8 @@ const LoginPage = () => {
                 setIsLoadingTx,
                 setCurrentStep,
                 setErrorMessage,
-                setIsErrorModalOpen, navigate
+                setIsErrorModalOpen,
+                navigate
               );
             }}
             className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-4`}

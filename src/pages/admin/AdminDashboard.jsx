@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import UserActivity from "../../components/UserActivity";
-import { connectorHost, connectorPort } from "../../utils/readEnv";
+import { connectorURL } from "../../utils/readEnv";
 const grafanaUrl = `http://localhost:3000/d/cegcehlfn4740c/admin-dash-stats?orgId=1&from=2025-03-18T17:00:00.000Z&to=2025-03-19T07:00:00.000Z&timezone=browser&kiosk&refresh=5s`;
 const Dashboard = () => {
   const accessToken = sessionStorage.getItem("access_token") || "";
@@ -21,14 +21,11 @@ const Dashboard = () => {
     const fetchDashboardStats = async () => {
       setLoading(true);
       try {
-        const response = await fetch(
-          `http://${connectorHost}:${connectorPort}/admin/v1/dashboard`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
+        const response = await fetch(`${connectorURL}/admin/v1/dashboard`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
         if (response.status === 401) {
           console.log("Redirecting to:", "/");
           window.location.href = "/";

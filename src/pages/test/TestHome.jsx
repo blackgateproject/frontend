@@ -1,9 +1,9 @@
 import { ethers } from "ethers";
+import FileSaver from "file-saver";
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import { useVeramoOperations } from "../../hooks/useVeramoOperations";
-import { connectorHost, connectorPort } from "../../utils/readEnv";
-import FileSaver from "file-saver";
+import { connectorURL } from "../../utils/readEnv";
 
 const TestDashboard = () => {
   const {
@@ -92,7 +92,7 @@ const TestDashboard = () => {
       const walletAddress = newWallet.address;
       try {
         const response = await fetch(
-          `http://${connectorHost}:${connectorPort}/auth/v1/pollTest/${walletAddress}`
+          `${connectorURL}/auth/v1/pollTest/${walletAddress}`
         );
 
         if (!response.ok) {
@@ -179,19 +179,16 @@ const TestDashboard = () => {
       );
 
       try {
-        const response = await fetch(
-          `http://${connectorHost}:${connectorPort}/auth/v1/verify`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              did: user.did,
-              merkleHash: user.merkle_hash,
-            }),
-          }
-        );
+        const response = await fetch(`${connectorURL}/auth/v1/verify`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            did: user.did,
+            merkleHash: user.merkle_hash,
+          }),
+        });
 
         if (!response.ok) {
           throw new Error(

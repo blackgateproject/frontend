@@ -15,16 +15,18 @@ import {
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { connectorHost, connectorPort } from "../utils/readEnv";
-
-
+import { connectorURL } from "../utils/readEnv";
 const Sidebar = ({ role, children }) => {
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const adminLinks = [
     { name: "Dashboard", path: "/admin/dashboard", icon: <ChartArea /> },
-    { name: "Statistics", path: "/admin/grafana-dashboard", icon: <LucideDatabase />,},
+    {
+      name: "Statistics",
+      path: "/admin/grafana-dashboard",
+      icon: <LucideDatabase />,
+    },
     { name: "Applications", path: "/admin/applications", icon: <Shapes /> },
     { name: "Users", path: "/admin/users", icon: <Users /> },
     { name: "Requests", path: "/admin/requests", icon: <Ticket /> },
@@ -32,24 +34,43 @@ const Sidebar = ({ role, children }) => {
   ];
 
   const userLinks = [
-    { name: "Dashboard", path: "/user/grafana-dashboard", icon: <LucideDatabase /> },
+    {
+      name: "Dashboard",
+      path: "/user/grafana-dashboard",
+      icon: <LucideDatabase />,
+    },
     { name: "Applications", path: "/user/dashboard", icon: <Home /> },
     // { name: "Help", path: "/user/help", icon: <HelpCircle /> },
     { name: "Profile", path: "/user/profile", icon: <User /> },
   ];
 
   const devicelinks = [
-    { name: "Dashboard", path: "/device/grafana-dashboard", icon: <LucideDatabase /> },
+    {
+      name: "Dashboard",
+      path: "/device/grafana-dashboard",
+      icon: <LucideDatabase />,
+    },
     // { name: "Applications", path: "/device/dashboard", icon: <Home /> },
     // { name: "Help", path: "/user/help", icon: <HelpCircle /> },
     { name: "Profile", path: "/device/profile", icon: <User /> },
   ];
 
   const testlinks = [
-    {name: "Dashboard", path: "/test/home", icon: <LucideNotepadTextDashed />}
-  ]
+    {
+      name: "Dashboard",
+      path: "/test/home",
+      icon: <LucideNotepadTextDashed />,
+    },
+  ];
 
-  const links = role === "admin" ? adminLinks : role === "device" ? devicelinks : role === "test" ? testlinks : userLinks 
+  const links =
+    role === "admin"
+      ? adminLinks
+      : role === "device"
+      ? devicelinks
+      : role === "test"
+      ? testlinks
+      : userLinks;
   const logoutPath = role === "admin" ? "/" : "/";
 
   const handleLogout = async () => {
@@ -57,7 +78,7 @@ const Sidebar = ({ role, children }) => {
     const did = localStorage.getItem("did");
     console.warn("Logging out\n", did);
     if (accessToken) {
-      await fetch(`http://${connectorHost}:${connectorPort}/auth/v1/logout`, {
+      await fetch(`${connectorURL}/auth/v1/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

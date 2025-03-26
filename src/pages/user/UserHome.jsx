@@ -1,45 +1,43 @@
-import React, {useState} from 'react';
-import { Search } from 'lucide-react';
-import linkedinLogo from '../../assets/linkedin.jpg';
-import instagramLogo from '../../assets/instagram.jpg';
-import hfLogo from '../../assets/hf.png'
-import githubLogo from '../../assets/github.png';
-import facebookLogo from '../../assets/facebook.png';
-import pinterestLogo from '../../assets/pinterest.png';
-import word from '../../assets/word.png';
-import pp from '../../assets/pp.png';
-import Sidebar from '../../components/Sidebar';
-import ApplicationsGrid from '../../components/ApplicationsGrid';
+import { Search } from "lucide-react";
+import React, { useState } from "react";
+import facebookLogo from "../../assets/facebook.png";
+import githubLogo from "../../assets/github.png";
+import hfLogo from "../../assets/hf.png";
+import instagramLogo from "../../assets/instagram.jpg";
+import linkedinLogo from "../../assets/linkedin.jpg";
+import pinterestLogo from "../../assets/pinterest.png";
+import pp from "../../assets/pp.png";
+import word from "../../assets/word.png";
+import ApplicationsGrid from "../../components/ApplicationsGrid";
+import Sidebar from "../../components/Sidebar";
 
 const Applications = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Dummy data for applications (Replace this with backend data)
   const applications = [
-    { name: 'LinkedIn', icon: linkedinLogo },
-    { name: 'Instagram', icon: instagramLogo },
-    { name: 'HuggingFace', icon: hfLogo },
-    { name: 'Github', icon: githubLogo },
-    { name: 'Facebook', icon: facebookLogo },
-    { name: 'Pinterest', icon: pinterestLogo },
-    { name: 'Microsoft Word', icon: word },
-    { name: 'Microsoft Powerpoint', icon: pp }
+    { name: "LinkedIn", icon: linkedinLogo },
+    { name: "Instagram", icon: instagramLogo },
+    { name: "HuggingFace", icon: hfLogo },
+    { name: "Github", icon: githubLogo },
+    { name: "Facebook", icon: facebookLogo },
+    { name: "Pinterest", icon: pinterestLogo },
+    { name: "Microsoft Word", icon: word },
+    { name: "Microsoft Powerpoint", icon: pp },
   ];
 
-   // Filter applications based on search query
-   const filteredApplications = applications.filter((app) =>
+  // Filter applications based on search query
+  const filteredApplications = applications.filter((app) =>
     app.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <Sidebar role={"user"}>
-
       {/* Main Content */}
       <div className="col-span-12">
         {/* Header Row */}
         <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#333333]">Applications</h1>
+          <h1 className="text-3xl font-bold text-[#333333]">Applications</h1>
           <div className="flex gap-3">
             <div className="flex items-center space-x-4">
               <div className="relative">

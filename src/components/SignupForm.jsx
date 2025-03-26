@@ -185,7 +185,6 @@ const SignupForm = ({
       newErrors.did = "Wallet needs to be unlocked/generated";
     }
 
-
     if (!formData.alias) {
       console.warn("Alias is empty");
       newErrors.alias = "Alias cannot be empty";
@@ -234,7 +233,7 @@ const SignupForm = ({
       };
 
       console.warn("Form Data:", updatedFormData);
-      
+
       // Generate DID
       setCurrentStep(1);
       const didDoc = await performGenerateDID(wallet);

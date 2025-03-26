@@ -11,7 +11,7 @@ import {
 import React, { useEffect, useState } from "react";
 import sampleQR from "../../assets/sample-QR.png";
 import Sidebar from "../../components/Sidebar";
-import { connectorHost, connectorPort } from "../../utils/readEnv";
+import { connectorURL } from "../../utils/readEnv";
 
 const AdminProfile = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -36,16 +36,13 @@ const AdminProfile = () => {
       const accessToken = sessionStorage.getItem("access_token") || "";
 
       try {
-        const response = await fetch(
-          `http://${connectorHost}:${connectorPort}/admin/v1/profile`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
+        const response = await fetch(`${connectorURL}/admin/v1/profile`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
         if (response.status === 401) {
           console.log("Redirecting to:", "/");
           window.location.href = "/";
@@ -103,17 +100,14 @@ const AdminProfile = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `http://${connectorHost}:${connectorPort}/admin/v1/updateProfile`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(editForm),
-        }
-      );
+      const response = await fetch(`${connectorURL}/admin/v1/updateProfile`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(editForm),
+      });
       if (response.status === 401) {
         console.log("Redirecting to:", "/");
         window.location.href = "/";
@@ -144,17 +138,14 @@ const AdminProfile = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `http://${connectorHost}:${connectorPort}/admin/v1/updateAuth`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(authForm),
-        }
-      );
+      const response = await fetch(`${connectorURL}/admin/v1/updateAuth`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(authForm),
+      });
 
       if (!response.ok) throw new Error("Failed to update authentication");
 

@@ -12,7 +12,8 @@ import React, { useEffect, useState } from "react";
 import { QRCode } from "react-qrcode-logo";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
-import { connectorHost, connectorPort } from "../../utils/readEnv";
+import { connectorURL } from "../../utils/readEnv";
+
 const UserProfile = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -54,7 +55,7 @@ const UserProfile = () => {
 
       setIsLoading(true);
       try {
-        const response = await fetch(`http://${connectorHost}:${connectorPort}/user/v1/profile`, {
+        const response = await fetch(`${connectorURL}/user/v1/profile`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -110,7 +111,7 @@ const UserProfile = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`http://${connectorHost}:${connectorPort}/auth/v1/editUser`, {
+      const response = await fetch(`${connectorURL}/auth/v1/editUser`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -131,7 +132,7 @@ const UserProfile = () => {
 
   const handleEnable2FA = async () => {
     try {
-      const response = await fetch(`http://${connectorHost}:${connectorPort}/user/v1/enable-2fa`, {
+      const response = await fetch(`${connectorURL}/user/v1/enable-2fa`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -183,7 +184,7 @@ const UserProfile = () => {
   const handleEditUser = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`http://${connectorHost}:${connectorPort}/auth/v1/editUser`, {
+      const response = await fetch(`${connectorURL}/auth/v1/editUser`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -312,7 +313,11 @@ const UserProfile = () => {
         </div>
       </dialog>
 
-      <dialog id="password-modal" className="modal backdrop-brightness-75" open={isPasswordModalOpen}>
+      <dialog
+        id="password-modal"
+        className="modal backdrop-brightness-75"
+        open={isPasswordModalOpen}
+      >
         <form className="modal-box" onSubmit={handleSubmit}>
           <h3 className="font-bold text-lg">Enter Wallet Password</h3>
           <input

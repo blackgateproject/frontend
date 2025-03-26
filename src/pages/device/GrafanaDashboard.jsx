@@ -1,10 +1,6 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar";
-import {
-  grafanaDashboard,
-  grafanaHost,
-  grafanaPort,
-} from "../../utils/readEnv";
+import { grafanaHost, grafanaPort } from "../../utils/readEnv";
 const GrafanaDashboard = () => {
   // Get the Grafana token and scanId (modify as per your auth mechanism)
   // const bearerToken = sessionStorage.getItem("access_token") || "";
@@ -21,9 +17,7 @@ const GrafanaDashboard = () => {
       {/* Main Content */}
       <div className="col-span-12 p-6">
         {/* Heading */}
-        <h1 className="text-3xl font-bold text-[#333333] mb-4">
-          Dashboard
-        </h1>
+        <h1 className="text-3xl font-bold text-[#333333] mb-4">Dashboard</h1>
 
         {/* Grafana Dashboard Embed */}
         <iframe
