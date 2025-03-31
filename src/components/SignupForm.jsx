@@ -38,22 +38,15 @@ const SignupForm = ({
   const [walletLocal, setWalletLocal] = useState(null);
   const [signer, setSignerLocal] = useState(null);
   const [isRejected, setIsRejected] = useState(false);
-  const {
-    performSendToConnector,
-    performGenerateDID,
-    performResolveDID,
-    performIssueVC,
-    performValidateVC,
-    performSubmitDIDVC,
-  } = useVeramoOperations();
+  const { performSubmitDID } = useVeramoOperations();
   const [showProgress, setShowProgress] = useState(false); // State to show progress indicator
   const [currentStep, setCurrentStep] = useState(0); // Add currentStep state
   const steps = [
     "Generate DID📝",
-    "Resolve DID ✅",
-    "Issue VC📝",
-    "Validate VC ✅",
-    "Submit DID + VC📤",
+    // "Resolve DID ✅",
+    // "Issue VC📝",
+    // "Validate VC ✅",
+    "Submit Data📤",
     "Pending Approval 🕒",
   ]; // Define steps
 
@@ -146,7 +139,7 @@ const SignupForm = ({
         // Set the DID and public key
         setFormData({
           ...formData,
-          did: `did:ethr:${randomWallet.publicKey}`,
+          did: `did:ethr:blackgate:${randomWallet.publicKey}`,
           // publicKey: randomWallet.publicKey,
         });
 
@@ -226,41 +219,23 @@ const SignupForm = ({
       }
 
       const updatedFormData = {
-        // test: "extra-role-got added",
+        ...formData,
         selectedRole: selectedRole,
-        alias: formData.alias,
-        firmwareVersion: formData.firmwareVersion,
       };
 
-      console.warn("Form Data:", updatedFormData);
+      // console.warn("Form Data:", updatedFormData);
 
       // Generate DID
-      setCurrentStep(1);
-      const didDoc = await performGenerateDID(wallet);
-      const did = didDoc.did;
-
-      // Resolve DID
-      setCurrentStep(2);
-      await performResolveDID(didDoc.did);
-
-      // Issue VC
-      setCurrentStep(3);
-      const signed_vc = await performIssueVC(didDoc, updatedFormData);
-
-      // Validate VC
-      setCurrentStep(4);
-      await performValidateVC(signed_vc);
-
+      // const didDoc = await performGenerateDID(wallet);
+      // const did = didDoc.did;
+      
       // Submit DID + VC
-      setCurrentStep(5);
-      await performSubmitDIDVC(wallet, didDoc.did, signed_vc, updatedFormData);
-
-      console.log("Form submitted:", {
-        ...formData,
-        role: selectedRole,
-        firmwareVersion: formData.firmwareVersion,
-      });
-
+      setCurrentStep(1);
+      await performSubmitDID(updatedFormData);
+      
+      setCurrentStep(2);
+      console.log("Form submitted:", updatedFormData);
+      
       // Set up polling for request status
       console.log("Starting polling for request status...");
 
@@ -341,7 +316,7 @@ const SignupForm = ({
       };
 
       // Start the polling process
-      setCurrentStep(6);
+      setCurrentStep(3);
       checkRequestStatus();
     } catch (error) {
       console.error("Error submitting form:", error);
