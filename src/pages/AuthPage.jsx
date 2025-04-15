@@ -10,7 +10,7 @@ const AuthPage = () => {
           <img src={logo} alt="logo" className="w-24" />
         </div>
         <h2 className="text-center text-3xl font-bold  text-primary">
-          Welcome to BLACKGATE
+          Welcome!
         </h2>
 
         <div className="">

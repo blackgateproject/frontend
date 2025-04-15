@@ -337,11 +337,11 @@ const SignupForm = ({
       </div>
 
       <h2 className="text-center text-2xl font-bold text-Black mb-6">
-        Create BLACKGATE Account
+        Create Account
       </h2>
 
       {showProgress ? (
-        <VerticalProgressIndicator currentStep={currentStep} steps={steps} /> // Show progress indicator with steps
+        <VerticalProgressIndicator currentStep={currentStep} steps={steps} />
       ) : (
         <>
           {isSuccess ? (
@@ -478,7 +478,6 @@ const SignupForm = ({
                 </form>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Role Selection */}
                   <div className="mb-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Role
@@ -533,7 +532,6 @@ const SignupForm = ({
                       )}
                     </div>
 
-                    {/* DID */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         DID
@@ -580,30 +578,8 @@ const SignupForm = ({
                     </div>
                   </div>
 
-                  {/* Device-specific fields */}
                   {selected_role === "device" && (
                     <div className="space-y-4 animate-fadeIn">
-                      {/* <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Device ID
-                        </label>
-                        <input
-                          type="text"
-                          name="deviceId"
-                          value={formData.deviceId}
-                          onChange={handleChange}
-                          placeholder="Device-123456"
-                          className={`input input-bordered w-full ${
-                            errors.deviceId ? "input-error" : ""
-                          }`}
-                        />
-                        {errors.deviceId && (
-                          <p className="mt-1 text-sm text-red-500">
-                            {errors.deviceId}
-                          </p>
-                        )}
-                      </div> */}
-
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Firmware Version
