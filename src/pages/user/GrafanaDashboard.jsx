@@ -1,6 +1,11 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar";
+<<<<<<< HEAD
 import { grafanaURL } from "../../utils/readEnv";
+=======
+// import { grafanaHost, grafanaPort } from "../../utils/readEnv";
+
+>>>>>>> 34221394cfc1eaec8f591652bb9607e725b9f56d
 const GrafanaDashboard = () => {
   // Get the Grafana token and scanId (modify as per your auth mechanism)
   // const bearerToken = sessionStorage.getItem("access_token") || "";
