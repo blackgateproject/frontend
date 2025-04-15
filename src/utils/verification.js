@@ -51,12 +51,12 @@ export const verifyMerkleProof = async (
           const parsedCredential = JSON.parse(verifiableCredential);
           if (
             !parsedCredential.credentialSubject ||
-            !parsedCredential.credentialSubject.selectedRole
+            !parsedCredential.credentialSubject.selected_role
           ) {
             throw new Error("[VC Verify ERR]: Invalid credential structure");
           }
 
-          const role = parsedCredential.credentialSubject.selectedRole;
+          const role = parsedCredential.credentialSubject.selected_role;
           console.log("Role:", role);
 
           navigate(`/${role}/dashboard`);

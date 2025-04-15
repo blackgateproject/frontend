@@ -58,9 +58,9 @@ const TestDashboard = () => {
 
       const roles = ["user", "admin", "device"];
       const formData = {
-        selectedRole: roles[Math.floor(Math.random() * roles.length)],
+        selected_role: roles[Math.floor(Math.random() * roles.length)],
         alias: i + 1,
-        firmwareVersion: `${Math.floor(Math.random() * 10)}.${Math.floor(
+        firmware_version: `${Math.floor(Math.random() * 10)}.${Math.floor(
           Math.random() * 10
         )}.${Math.floor(Math.random() * 10)}`,
         testMode: true,
@@ -110,8 +110,8 @@ const TestDashboard = () => {
           alias: formData.alias,
           did: did,
           wallet: newWallet.address,
-          firmwareVersion: formData.firmwareVersion,
-          selectedRole: formData.selectedRole,
+          firmware_version: formData.firmware_version,
+          selected_role: formData.selected_role,
           merkle_hash: data.merkle_hash,
           merkle_root: data.merkle_root,
           tx_hash: data.tx_hash,
@@ -127,8 +127,8 @@ const TestDashboard = () => {
           alias: formData.alias,
           did: did,
           wallet: newWallet.address,
-          firmwareVersion: formData.firmwareVersion,
-          selectedRole: formData.selectedRole,
+          firmware_version: formData.firmware_version,
+          selected_role: formData.selected_role,
           merkle_hash: null,
           merkle_root: null,
           tx_hash: null,

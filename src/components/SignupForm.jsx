@@ -20,13 +20,13 @@ const SignupForm = ({
   isSetupPage = false,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedRole, setSelectedRole] = useState("user");
+  const [selected_role, setselected_role] = useState("user");
   const [formData, setFormData] = useState({
     did: "",
     alias: "",
     // publicKey: "",
-    selectedRole: "",
-    firmwareVersion: "",
+    selected_role: "",
+    firmware_version: "",
   });
   const [errors, setErrors] = useState({});
   const [isGeneratingKeys, setIsGeneratingKeys] = useState(false);
@@ -183,13 +183,13 @@ const SignupForm = ({
       newErrors.alias = "Alias cannot be empty";
     }
 
-    if (selectedRole === "device") {
+    if (selected_role === "device") {
       // if (!formData.deviceId) {
       //   newErrors.deviceId = "Device ID is required";
       // }
 
-      if (!formData.firmwareVersion) {
-        newErrors.firmwareVersion = "Firmware version is required";
+      if (!formData.firmware_version) {
+        newErrors.firmware_version = "Firmware version is required";
       }
     }
 
@@ -220,7 +220,7 @@ const SignupForm = ({
 
       const updatedFormData = {
         ...formData,
-        selectedRole: selectedRole,
+        selected_role: selected_role,
       };
 
       // console.warn("Form Data:", updatedFormData);
@@ -228,14 +228,14 @@ const SignupForm = ({
       // Generate DID
       // const didDoc = await performGenerateDID(wallet);
       // const did = didDoc.did;
-      
+
       // Submit DID + VC
       setCurrentStep(1);
       await performSubmitDID(updatedFormData);
-      
+
       setCurrentStep(2);
       console.log("Form submitted:", updatedFormData);
-      
+
       // Set up polling for request status
       console.log("Starting polling for request status...");
 
@@ -489,8 +489,8 @@ const SignupForm = ({
                       <div className="flex-grow">
                         <select
                           className="select select-bordered bg-base-100 text-gray-500 shadow-sm"
-                          value={selectedRole}
-                          onChange={(e) => setSelectedRole(e.target.value)}
+                          value={selected_role}
+                          onChange={(e) => setselected_role(e.target.value)}
                         >
                           {!isSetupPage && <option value="user">User</option>}
                           <option value="admin">Admin</option>
@@ -585,7 +585,7 @@ const SignupForm = ({
                   </div>
 
                   {/* Device-specific fields */}
-                  {selectedRole === "device" && (
+                  {selected_role === "device" && (
                     <div className="space-y-4 animate-fadeIn">
                       {/* <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -614,17 +614,17 @@ const SignupForm = ({
                         </label>
                         <input
                           type="text"
-                          name="firmwareVersion"
-                          value={formData.firmwareVersion}
+                          name="firmware_version"
+                          value={formData.firmware_version}
                           onChange={handleChange}
                           placeholder="v1.0.0"
                           className={`input input-bordered w-full ${
-                            errors.firmwareVersion ? "input-error" : ""
+                            errors.firmware_version ? "input-error" : ""
                           }`}
                         />
-                        {errors.firmwareVersion && (
+                        {errors.firmware_version && (
                           <p className="mt-1 text-sm text-red-500">
-                            {errors.firmwareVersion}
+                            {errors.firmware_version}
                           </p>
                         )}
                       </div>
