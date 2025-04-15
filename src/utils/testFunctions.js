@@ -28,9 +28,9 @@
 //   // Issue VC
 //   const roles = ["user", "admin", "device"];
 //   const formData = {
-//     selectedRole: roles[Math.floor(Math.random() * roles.length)], // Randomly select one role
+//     selected_role: roles[Math.floor(Math.random() * roles.length)], // Randomly select one role
 //     alias: iterationNum,
-//     firmwareVersion: `${Math.floor(Math.random() * 10)}.${Math.floor(
+//     firmware_version: `${Math.floor(Math.random() * 10)}.${Math.floor(
 //       Math.random() * 10
 //     )}.${Math.floor(Math.random() * 10)}`, // Random version in format X.X.X
 //     testMode: true,

@@ -25,7 +25,7 @@ const Requests = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [requestsPerPage] = useState(5);
   const [loading, setLoading] = useState(true);
-  const [selectedRole, setSelectedRole] = useState("all");
+  const [selected_role, setselected_role] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("pending");
   const [confirmModal, setConfirmModal] = useState({
     open: false,
@@ -272,7 +272,7 @@ const Requests = () => {
   };
 
   return (
-    <Sidebar role={selectedRole === "all" ? "admin" : selectedRole}>
+    <Sidebar role={selected_role === "all" ? "admin" : selected_role}>
       {/* Notification Toast */}
       {notification.show && (
         <motion.div
@@ -523,8 +523,8 @@ const Requests = () => {
             <div className="w-full md:w-auto">
               <select
                 className="select select-bordered rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
+                value={selected_role}
+                onChange={(e) => setselected_role(e.target.value)}
               >
                 <option value="all">All Roles</option>
                 <option value="user">User</option>
@@ -785,18 +785,18 @@ const Requests = () => {
                 No requests found
               </h3>
               <p className="text-gray-500 max-w-md mx-auto">
-                {selectedStatus !== "all" && selectedRole !== "all"
-                  ? `No ${selectedStatus} requests found for ${selectedRole} role.`
+                {selectedStatus !== "all" && selected_role !== "all"
+                  ? `No ${selectedStatus} requests found for ${selected_role} role.`
                   : selectedStatus !== "all"
                   ? `No ${selectedStatus} requests found.`
-                  : selectedRole !== "all"
-                  ? `No requests found for ${selectedRole} role.`
+                  : selected_role !== "all"
+                  ? `No requests found for ${selected_role} role.`
                   : "No requests match your search criteria."}
               </p>
               <button
                 className="btn btn-outline btn-sm mt-4"
                 onClick={() => {
-                  setSelectedRole("all");
+                  setselected_role("all");
                   setSelectedStatus("all");
                   setSearchQuery("");
                 }}

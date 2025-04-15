@@ -106,7 +106,7 @@ export const submitDIDVC = async (wallet, did, signed_vc, formData) => {
     didStr: did,
     verifiableCredential: signed_vc,
     usernetwork_info: networkInfo,
-    requested_role: formData.selectedRole,
+    requested_role: formData.selected_role,
   };
   console.log("Data:", data);
 
