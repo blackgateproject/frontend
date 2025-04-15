@@ -40,10 +40,10 @@ export const submitDID = async (formData) => {
 };
 
 // Poll for request status
-export const pollForRequestStatus = async (walletAddress) => {
+export const pollForRequestStatus = async (did_str) => {
   console.log("Polling for request status...");
 
-  return fetch(`${connectorURL}/auth/v1/poll/${walletAddress}`)
+  return fetch(`${connectorURL}/auth/v1/poll/${did_str}`)
     .then((response) => {
       if (response.ok) {
         return response.json();
@@ -54,20 +54,10 @@ export const pollForRequestStatus = async (walletAddress) => {
     .then((data) => {
       if (data) {
         console.log("then data:", data);
-        const {
-          message,
-          merkle_hash,
-          // merkle_proof,
-          merkle_root,
-          tx_hash,
-          request_status,
-        } = data;
+        const { message, verifiable_credential, request_status } = data;
         return {
           message,
-          merkle_hash,
-          // merkle_proof,
-          merkle_root,
-          tx_hash,
+          verifiable_credential,
           request_status,
         };
       } else {
@@ -78,10 +68,7 @@ export const pollForRequestStatus = async (walletAddress) => {
       console.error(error);
       return {
         message: "Error occurred while polling",
-        request_status: null,
-        // merkle_proof: null,
-        merkle_hash: null,
-        merkle_root: null,
+        verifiable_credential: null,
         tx_hash: null,
       };
     });

@@ -256,7 +256,7 @@ const SignupForm = ({
 
         try {
           // Await the result of pollForRequestStatus
-          const status = await pollForRequestStatus(wallet.address);
+          const status = await pollForRequestStatus(formData.did);
           console.log("Polling result:", status);
 
           if (status && status.request_status) {
@@ -267,16 +267,16 @@ const SignupForm = ({
                 console.log("Request approved!");
 
                 // Store merkle proof and hash in local storage
-                localStorage.setItem("merkleHash", status.merkle_hash);
+                // localStorage.setItem("merkleHash", status.merkle_hash);
                 // localStorage.setItem(
                 //   "merkleProof",
                 //   JSON.stringify(status.merkle_proof)
                 // );
                 // localStorage.setItem("merkleRoot", status.merkle_root);
-                localStorage.setItem("did", did);
+                // localStorage.setItem("did", did);
                 localStorage.setItem(
-                  "verifiableCredential",
-                  JSON.stringify(signed_vc)
+                  "verifiable_credential",
+                  JSON.stringify(status.verifiable_credential)
                 );
 
                 setShowProgress(false); // Hide progress indicator
