@@ -24,7 +24,6 @@ const LoginPage = () => {
   const [isWalletLoaded, setIsWalletLoaded] = useState(false);
   const [isLoadingTx, setIsLoadingTx] = useState(false);
   const [showSignupForm, setShowSignupForm] = useState(false);
-  const [hasVerificationData, setHasVerificationData] = useState(false);
   const [hasVC, setHasVC] = useState(false);
   const [isBackendInSetupMode, setIsBackendInSetupMode] = useState(false);
   const [isCheckingBackendStatus, setIsCheckingBackendStatus] = useState(false); // Set to true to enable setup mode
@@ -50,25 +49,11 @@ const LoginPage = () => {
   // Check if merkle proof and hash exist in local storage
   useEffect(() => {
     const checkLocalStorage = () => {
-      // const merkleProof = localStorage.getItem("merkleProof");
-      const merkleHash = localStorage.getItem("merkleHash");
-      // const merkleRoot = localStorage.getItem("merkleRoot");
-      const did = localStorage.getItem("did");
-      const verifiableCredential = localStorage.getItem("verifiableCredential");
+      const verifiable_credential = localStorage.getItem(
+        "verifiable_credential"
+      );
 
-      //Debug line
-      // console.log("LocalStorage data:", {
-      //   merkleProof: !!merkleProof,
-      //   merkleHash: !!merkleHash,
-      //   did: !!did,
-      //   // merkleRoot: !!merkleRoot,
-      //   verifiableCredential: !!verifiableCredential,
-      // });
-
-      setHasVerificationData(!!merkleHash && !!did);
-      // setHasVerificationData(!!merkleProof && !!merkleHash && !!did);
-      // setHasVerificationData(!!merkleProof && !!merkleHash && !!merkleRoot);
-      setHasVC(!!verifiableCredential);
+      setHasVC(!!verifiable_credential);
     };
 
     // Check initially
@@ -151,17 +136,27 @@ const LoginPage = () => {
     return () => clearInterval(intervalId); // Clean up on unmount
   }, []); // Empty dependency array ensures this runs once on mount
 
-
   const handleButtonClick = () => {
     const encryptedWallet = localStorage.getItem("encryptedWallet");
-    const verifiableCredential = localStorage.getItem("verifiableCredential");
-    // const merkleProof = localStorage.getItem("merkleProof")
-    const merkleHash = localStorage.getItem("merkleHash");
-    const did = localStorage.getItem("did");
-    // const merkleRoot = localStorage.getItem("merkleRoot");
+    const verifiable_credential = localStorage.getItem("verifiable_credential");
+
+    let merkleHash = null;
+    let did = null;
+
+    // Only try to parse if verifiable_credential exists
+    if (verifiable_credential) {
+      try {
+        const parsedVC = JSON.parse(verifiable_credential);
+        merkleHash = parsedVC.credential?.credentialSubject?.ZKP?.userHash;
+        did = parsedVC.credential?.credentialSubject?.did;
+      } catch (error) {
+        console.error("Error parsing verifiable credential:", error);
+        // Continue with default flow if parsing fails
+      }
+    }
 
     if (encryptedWallet) {
-      if (verifiableCredential) {
+      if (verifiable_credential) {
         setShowAuthButtons(true);
       } else {
         // Wallet exists but no VC, go to signup to complete registration
@@ -170,8 +165,6 @@ const LoginPage = () => {
       }
     } else {
       if (merkleHash && did) {
-        // if (merkleProof && merkleHash && did) {
-        // if (merkleProof && merkleHash && merkleRoot) {
         // Handle verification
         verifyMerkleProof(
           setIsLoadingTx,
@@ -311,7 +304,7 @@ const LoginPage = () => {
                       : "Wallet detected, but registration is incomplete. Please complete your registration."
                     : "To get started, please create a wallet."}
                 </p>
-                {hasVerificationData && hasVC ? (
+                {hasVC ? (
                   <div className="flex flex-col ">
                     <button
                       onClick={() => {
@@ -344,7 +337,7 @@ const LoginPage = () => {
                         Processing...
                       </div>
                     ) : localStorage.getItem("encryptedWallet") &&
-                      !localStorage.getItem("verifiableCredential") ? (
+                      !localStorage.getItem("verifiable_credential") ? (
                       "Complete Registration"
                     ) : localStorage.getItem("encryptedWallet") ? (
                       "Login"
