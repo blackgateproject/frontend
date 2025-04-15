@@ -15,8 +15,8 @@ export default {
       "nord",
       {
         blackgate: {
-          "primary": "#000000",
-          "secondary": "#B80000",
+          "primary": "#0068ff",
+          "secondary": "#0040ff",
           "accent": "#AE4AFF",
           "neutral": "#FFFFFF",
           "base-100": "#ffffff",

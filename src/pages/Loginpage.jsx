@@ -1,3 +1,4 @@
+import { animated } from "@react-spring/web";
 import { Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -33,6 +34,18 @@ const LoginPage = () => {
   const [previousPage, setPreviousPage] = useState(null);
   const [currentPage, setCurrentPage] = useState("main");
   const navigate = useNavigate();
+
+  const [shapes, setShapes] = useState([]);
+  const shapeCount = 100; // Define the number of shapes to generate
+  const colorPalette = [
+    "#00d969", // Primary color
+    "#009648", // Secondary color
+    "#076034", // Accent color
+    "#06753d", // Base-200 color
+    "#004D29", // Base-300 color
+    "#5F6368", // Slate-900 color
+    "#4A4E51", // Slate-950 color
+  ];
 
   // Check if merkle proof and hash exist in local storage
   useEffect(() => {
@@ -84,6 +97,60 @@ const LoginPage = () => {
       document.getElementById("error-modal").close();
     }
   }, [isErrorModalOpen]);
+
+  // Generate shapes with random sizes, positions, and colors
+  useEffect(() => {
+    const generateShapes = () => {
+      let shapesArray = [];
+      for (let i = 0; i < shapeCount; i++) {
+        const randomSize = Math.random() * 8 + 2; // Random size between 2px and 10px
+        const randomX = Math.random() * window.innerWidth;
+        const randomY = Math.random() * window.innerHeight;
+
+        // Randomly select a color from the predefined color palette
+        const randomColor =
+          colorPalette[Math.floor(Math.random() * colorPalette.length)];
+
+        shapesArray.push({
+          id: i,
+          x: randomX,
+          y: randomY,
+          size: randomSize,
+          color: randomColor,
+          // Reduce vx and vy for slower movement
+          vx: Math.random() * 0.5 - 0.25, // Slower random horizontal speed
+          vy: Math.random() * 0.5 - 0.25, // Slower random vertical speed
+        });
+      }
+      setShapes(shapesArray);
+    };
+
+    generateShapes(); // Initialize shapes when component mounts
+  }, [shapeCount]); // Regenerate shapes when shapeCount changes
+
+  // Handle shape movement and collision detection
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setShapes((prevShapes) => {
+        const updatedShapes = prevShapes.map((shape) => {
+          // Update position
+          const newX = shape.x + shape.vx;
+          const newY = shape.y + shape.vy;
+
+          // Bounce off the edges
+          if (newX < 0 || newX > window.innerWidth) shape.vx = -shape.vx;
+          if (newY < 0 || newY > window.innerHeight) shape.vy = -shape.vy;
+
+          return { ...shape, x: newX, y: newY };
+        });
+
+        return updatedShapes;
+      });
+    }, 15); // Update positions every 15ms
+
+    return () => clearInterval(intervalId); // Clean up on unmount
+  }, []); // Empty dependency array ensures this runs once on mount
+
 
   const handleButtonClick = () => {
     const encryptedWallet = localStorage.getItem("encryptedWallet");
@@ -139,105 +206,123 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-400 to-black">
-      {currentPage !== "main" && (
-        <button
-          onClick={handleBackButtonClick}
-          className="absolute top-4 left-4 btn bg-primary/75 hover:bg-primary text-base-100 rounded-2xl"
-        >
-          Back
-        </button>
-      )}
-      {currentPage === "signup" ? (
-        <SignupForm
-          walletExists={walletExists}
-          setWalletExists={setWalletExists}
-          setWallet={setWallet}
-          setSigner={setSigner}
-          setIsWalletLoaded={setIsWalletLoaded}
-          setErrorMessage={setErrorMessage}
-          setIsErrorModalOpen={setIsErrorModalOpen}
-          wallet={wallet} // Pass wallet to SignupForm
-        />
-      ) : currentPage === "auth1" ? (
-        <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
-          <h2 className="text-center text-3xl font-bold text-primary">
-            Verify via ZKP
-          </h2>
-          <p className="text-center mt-4">
-            Click below to verify using zero-knowledge proof.
-          </p>
-          <button
-            onClick={() => {
-              verifyMerkleProof(
-                setIsLoadingTx,
-                setCurrentStep,
-                setErrorMessage,
-                setIsErrorModalOpen,
-                navigate
-              );
+    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-400 to-bg-primary relative overflow-hidden">
+      {/* Animated shapes with different colors */}
+      <div className="absolute top-0 left-0 w-full h-full z-0">
+        {shapes.map((shape) => (
+          <animated.div
+            key={shape.id}
+            style={{
+              position: "absolute",
+              left: shape.x,
+              top: shape.y,
+              backgroundColor: shape.color,
+              width: shape.size,
+              height: shape.size,
+              borderRadius: "50%",
             }}
-            className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-4`}
-            disabled={isLoadingTx}
+          />
+        ))}
+      </div>
+      <div className="z-10">
+        {currentPage !== "main" && (
+          <button
+            onClick={handleBackButtonClick}
+            className="absolute top-4 left-4 btn bg-primary/75 hover:bg-primary text-base-100 rounded-2xl"
           >
-            {isLoadingTx ? (
-              <div className="flex items-center justify-center">
-                <Loader2 className="animate-spin mr-2" />
-                Processing...
-              </div>
-            ) : (
-              "Verify Now"
-            )}
+            Back
           </button>
-          {currentStep && (
-            <div className="mt-4 text-center text-black">
-              <p>{currentStep}</p>
-            </div>
-          )}
-          {isLoadingTx && !currentStep && (
-            <div className="mt-4 text-center">
-              <Loader2 className="animate-spin mx-auto" />
-              <p className="mt-2">Verifying...</p>
-            </div>
-          )}
-        </div>
-      ) : currentPage === "auth2" ? (
-        <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
-          {/* <h2 className="text-center text-3xl font-bold text-primary">
+        )}
+        {currentPage === "signup" ? (
+          <SignupForm
+            walletExists={walletExists}
+            setWalletExists={setWalletExists}
+            setWallet={setWallet}
+            setSigner={setSigner}
+            setIsWalletLoaded={setIsWalletLoaded}
+            setErrorMessage={setErrorMessage}
+            setIsErrorModalOpen={setIsErrorModalOpen}
+            wallet={wallet} // Pass wallet to SignupForm
+          />
+        ) : currentPage === "auth1" ? (
+          <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
+            <h2 className="text-center text-3xl font-bold text-Black">
+              Verify via ZKP
+            </h2>
+            <p className="text-center mt-4">
+              Click below to verify using zero-knowledge proof.
+            </p>
+            <button
+              onClick={() => {
+                verifyMerkleProof(
+                  setIsLoadingTx,
+                  setCurrentStep,
+                  setErrorMessage,
+                  setIsErrorModalOpen,
+                  navigate
+                );
+              }}
+              className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-4`}
+              disabled={isLoadingTx}
+            >
+              {isLoadingTx ? (
+                <div className="flex items-center justify-center">
+                  <Loader2 className="animate-spin mr-2" />
+                  Processing...
+                </div>
+              ) : (
+                "Verify Now"
+              )}
+            </button>
+            {currentStep && (
+              <div className="mt-4 text-center text-black">
+                <p>{currentStep}</p>
+              </div>
+            )}
+            {isLoadingTx && !currentStep && (
+              <div className="mt-4 text-center">
+                <Loader2 className="animate-spin mx-auto" />
+                <p className="mt-2">Verifying...</p>
+              </div>
+            )}
+          </div>
+        ) : currentPage === "auth2" ? (
+          <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
+            {/* <h2 className="text-center text-3xl font-bold text-Black">
             Verify via VC
           </h2> */}
-          {/* Add your VC verification component or logic here */}
-        </div>
-      ) : (
-        <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
-          <div className="flex justify-center items-center mb-4">
-            <img src={logo} alt="logo" className="w-24" />
+            {/* Add your VC verification component or logic here */}
           </div>
-          <h2 className="text-center text-3xl font-bold  text-primary">
-            {walletExists ? "BLACKGATE" : "Welcome to BLACKGATE"}
-          </h2>
+        ) : (
+          <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
+            <div className="flex justify-center items-center mb-4">
+              <img src={logo} alt="logo" className="w-24" />
+            </div>
+            <h2 className="text-center text-3xl font-bold  text-Black">
+              {walletExists ? "BLACKGATE" : "Welcome to BLACKGATE"}
+            </h2>
 
-          <div className=" text-center">
-            <div>
-              <p className="text-black mb-4">
-                {walletExists
-                  ? hasVC
-                    ? "Please choose a verification method to continue."
-                    : "Wallet detected, but registration is incomplete. Please complete your registration."
-                  : "To get started, please create a wallet."}
-              </p>
-              {hasVerificationData && hasVC ? (
-                <div className="flex flex-col ">
-                  <button
-                    onClick={() => {
-                      setPreviousPage("main");
-                      setCurrentPage("auth1");
-                    }}
-                    className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-4`}
-                  >
-                    Verify via ZKP
-                  </button>
-                  {/* <button
+            <div className=" text-center">
+              <div>
+                <p className="text-black mb-4">
+                  {walletExists
+                    ? hasVC
+                      ? "Please choose a verification method to continue."
+                      : "Wallet detected, but registration is incomplete. Please complete your registration."
+                    : "To get started, please create a wallet."}
+                </p>
+                {hasVerificationData && hasVC ? (
+                  <div className="flex flex-col ">
+                    <button
+                      onClick={() => {
+                        setPreviousPage("main");
+                        setCurrentPage("auth1");
+                      }}
+                      className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-4`}
+                    >
+                      Verify via ZKP
+                    </button>
+                    {/* <button
                     onClick={() => {
                       setPreviousPage("main");
                       setCurrentPage("auth2");
@@ -246,58 +331,59 @@ const LoginPage = () => {
                   >
                     Verify via VC
                   </button> */}
-                </div>
-              ) : (
-                <button
-                  onClick={handleButtonClick}
-                  className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-4`}
-                  disabled={isLoadingTx}
-                >
-                  {isLoadingTx ? (
-                    <div className="flex items-center justify-center">
-                      <Loader2 className="animate-spin mr-2" />
-                      Processing...
-                    </div>
-                  ) : localStorage.getItem("encryptedWallet") &&
-                    !localStorage.getItem("verifiableCredential") ? (
-                    "Complete Registration"
-                  ) : localStorage.getItem("encryptedWallet") ? (
-                    "Login"
-                  ) : (
-                    "Register"
-                  )}
-                </button>
-              )}
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleButtonClick}
+                    className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-4`}
+                    disabled={isLoadingTx}
+                  >
+                    {isLoadingTx ? (
+                      <div className="flex items-center justify-center">
+                        <Loader2 className="animate-spin mr-2" />
+                        Processing...
+                      </div>
+                    ) : localStorage.getItem("encryptedWallet") &&
+                      !localStorage.getItem("verifiableCredential") ? (
+                      "Complete Registration"
+                    ) : localStorage.getItem("encryptedWallet") ? (
+                      "Login"
+                    ) : (
+                      "Register"
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
+            {currentStep && (
+              <div className="mt-4 text-center text-white">
+                <p>{currentStep}</p>
+              </div>
+            )}
+            {isLoadingDID && (
+              <div className="mt-4 text-center text-white">
+                <Loader2 className="animate-spin" />
+              </div>
+            )}
           </div>
-          {currentStep && (
-            <div className="mt-4 text-center text-white">
-              <p>{currentStep}</p>
-            </div>
-          )}
-          {isLoadingDID && (
-            <div className="mt-4 text-center text-white">
-              <Loader2 className="animate-spin" />
-            </div>
-          )}
-        </div>
-      )}
+        )}
 
-      <dialog id="error-modal" className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Error</h3>
-          <p className="py-4">{errorMessage}</p>
-          <div className="modal-action">
-            <button
-              type="button"
-              className="btn"
-              onClick={() => setIsErrorModalOpen(false)}
-            >
-              Close
-            </button>
+        <dialog id="error-modal" className="modal">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">Error</h3>
+            <p className="py-4">{errorMessage}</p>
+            <div className="modal-action">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setIsErrorModalOpen(false)}
+              >
+                Close
+              </button>
+            </div>
           </div>
-        </div>
-      </dialog>
+        </dialog>
+      </div>
     </div>
   );
 };

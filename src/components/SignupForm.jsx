@@ -94,7 +94,7 @@ const SignupForm = ({
           setWallet, // Now properly defined
           setIsWalletLoaded,
           setIsLoadingWallet,
-          () => {},
+          () => { },
           setSigner // Now properly defined
         );
 
@@ -336,7 +336,7 @@ const SignupForm = ({
         />
       </div>
 
-      <h2 className="text-center text-2xl font-bold text-primary mb-6">
+      <h2 className="text-center text-2xl font-bold text-Black mb-6">
         Create BLACKGATE Account
       </h2>
 
@@ -419,9 +419,8 @@ const SignupForm = ({
                       type="password"
                       value={walletPassword}
                       onChange={(e) => setWalletPassword(e.target.value)}
-                      className={`input input-bordered w-full ${
-                        errors.walletPassword ? "input-error" : ""
-                      }`}
+                      className={`input input-bordered w-full ${errors.walletPassword ? "input-error" : ""
+                        }`}
                       placeholder="Enter wallet password"
                     />
                     {errors.walletPassword && (
@@ -442,9 +441,8 @@ const SignupForm = ({
                         onChange={(e) =>
                           setConfirmWalletPassword(e.target.value)
                         }
-                        className={`input input-bordered w-full ${
-                          errors.confirmWalletPassword ? "input-error" : ""
-                        }`}
+                        className={`input input-bordered w-full ${errors.confirmWalletPassword ? "input-error" : ""
+                          }`}
                         placeholder="Confirm wallet password"
                       />
                       {errors.confirmWalletPassword && (
@@ -459,13 +457,13 @@ const SignupForm = ({
                     <button
                       type="button"
                       onClick={() => setShowWalletPasswordModal(false)}
-                      className="btn flex-1"
+                      className="btn flex-1 bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="btn btn-primary flex-1"
+                      className="btn flex-1 bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
                       disabled={isLoadingWallet}
                     >
                       {isLoadingWallet ? (
@@ -525,9 +523,8 @@ const SignupForm = ({
                         value={formData.alias}
                         onChange={handleChange}
                         placeholder="Enter a temp name"
-                        className={`input input-bordered w-full ${
-                          errors.alias ? "input-error" : ""
-                        }`}
+                        className={`input input-bordered w-full ${errors.alias ? "input-error" : ""
+                          }`}
                       />
                       {errors.alias && (
                         <p className="mt-1 text-sm text-red-500">
@@ -547,9 +544,8 @@ const SignupForm = ({
                           name="did"
                           value={formData.did}
                           placeholder="did:ethr:0x..."
-                          className={`input input-bordered w-full ${
-                            errors.did ? "input-error" : ""
-                          } bg-gray-100`}
+                          className={`input input-bordered w-full ${errors.did ? "input-error" : ""
+                            } bg-gray-100`}
                           readOnly={true}
                         />
                         {formData.did && (
@@ -618,9 +614,8 @@ const SignupForm = ({
                           value={formData.firmware_version}
                           onChange={handleChange}
                           placeholder="v1.0.0"
-                          className={`input input-bordered w-full ${
-                            errors.firmware_version ? "input-error" : ""
-                          }`}
+                          className={`input input-bordered w-full ${errors.firmware_version ? "input-error" : ""
+                            }`}
                         />
                         {errors.firmware_version && (
                           <p className="mt-1 text-sm text-red-500">
