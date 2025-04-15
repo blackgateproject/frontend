@@ -1,3 +1,9 @@
+# Branch Def
+
+This branch is for generic development bug fixes, minor feature additions
+
+ Currently intend to fix stuff before job fair
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
