@@ -13,7 +13,9 @@ const GrafanaDashboard = () => {
   // Abdullah grafana
   // const grafanaUrl = `http://localhost:3000/public-dashboards/5c6de844c29a4783a657cb4d8021fe44?orgId=2`
   // Awais grafana
-  const did = localStorage.getItem("did");
+  const did =
+    JSON.parse(localStorage.getItem("verifiable_credential"))?.credential
+      ?.credentialSubject?.did || "";
   if (!did) {
     console.error("DID not found in localStorage");
     return <div>Error: DID not found</div>;

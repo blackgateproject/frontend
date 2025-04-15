@@ -2,10 +2,7 @@ import { motion } from "framer-motion";
 import {
   AlertCircle,
   CheckCircle,
-  Globe,
   Info,
-  MapPin,
-  Monitor,
   Search,
   TicketIcon,
   XCircle,
@@ -63,16 +60,24 @@ const Requests = () => {
       }
       if (!response.ok) throw new Error("Failed to fetch requests");
       const data = await response.json();
+      console.log("Server Response:", data); // Log the server response
       setRequests(
         data.map((request) => ({
           id: request.id,
-          walletAddr: request.wallet_addr,
-          userNetworkInfo: request.usernetwork_info,
-          date: new Date(request.created_at),
-          isApproved: request.isApproved,
-          isRegistered: request.isRegistered,
+          did_str: request.did_str,
+          alias: request.form_data.alias,
+          role: request.form_data.selected_role,
+          firmwareVersion: request.form_data.firmware_version,
+          networkInfo: request.network_info,
+          isVCSent: request.isVCSent,
+          verifiableCred: request.verifiable_cred,
+          createdAt: new Date(request.created_at),
+          updatedAt: request.updated_at ? new Date(request.updated_at) : null,
           status: request.request_status,
-          role: request.requested_role,
+          ip_address: request.network_info.ip_address,
+          user_agent: request.network_info.user_agent,
+          location_lat: request.network_info.location_lat,
+          location_long: request.network_info.location_long,
         }))
       );
     } catch (error) {
@@ -176,35 +181,10 @@ const Requests = () => {
 
   // Open details modal
   const openDetailsModal = (request) => {
-    // Ensure we have the full data including extended fields
-    // This is needed because our display objects might not have all the fields
-    const fullRequestData = processedData.all.find(
-      (item) => item.id === request.id
-    );
-
-    if (fullRequestData) {
-      setDetailsModal({
-        open: true,
-        request: {
-          ...request,
-          userNetworkInfo: {
-            ...request.userNetworkInfo,
-            // Add any missing fields from the original data
-            city: fullRequestData.usernetwork_info.city,
-            country: fullRequestData.usernetwork_info.country,
-            isp: fullRequestData.usernetwork_info.isp,
-            timezone: fullRequestData.usernetwork_info.timezone,
-            connection_type: fullRequestData.usernetwork_info.connection_type,
-          },
-        },
-      });
-    } else {
-      // Fallback if we 't find full data
-      setDetailsModal({
-        open: true,
-        request,
-      });
-    }
+    setDetailsModal({
+      open: true,
+      request,
+    });
   };
 
   // Close details modal
@@ -245,16 +225,14 @@ const Requests = () => {
   const filteredRequests = requests
     .filter((request) => {
       // Filter by search query
-      return request.walletAddr
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
+      return request.did_str.toLowerCase().includes(searchQuery.toLowerCase());
     })
     .sort((a, b) => {
       // Sort by date
       if (sortOrder === "asc") {
-        return a.date - b.date;
+        return a.createdAt - b.createdAt;
       } else {
-        return b.date - a.date;
+        return b.createdAt - a.createdAt;
       }
     });
 
@@ -357,19 +335,24 @@ const Requests = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500 font-medium mb-1">
-                    Created
+                    Created At
                   </p>
                   <p className="text-gray-800">
-                    {detailsModal.request.date.toLocaleDateString()} at{" "}
-                    {detailsModal.request.date.toLocaleTimeString()}
+                    {detailsModal.request.createdAt.toLocaleDateString()} at{" "}
+                    {detailsModal.request.createdAt.toLocaleTimeString()}
                   </p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500 font-medium mb-1">Role</p>
-                  <p className="text-gray-800 capitalize">
-                    {detailsModal.request.role}
-                  </p>
-                </div>
+                {detailsModal.request.updatedAt && (
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium mb-1">
+                      Updated At
+                    </p>
+                    <p className="text-gray-800">
+                      {detailsModal.request.updatedAt.toLocaleDateString()} at{" "}
+                      {detailsModal.request.updatedAt.toLocaleTimeString()}
+                    </p>
+                  </div>
+                )}
                 <div>
                   <p className="text-sm text-gray-500 font-medium mb-1">
                     Status
@@ -382,22 +365,87 @@ const Requests = () => {
                     {detailsModal.request.status}
                   </div>
                 </div>
+                <div>
+                  <p className="text-sm text-gray-500 font-medium mb-1">
+                    VC Sent
+                  </p>
+                  <div
+                    className={`badge ${
+                      detailsModal.request.isVCSent
+                        ? "badge-success"
+                        : "badge-warning"
+                    }`}
+                  >
+                    {detailsModal.request.isVCSent ? "Yes" : "No"}
+                  </div>
+                </div>
               </div>
 
               {/* Divider */}
               <hr className="border-gray-200" />
 
-              {/* Wallet Address */}
+              {/* DID String */}
               <div>
                 <p className="text-sm text-gray-500 font-medium mb-2">
-                  Wallet Address
+                  DID String
                 </p>
                 <div className="bg-gray-100 p-3 rounded-lg">
                   <p className="font-mono text-gray-800 break-all">
-                    {detailsModal.request.walletAddr}
+                    {detailsModal.request.did_str || "Not provided"}
                   </p>
                 </div>
               </div>
+
+              {/* Form Data */}
+              <div>
+                <p className="text-lg font-semibold text-gray-700 mb-3">
+                  Form Data
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium mb-1">
+                      Alias
+                    </p>
+                    <p className="text-gray-800">
+                      {detailsModal.request.alias || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium mb-1">
+                      Selected Role
+                    </p>
+                    <p className="text-gray-800 capitalize">
+                      {detailsModal.request.selectedRole || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium mb-1">
+                      Firmware Version
+                    </p>
+                    <p className="text-gray-800">
+                      {detailsModal.request.firmwareVersion || "N/A"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Verifiable Credential */}
+              {detailsModal.request.verifiableCred && (
+                <div>
+                  <p className="text-lg font-semibold text-gray-700 mb-3">
+                    Verifiable Credential
+                  </p>
+                  <div className="bg-gray-100 p-3 rounded-lg">
+                    <pre className="text-xs overflow-auto max-h-40">
+                      {JSON.stringify(
+                        detailsModal.request.verifiableCred,
+                        null,
+                        2
+                      )}
+                    </pre>
+                  </div>
+                </div>
+              )}
 
               {/* Network Information */}
               <div>
@@ -408,100 +456,41 @@ const Requests = () => {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
                     <div>
-                      <div className="flex items-center mb-1">
-                        <Globe className="w-4 h-4 text-gray-500 mr-1" />
-                        <p className="text-sm text-gray-500 font-medium">
-                          IP Address
-                        </p>
-                      </div>
+                      <p className="text-sm text-gray-500 font-medium mb-1">
+                        IP Address
+                      </p>
                       <p className="font-mono text-gray-800">
-                        {detailsModal.request.userNetworkInfo.ip_address}
+                        {detailsModal.request.networkInfo.ip_address}
                       </p>
                     </div>
-
                     <div>
-                      <div className="flex items-center mb-1">
-                        <Monitor className="w-4 h-4 text-gray-500 mr-1" />
-                        <p className="text-sm text-gray-500 font-medium">
-                          Device
-                        </p>
-                      </div>
+                      <p className="text-sm text-gray-500 font-medium mb-1">
+                        User Agent
+                      </p>
                       <p className="text-gray-800 text-sm">
-                        {detailsModal.request.userNetworkInfo.user_agent}
+                        {detailsModal.request.networkInfo.user_agent}
                       </p>
                     </div>
                   </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
                     <div>
-                      <div className="flex items-center mb-1">
-                        <MapPin className="w-4 h-4 text-gray-500 mr-1" />
-                        <p className="text-sm text-gray-500 font-medium">
-                          Location
-                        </p>
-                      </div>
-                      <p className="text-gray-800">
-                        {detailsModal.request.userNetworkInfo.city},{" "}
-                        {detailsModal.request.userNetworkInfo.country}
+                      <p className="text-sm text-gray-500 font-medium mb-1">
+                        Location
                       </p>
-                      <p className="text-sm text-gray-500">
-                        {detailsModal.request.userNetworkInfo.location_lat},{" "}
-                        {detailsModal.request.userNetworkInfo.location_long}
+                      <p className="text-gray-800">
+                        {detailsModal.request.networkInfo.location_lat},{" "}
+                        {detailsModal.request.networkInfo.location_long}
                       </p>
                     </div>
-
                     <div>
-                      <div className="flex items-center mb-1">
-                        <p className="text-sm text-gray-500 font-medium">
-                          Language
-                        </p>
-                      </div>
+                      <p className="text-sm text-gray-500 font-medium mb-1">
+                        Language
+                      </p>
                       <p className="text-gray-800">
-                        {detailsModal.request.userNetworkInfo.user_language}
+                        {detailsModal.request.networkInfo.user_language}
                       </p>
                     </div>
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3">
-                    <div>
-                      <p className="text-sm text-gray-500 font-medium mb-1">
-                        ISP
-                      </p>
-                      <p className="text-gray-800">
-                        {detailsModal.request.userNetworkInfo.isp}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-sm text-gray-500 font-medium mb-1">
-                        Connection
-                      </p>
-                      <p className="text-gray-800">
-                        {detailsModal.request.userNetworkInfo.connection_type}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-sm text-gray-500 font-medium mb-1">
-                        Timezone
-                      </p>
-                      <p className="text-gray-800">
-                        {detailsModal.request.userNetworkInfo.timezone}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Map placeholder */}
-              <div className="mt-4">
-                <p className="text-sm text-gray-500 font-medium mb-2">
-                  Location Map
-                </p>
-                <div className="bg-gray-100 p-2 rounded-lg h-40 flex items-center justify-center">
-                  <p className="text-gray-400">
-                    Map visualization would appear here
-                  </p>
                 </div>
               </div>
             </div>
@@ -566,7 +555,7 @@ const Requests = () => {
               </span>
               <input
                 type="text"
-                placeholder="Search wallet address"
+                placeholder="Search DID"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="input input-bordered w-full md:w-60 pl-10 rounded-2xl bg-base-100 text-gray-500 border-none shadow-sm"
@@ -671,8 +660,10 @@ const Requests = () => {
                         Request #{request.id}
                       </h2>
                       <p className="text-sm text-gray-500">
-                        Created on {request.date.toLocaleDateString()} at{" "}
-                        {request.date.toLocaleTimeString()}
+                        Created on{" "}
+                        {request.createdAt
+                          ? `${request.createdAt.toLocaleDateString()} at ${request.createdAt.toLocaleTimeString()}`
+                          : "N/A"}
                       </p>
                     </div>
                   </div>
@@ -701,7 +692,7 @@ const Requests = () => {
                       Wallet Address
                     </p>
                     <p className="text-gray-800 font-mono bg-gray-100 p-2 rounded overflow-x-auto">
-                      {request.walletAddr}
+                      {request.did_str}
                     </p>
                   </div>
 
@@ -710,7 +701,7 @@ const Requests = () => {
                       IP Address
                     </p>
                     <p className="text-gray-800 font-mono bg-gray-100 p-2 rounded">
-                      {request.userNetworkInfo.ip_address}
+                      {request.ip_address}
                     </p>
                   </div>
 
@@ -719,7 +710,7 @@ const Requests = () => {
                       User Agent
                     </p>
                     <p className="text-gray-800 bg-gray-100 p-2 rounded overflow-x-auto text-sm">
-                      {request.userNetworkInfo.user_agent}
+                      {request.user_agent}
                     </p>
                   </div>
 
@@ -728,8 +719,8 @@ const Requests = () => {
                       Location
                     </p>
                     <p className="text-gray-800 bg-gray-100 p-2 rounded">
-                      {request.userNetworkInfo.location_lat},{" "}
-                      {request.userNetworkInfo.location_long}
+                      {request.location_lat},{" "}
+                      {request.location_long}
                     </p>
                   </div>
                 </div>
