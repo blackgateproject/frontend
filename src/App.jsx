@@ -67,10 +67,7 @@ function App() {
 
         {/* Device Routes */}
         <Route path="/device">
-          <Route
-            path="grafana-dashboard"
-            element={<DeviceGrafana role={"device"} />}
-          />
+          <Route path="dashboard" element={<DeviceGrafana role={"device"} />} />
           <Route path="profile" element={<DeviceProfile role={"device"} />} />
         </Route>
 
