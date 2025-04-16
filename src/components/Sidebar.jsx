@@ -47,7 +47,7 @@ const Sidebar = ({ role, children }) => {
   const devicelinks = [
     {
       name: "Dashboard",
-      path: "/device/grafana-dashboard",
+      path: "/device/dashboard",
       icon: <LucideDatabase />,
     },
     // { name: "Applications", path: "/device/dashboard", icon: <Home /> },
