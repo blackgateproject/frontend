@@ -10,13 +10,13 @@ import UserActivityLogs from "./pages/admin/UserActivityLogs";
 import LoginPage from "./pages/Loginpage";
 // import Onboarding from "./pages/Onboarding";
 import AuthPage from "./pages/AuthPage";
+import DeviceGrafana from "./pages/device/GrafanaDashboard";
+import DeviceProfile from "./pages/device/Profile";
 import SetupPage from "./pages/SetupPage";
+import UserGrafana from "./pages/user/GrafanaDashboard";
 import UserDashboard from "./pages/user/UserDashboard";
 import UserHelp from "./pages/user/UserHelp";
 import UserProfile from "./pages/user/UserProfile";
-import UserGrafana from "./pages/user/GrafanaDashboard";
-import DeviceGrafana from "./pages/device/GrafanaDashboard";
-import DeviceProfile from "./pages/device/Profile";
 
 import TestDashbaord from "./pages/test/TestHome";
 
@@ -55,7 +55,10 @@ function App() {
 
         {/* User Routes */}
         <Route path="/user">
-          <Route path="grafana-dashboard" element={<UserGrafana role={"user"} />} />
+          <Route
+            path="grafana-dashboard"
+            element={<UserGrafana role={"user"} />}
+          />
           <Route path="dashboard" element={<UserDashboard role={"user"} />} />
           <Route path="help" element={<UserHelp role={"user"} />} />
           <Route path="profile" element={<UserProfile role={"user"} />} />
@@ -64,16 +67,17 @@ function App() {
 
         {/* Device Routes */}
         <Route path="/device">
-          <Route path="dashboard" element={<DeviceGrafana role={"device"} />} />
+          <Route
+            path="grafana-dashboard"
+            element={<DeviceGrafana role={"device"} />}
+          />
           <Route path="profile" element={<DeviceProfile role={"device"} />} />
         </Route>
 
         {/* Test Routes */}
-        <Route path="/test">
+        <Route path="/test" element={<TestDashbaord role={"test"} />}>
           <Route path="home" element={<TestDashbaord role={"test"} />} />
         </Route>
-
-
       </Routes>
     </Router>
   );
