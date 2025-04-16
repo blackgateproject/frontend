@@ -1,18 +1,10 @@
 import { ethers } from "ethers";
 import FileSaver from "file-saver";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "../../components/Sidebar";
-import { useVeramoOperations } from "../../hooks/useVeramoOperations";
 import { connectorURL } from "../../utils/readEnv";
-
+import { submitDID } from "../../utils/registrations";
 const TestDashboard = () => {
-  const {
-    performGenerateDID,
-    performResolveDID,
-    performIssueVC,
-    performValidateVC,
-    performSubmitDIDVC,
-  } = useVeramoOperations();
   const [users, setUsers] = useState([]);
   const [generateUsers, setGenerateUsers] = useState(1);
   const [verifyUsers, setVerifyUsers] = useState(1);
@@ -26,6 +18,10 @@ const TestDashboard = () => {
   const [longestRegisterTime, setLongestRegisterTime] = useState(0);
   const [fastestVerifyTime, setFastestVerifyTime] = useState(Infinity);
   const [longestVerifyTime, setLongestVerifyTime] = useState(0);
+
+  const [intervalCount, setIntervalCount] = useState(1); // Number of times to run
+  const [isIntervalRunning, setIsIntervalRunning] = useState(false);
+  const intervalRef = useRef(null);
 
   useEffect(() => {
     console.log("All users:", users);
@@ -44,20 +40,11 @@ const TestDashboard = () => {
       console.error("Registering user", i + 1);
 
       const newWallet = ethers.Wallet.createRandom();
-      const didDoc = await performGenerateDID(newWallet);
-      if (!didDoc) {
-        console.error("Failed to generate DID");
-        continue;
-      }
-
-      const resolvedDid = await performResolveDID(didDoc.did);
-      if (!resolvedDid) {
-        console.error("Failed to resolve DID");
-        continue;
-      }
+      const did = `did:ethr:${newWallet.publicKey}`;
 
       const roles = ["user", "admin", "device"];
       const formData = {
+        did: did,
         selected_role: roles[Math.floor(Math.random() * roles.length)],
         alias: i + 1,
         firmware_version: `${Math.floor(Math.random() * 10)}.${Math.floor(
@@ -65,35 +52,15 @@ const TestDashboard = () => {
         )}.${Math.floor(Math.random() * 10)}`,
         testMode: true,
       };
-      const signed_vc = await performIssueVC(didDoc, formData);
-      if (!signed_vc) {
-        console.error("Failed to issue VC");
-        continue;
-      }
 
-      const validationResult = await performValidateVC(signed_vc);
-      if (!validationResult) {
-        console.error("Failed to validate VC");
-        continue;
-      }
-
-      const did = didDoc.did;
-      const submitResult = await performSubmitDIDVC(
-        newWallet,
-        did,
-        signed_vc,
-        formData
-      );
+      const submitResult = await submitDID(formData);
       if (!submitResult) {
         console.error("Failed to submit DID and VC");
         continue;
       }
 
-      const walletAddress = newWallet.address;
       try {
-        const response = await fetch(
-          `${connectorURL}/auth/v1/pollTest/${walletAddress}`
-        );
+        const response = await fetch(`${connectorURL}/auth/v1/pollTest/${did}`);
 
         if (!response.ok) {
           throw new Error("Failed to fetch request status");
@@ -107,14 +74,7 @@ const TestDashboard = () => {
         console.log("fetch data:", data);
 
         const user = {
-          alias: formData.alias,
-          did: did,
-          wallet: newWallet.address,
-          firmware_version: formData.firmware_version,
-          selected_role: formData.selected_role,
-          merkle_hash: data.merkle_hash,
-          merkle_root: data.merkle_root,
-          tx_hash: data.tx_hash,
+          verifiable_credential: data.verifiable_credential,
           request_status: data.request_status,
           message: data.message,
         };
@@ -124,16 +84,9 @@ const TestDashboard = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
         const user = {
-          alias: formData.alias,
-          did: did,
-          wallet: newWallet.address,
-          firmware_version: formData.firmware_version,
-          selected_role: formData.selected_role,
-          merkle_hash: null,
-          merkle_root: null,
-          tx_hash: null,
-          request_status: null,
-          message: "Error occurred while polling",
+          verifiable_credential: data.verifiable_credential,
+          request_status: data.request_status,
+          message: data.message,
         };
 
         setUsers((prevUsers) => [...prevUsers, user]);
@@ -174,20 +127,19 @@ const TestDashboard = () => {
       const startTime = performance.now();
       const user = selectedUsers[i];
       console.log(`Verifying user ${i + 1}:`);
-      console.log(
-        `User Data: \nMerkle Hash: ${user.merkle_hash}\nDID: ${user.did}`
-      );
+      const merkleHash =
+        user.verifiable_credential.credential.credentialSubject.ZKP.userHash;
+      const did = user.verifiable_credential.credential.credentialSubject.did;
 
+      console.log("Merkle Hash:", merkleHash);
+      console.log("DID:", did);
       try {
         const response = await fetch(`${connectorURL}/auth/v1/verify`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            did: user.did,
-            merkleHash: user.merkle_hash,
-          }),
+          body: JSON.stringify(user.verifiable_credential),
         });
 
         if (!response.ok) {
@@ -221,7 +173,7 @@ const TestDashboard = () => {
         setSuccessfulVerifications((prevCount) => prevCount + 1);
       } catch (error) {
         console.error(
-          `Error verifying user ${user.alias} (DID: ${user.did}):`,
+          `Error verifying user ${user.verifiable_credential.credential.credentialSubject.alias} (DID: ${did}):`,
           error
         );
 
@@ -255,6 +207,28 @@ const TestDashboard = () => {
     setLongestVerifyTime(longestTime);
 
     console.log("Verification complete. Updated users:", users);
+  };
+
+  const handleStartInterval = () => {
+    if (isIntervalRunning) {
+      clearInterval(intervalRef.current);
+      setIsIntervalRunning(false);
+      console.log("Interval stopped.");
+    } else {
+      let runs = 0;
+      console.log(`Interval started to run ${intervalCount} times.`);
+      intervalRef.current = setInterval(() => {
+        if (runs >= intervalCount) {
+          clearInterval(intervalRef.current);
+          setIsIntervalRunning(false);
+          console.log("Interval completed.");
+          return;
+        }
+        handleVerifySubmit(new Event("submit"));
+        runs++;
+      }, 1000); // Runs every second
+      setIsIntervalRunning(true);
+    }
   };
 
   const handleSaveUsers = () => {
@@ -378,6 +352,35 @@ const TestDashboard = () => {
               Verify Users
             </button>
           </form>
+          <div className="mt-4">
+            <label
+              htmlFor="intervalCount"
+              className="block mb-2 font-medium text-gray-700"
+            >
+              Interval Count (times to run):
+            </label>
+            <input
+              type="number"
+              id="intervalCount"
+              name="intervalCount"
+              min="1"
+              value={intervalCount}
+              onChange={(e) => setIntervalCount(e.target.value)}
+              className="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            />
+            <button
+              onClick={handleStartInterval}
+              className={`mt-4 px-4 py-2 ${
+                isIntervalRunning
+                  ? "bg-red-600 hover:bg-red-700"
+                  : "bg-blue-600 hover:bg-blue-700"
+              } text-white rounded-md transition-colors focus:outline-none focus:ring-2 ${
+                isIntervalRunning ? "focus:ring-red-500" : "focus:ring-blue-500"
+              } focus:ring-offset-2`}
+            >
+              {isIntervalRunning ? "Stop Interval" : "Start Interval"}
+            </button>
+          </div>
           <div className="mt-4 p-3 bg-blue-50 rounded-md">
             <p className="text-blue-700 font-medium">
               Successful Verifications:{" "}

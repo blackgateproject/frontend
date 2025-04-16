@@ -9,54 +9,71 @@ export const verifyMerkleProof = async (
 ) => {
   setIsLoadingTx(true);
   try {
-    // const merkleProof = localStorage.getItem("merkleProof");
-    const merkleHash = localStorage.getItem("merkleHash");
-    // const merkleProof = localStorage.getItem("merkleProof");
-    const did = localStorage.getItem("did");
+    const verifiable_credential = localStorage.getItem("verifiable_credential");
+    console.log("VC exists in localStorage:", !!verifiable_credential);
+    if (!verifiable_credential) {
+      throw new Error(
+        "[VC Verify ERR]: verifiable_credential not found in localStorage"
+      );
+    }
 
-    const creds = {
-      // merkleProof: JSON.parse(merkleProof),
-      merkleHash: merkleHash,
-      did: did,
-    };
-    console.log("sending data:", creds);
+    console.log("sending data:", verifiable_credential);
     const response = await fetch(`${connectorURL}/auth/v1/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(creds),
+      body: verifiable_credential,
     });
 
     const data = await response.json();
 
     if (response.ok) {
       console.log("Got response", data);
-      // setCurrentStep(data.message);
-      // Check the results object if both valid-Offchain and valid-Onchain are true then verification is successful
-      if (data.results.valid_Offchain && data.results.valid_Onchain) {
-        sessionStorage.setItem("access_token", data.access_token || "");
-        sessionStorage.setItem("refresh_token", data.refresh_token || "");
 
+      // Debug the results structure
+      console.log("Results structure:", data.results);
+      console.log("Access token exists:", !!data.access_token);
+      console.log("Refresh token exists:", !!data.refresh_token);
+
+      // Store tokens regardless of validation results
+      if (data.access_token) {
+        sessionStorage.setItem("access_token", data.access_token);
+        console.log("Access token stored in session");
+      }
+
+      if (data.refresh_token) {
+        sessionStorage.setItem("refresh_token", data.refresh_token);
+        console.log("Refresh token stored in session");
+      }
+
+      // Check the results object if both valid-Offchain and valid-Onchain are true then verification is successful
+      if (
+        data.results &&
+        ((data.results.valid_Offchain && data.results.valid_Onchain) ||
+          (data.results.validOffchain && data.results.validOnchain))
+      ) {
         try {
-          const verifiableCredential = localStorage.getItem(
-            "verifiableCredential"
+          const verifiable_credential = localStorage.getItem(
+            "verifiable_credential"
           );
-          if (!verifiableCredential) {
+          if (!verifiable_credential) {
             throw new Error(
-              "[VC Verify ERR]: verifiableCredential not found in localStorage"
+              "[VC Verify ERR]: verifiable_credential not found in localStorage"
             );
           }
 
-          const parsedCredential = JSON.parse(verifiableCredential);
+          const parsedCredential = JSON.parse(verifiable_credential);
           if (
-            !parsedCredential.credentialSubject ||
-            !parsedCredential.credentialSubject.selected_role
+            !parsedCredential.credential ||
+            !parsedCredential.credential.credentialSubject ||
+            !parsedCredential.credential.credentialSubject.selected_role
           ) {
             throw new Error("[VC Verify ERR]: Invalid credential structure");
           }
 
-          const role = parsedCredential.credentialSubject.selected_role;
+          const role =
+            parsedCredential.credential.credentialSubject.selected_role;
           console.log("Role:", role);
 
           navigate(`/${role}/dashboard`);

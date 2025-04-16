@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@digitalcredentials/open-badges-context": "^2.1.0",
+    "@react-spring/web": "^9.7.5",
     "@spruceid/didkit-wasm": "^0.2.1",
     "@supabase/supabase-js": "^2.49.1",
     "@tanstack/react-query": "^5.67.3",

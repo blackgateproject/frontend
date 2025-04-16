@@ -94,7 +94,7 @@ const SignupForm = ({
           setWallet, // Now properly defined
           setIsWalletLoaded,
           setIsLoadingWallet,
-          () => {},
+          () => { },
           setSigner // Now properly defined
         );
 
@@ -104,6 +104,7 @@ const SignupForm = ({
 
         // Get wallet address and use it to create DID
         // const address = walletObj.address;
+        
         setFormData({
           ...formData,
           did: `did:ethr:${walletObj.publicKey}`,
@@ -256,7 +257,7 @@ const SignupForm = ({
 
         try {
           // Await the result of pollForRequestStatus
-          const status = await pollForRequestStatus(wallet.address);
+          const status = await pollForRequestStatus(formData.did);
           console.log("Polling result:", status);
 
           if (status && status.request_status) {
@@ -267,16 +268,16 @@ const SignupForm = ({
                 console.log("Request approved!");
 
                 // Store merkle proof and hash in local storage
-                localStorage.setItem("merkleHash", status.merkle_hash);
+                // localStorage.setItem("merkleHash", status.merkle_hash);
                 // localStorage.setItem(
                 //   "merkleProof",
                 //   JSON.stringify(status.merkle_proof)
                 // );
                 // localStorage.setItem("merkleRoot", status.merkle_root);
-                localStorage.setItem("did", did);
+                // localStorage.setItem("did", did);
                 localStorage.setItem(
-                  "verifiableCredential",
-                  JSON.stringify(signed_vc)
+                  "verifiable_credential",
+                  JSON.stringify(status.verifiable_credential)
                 );
 
                 setShowProgress(false); // Hide progress indicator
@@ -336,12 +337,12 @@ const SignupForm = ({
         />
       </div>
 
-      <h2 className="text-center text-2xl font-bold text-primary mb-6">
-        Create BLACKGATE Account
+      <h2 className="text-center text-2xl font-bold text-Black mb-6">
+        Create Account
       </h2>
 
       {showProgress ? (
-        <VerticalProgressIndicator currentStep={currentStep} steps={steps} /> // Show progress indicator with steps
+        <VerticalProgressIndicator currentStep={currentStep} steps={steps} />
       ) : (
         <>
           {isSuccess ? (
@@ -419,9 +420,8 @@ const SignupForm = ({
                       type="password"
                       value={walletPassword}
                       onChange={(e) => setWalletPassword(e.target.value)}
-                      className={`input input-bordered w-full ${
-                        errors.walletPassword ? "input-error" : ""
-                      }`}
+                      className={`input input-bordered w-full ${errors.walletPassword ? "input-error" : ""
+                        }`}
                       placeholder="Enter wallet password"
                     />
                     {errors.walletPassword && (
@@ -442,9 +442,8 @@ const SignupForm = ({
                         onChange={(e) =>
                           setConfirmWalletPassword(e.target.value)
                         }
-                        className={`input input-bordered w-full ${
-                          errors.confirmWalletPassword ? "input-error" : ""
-                        }`}
+                        className={`input input-bordered w-full ${errors.confirmWalletPassword ? "input-error" : ""
+                          }`}
                         placeholder="Confirm wallet password"
                       />
                       {errors.confirmWalletPassword && (
@@ -459,13 +458,13 @@ const SignupForm = ({
                     <button
                       type="button"
                       onClick={() => setShowWalletPasswordModal(false)}
-                      className="btn flex-1"
+                      className="btn flex-1 bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="btn btn-primary flex-1"
+                      className="btn flex-1 bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
                       disabled={isLoadingWallet}
                     >
                       {isLoadingWallet ? (
@@ -480,7 +479,6 @@ const SignupForm = ({
                 </form>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Role Selection */}
                   <div className="mb-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Role
@@ -525,9 +523,8 @@ const SignupForm = ({
                         value={formData.alias}
                         onChange={handleChange}
                         placeholder="Enter a temp name"
-                        className={`input input-bordered w-full ${
-                          errors.alias ? "input-error" : ""
-                        }`}
+                        className={`input input-bordered w-full ${errors.alias ? "input-error" : ""
+                          }`}
                       />
                       {errors.alias && (
                         <p className="mt-1 text-sm text-red-500">
@@ -536,7 +533,6 @@ const SignupForm = ({
                       )}
                     </div>
 
-                    {/* DID */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         DID
@@ -547,9 +543,8 @@ const SignupForm = ({
                           name="did"
                           value={formData.did}
                           placeholder="did:ethr:0x..."
-                          className={`input input-bordered w-full ${
-                            errors.did ? "input-error" : ""
-                          } bg-gray-100`}
+                          className={`input input-bordered w-full ${errors.did ? "input-error" : ""
+                            } bg-gray-100`}
                           readOnly={true}
                         />
                         {formData.did && (
@@ -584,30 +579,8 @@ const SignupForm = ({
                     </div>
                   </div>
 
-                  {/* Device-specific fields */}
                   {selected_role === "device" && (
                     <div className="space-y-4 animate-fadeIn">
-                      {/* <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Device ID
-                        </label>
-                        <input
-                          type="text"
-                          name="deviceId"
-                          value={formData.deviceId}
-                          onChange={handleChange}
-                          placeholder="Device-123456"
-                          className={`input input-bordered w-full ${
-                            errors.deviceId ? "input-error" : ""
-                          }`}
-                        />
-                        {errors.deviceId && (
-                          <p className="mt-1 text-sm text-red-500">
-                            {errors.deviceId}
-                          </p>
-                        )}
-                      </div> */}
-
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Firmware Version
@@ -618,9 +591,8 @@ const SignupForm = ({
                           value={formData.firmware_version}
                           onChange={handleChange}
                           placeholder="v1.0.0"
-                          className={`input input-bordered w-full ${
-                            errors.firmware_version ? "input-error" : ""
-                          }`}
+                          className={`input input-bordered w-full ${errors.firmware_version ? "input-error" : ""
+                            }`}
                         />
                         {errors.firmware_version && (
                           <p className="mt-1 text-sm text-red-500">
