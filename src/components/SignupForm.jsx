@@ -338,7 +338,7 @@ const SignupForm = ({
       </div>
 
       <h2 className="text-center text-2xl font-bold text-Black mb-6">
-        Create Account
+        Create BlackGate Account!
       </h2>
 
       {showProgress ? (
