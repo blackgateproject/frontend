@@ -104,6 +104,7 @@ const SignupForm = ({
 
         // Get wallet address and use it to create DID
         // const address = walletObj.address;
+        
         setFormData({
           ...formData,
           did: `did:ethr:${walletObj.publicKey}`,
