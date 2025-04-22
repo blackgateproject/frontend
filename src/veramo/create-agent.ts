@@ -34,7 +34,7 @@ import { JsonRpcProvider } from "ethers";
 //     nothing: "https://example.com/custom/context",
 //   },
 // };
-console.log("Loaded BLOCKCHAIN_RPC_PROVIDER:", blockchainHost);
+console.log("Loaded BLOCKCHAIN_RPC_URL:", blockchainHost);
 console.log("Loaded CHAIN_ID:", blockchainChainID);
 console.log("Loaded ContractAddr: ", didRegistryAddress);
 
@@ -70,13 +70,10 @@ export const localAgent = createAgent<
               name: "blackgate",
               // [NOTE::] Use this for external zksync
               // provider: new JsonRpcProvider(
-              //   BLOCKCHAIN_RPC_PROVIDER, 300),
+              //   BLOCKCHAIN_RPC_URL, 300),
               // registry: ContractABI.entries[0].address,
               // // [NOTE::] Use this for dokcerized zksync
-              provider: new JsonRpcProvider(
-                blockchainHost,
-                300
-              ),
+              provider: new JsonRpcProvider(blockchainHost, 300),
               // provider: new JsonRpcProvider(
               //   blockchainHost as string,
               //   blockchainChainID as number
@@ -97,9 +94,7 @@ export const localAgent = createAgent<
           // chainId: 300,
           // name: "blackgate",
           // provider: new JsonRpcProvider(blockchainHost as string) as any,
-          provider: new JsonRpcProvider(
-            blockchainHost as string,
-          ) as any,
+          provider: new JsonRpcProvider(blockchainHost as string) as any,
           registry: didRegistryAddress as string,
           chainId: 300,
           // chainId: blockchainChainID as number,
