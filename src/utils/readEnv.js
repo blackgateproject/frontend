@@ -1,21 +1,24 @@
 /**
  * @type {string} URL of the blockchain RPC provider
  */
-export const blockchainHost = import.meta.env.VITE_BLOCKCHAIN_RPC_PROVIDER;
+export const blockchainHost = import.meta.env.VITE_BLOCKCHAIN_RPC_URL;
 
 /**
  * @type {number} Chain ID of the blockchain
  */
-export const blockchainChainID = Number(import.meta.env.VITE_BLOCKCHAIN_CHAIN_ID);
+export const blockchainChainID = Number(
+  import.meta.env.VITE_BLOCKCHAIN_CHAIN_ID
+);
 
 /**
  * @type {string} Address of DID_Registry contract
-*/
-export const didRegistryAddress = import.meta.env.VITE_BLOCKCHAIN_DID_REGISTRY_ADDR;
+ */
+export const didRegistryAddress = import.meta.env
+  .VITE_BLOCKCHAIN_DID_REGISTRY_ADDR;
 
 /**
  * @type {string} Address of Merkle contract
-*/
+ */
 export const merkleAddress = import.meta.env.VITE_BLOCKCHAIN_MERKLE_ADDR;
 
 /**
