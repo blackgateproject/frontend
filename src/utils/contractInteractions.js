@@ -1,15 +1,6 @@
 import { ethers } from "ethers";
 import { Provider, Wallet } from "zksync-web3";
 
-{
-  /*
-  Make sure ContractABI points to the contract ABI, 
-  for dev, it is created+stored in the blockchain repo after contract compiles+deploys
-  for prod, it will be stored in the /contracts folder
-  */
-}
-// import ContractABI from "../../../blockchain/deployments-zk/zkSyncSepoliaTestnet/contracts/Merkle.sol/Merkle.json";
-// import ContractABI from "../../deployments-zk/zkSyncSepoliaTestnet/contracts/Merkle.sol/Merkle.json";
 
 export const providerInstance = async (providerType) => {
   // Use "ethers" for Ethereum and "zksync" for zkSync
@@ -23,23 +14,7 @@ export const providerInstance = async (providerType) => {
     return provider;
   }
 };
-// export const contractInstance = async () => {
-//   const provider = await providerInstance("ethers");
-//   const contractAddress = merkleAddress;
-//   const contractABI = ContractABI.abi;
-//   console.log("Contract Address:", contractAddress);
-//   // console.log("Contract ABI:", contractABI);
-//   const contract = new ethers.Contract(contractAddress, contractABI, provider);
-//   return contract;
-// };
 
-export const fetchBalance = async (wallet, setBalance) => {
-  if (wallet) {
-    const provider = await providerInstance("ethers");
-    const balance = await provider.getBalance(wallet.address);
-    setBalance(parseFloat(ethers.formatEther(balance)).toFixed(4));
-  }
-};
 
 export const createNewWallet = async (
   walletPassword,
