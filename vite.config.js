@@ -15,8 +15,20 @@ export default defineConfig({
         "@digitalcredentials/open-badges-context"
       ),
     },
-    optimizeDeps: {
-      include: ["@digitalcredentials/open-badges-context"],
+  },
+  optimizeDeps: {
+    include: ["@digitalcredentials/open-badges-context"],
+  },
+  build: {
+    outDir: "dist",
+    assetsDir: "assets",
+    emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+        },
+      },
     },
   },
 });
