@@ -1,13 +1,20 @@
 version: "3.8"
-
+# slightly annoying, but every env for the frontend has to be typed in by hand as a build arg
 services:
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - VITE_CONNECTOR_URL=${VITE_CONNECTOR_URL}
+        - VITE_GRAFANA_URL=${VITE_GRAFANA_URL}
+        - VITE_GRAFANA_DASHBOARD_AUTH_TIMES=${VITE_GRAFANA_DASHBOARD_AUTH_TIMES}
+        - VITE_GRAFANA_DASHBOARD_ADMIN_DASH_STATS=${VITE_GRAFANA_DASHBOARD_ADMIN_DASH_STATS}
     environment:
       - VITE_CONNECTOR_URL=${VITE_CONNECTOR_URL}
       - VITE_GRAFANA_URL=${VITE_GRAFANA_URL}
+      - VITE_GRAFANA_DASHBOARD_AUTH_TIMES=${VITE_GRAFANA_DASHBOARD_AUTH_TIMES}
+      - VITE_GRAFANA_DASHBOARD_ADMIN_DASH_STATS=${VITE_GRAFANA_DASHBOARD_ADMIN_DASH_STATS}
     ports:
       - "80:80"
     restart: unless-stopped
