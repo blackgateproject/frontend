@@ -6,8 +6,8 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - VITE_CONNECTOR_URL=${CONNNECTOR_URL}
-      - VITE_GRAFANA_URL=${GRAFANA_URL}
+      - VITE_CONNECTOR_URL=${VITE_CONNECTOR_URL}
+      - VITE_GRAFANA_URL=${VITE_GRAFANA_URL}
     ports:
       - "80:80"
     restart: unless-stopped
