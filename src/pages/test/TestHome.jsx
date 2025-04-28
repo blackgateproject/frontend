@@ -51,8 +51,8 @@ const TestDashboard = () => {
         firmware_version: `${Math.floor(Math.random() * 10)}.${Math.floor(
           Math.random() * 10
         )}.${Math.floor(Math.random() * 10)}`,
-        testMode: true,
         proof_type: proofType, // <-- Add this line
+        testMode: true,
       };
 
       const submitResult = await submitDID(formData);

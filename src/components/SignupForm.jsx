@@ -23,11 +23,11 @@ const SignupForm = ({
   const [selected_role, setselected_role] = useState("user");
   const [formData, setFormData] = useState({
     did: "",
-    alias: "",
-    // publicKey: "",
     selected_role: "",
+    alias: "",
     firmware_version: "",
     proof_type: "merkle",
+    // publicKey: "",
   });
   const [errors, setErrors] = useState({});
   const [isGeneratingKeys, setIsGeneratingKeys] = useState(false);
