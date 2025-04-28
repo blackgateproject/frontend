@@ -277,7 +277,6 @@ const TestDashboard = () => {
                 id="generateUsers"
                 name="generateUsers"
                 min="1"
-                max="1000"
                 value={generateUsers}
                 onChange={(e) => setGenerateUsers(e.target.value)}
                 className="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
@@ -360,7 +359,6 @@ const TestDashboard = () => {
                 id="verifyUsers"
                 name="verifyUsers"
                 min="1"
-                max="1000"
                 value={verifyUsers}
                 onChange={(e) => setVerifyUsers(e.target.value)}
                 className="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
