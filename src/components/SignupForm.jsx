@@ -23,10 +23,11 @@ const SignupForm = ({
   const [selected_role, setselected_role] = useState("user");
   const [formData, setFormData] = useState({
     did: "",
-    alias: "",
-    // publicKey: "",
     selected_role: "",
+    alias: "",
     firmware_version: "",
+    proof_type: "merkle",
+    // publicKey: "",
   });
   const [errors, setErrors] = useState({});
   const [isGeneratingKeys, setIsGeneratingKeys] = useState(false);
@@ -94,7 +95,7 @@ const SignupForm = ({
           setWallet, // Now properly defined
           setIsWalletLoaded,
           setIsLoadingWallet,
-          () => { },
+          () => {},
           setSigner // Now properly defined
         );
 
@@ -104,7 +105,7 @@ const SignupForm = ({
 
         // Get wallet address and use it to create DID
         // const address = walletObj.address;
-        
+
         setFormData({
           ...formData,
           did: `did:ethr:${walletObj.publicKey}`,
@@ -222,6 +223,7 @@ const SignupForm = ({
       const updatedFormData = {
         ...formData,
         selected_role: selected_role,
+        proof_type: formData.proof_type,
       };
 
       // console.warn("Form Data:", updatedFormData);
@@ -256,8 +258,14 @@ const SignupForm = ({
         console.log(`Polling attempt ${attempts}/${maxAttempts}`);
 
         try {
-          // Await the result of pollForRequestStatus
-          const status = await pollForRequestStatus(formData.did);
+          // Await the result of pollForRequestStatus_MerkleTree
+          if (formData.proof_type === "merkle") {
+            console.log("Polling for Merkle Tree status...");
+          }
+          const status = await pollForRequestStatus(
+            formData.did,
+            formData.proof_type
+          );
           console.log("Polling result:", status);
 
           if (status && status.request_status) {
@@ -420,8 +428,9 @@ const SignupForm = ({
                       type="password"
                       value={walletPassword}
                       onChange={(e) => setWalletPassword(e.target.value)}
-                      className={`input input-bordered w-full ${errors.walletPassword ? "input-error" : ""
-                        }`}
+                      className={`input input-bordered w-full ${
+                        errors.walletPassword ? "input-error" : ""
+                      }`}
                       placeholder="Enter wallet password"
                     />
                     {errors.walletPassword && (
@@ -442,8 +451,9 @@ const SignupForm = ({
                         onChange={(e) =>
                           setConfirmWalletPassword(e.target.value)
                         }
-                        className={`input input-bordered w-full ${errors.confirmWalletPassword ? "input-error" : ""
-                          }`}
+                        className={`input input-bordered w-full ${
+                          errors.confirmWalletPassword ? "input-error" : ""
+                        }`}
                         placeholder="Confirm wallet password"
                       />
                       {errors.confirmWalletPassword && (
@@ -512,7 +522,27 @@ const SignupForm = ({
                       </button>
                     </div>
                   </div>
+
                   <div className="space-y-4 animate-fadeIn">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        ZKP Proof type
+                      </label>
+                      <select
+                        className="select select-bordered bg-base-100 text-gray-500 shadow-sm"
+                        value={formData.proof_type}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            proof_type: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="merkle">Merkle</option>
+                        <option value="smt">Sparse Merkle Tree</option>
+                        {/* <option value="acc">Accumulator</option> */}
+                      </select>
+                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Alias
@@ -523,8 +553,9 @@ const SignupForm = ({
                         value={formData.alias}
                         onChange={handleChange}
                         placeholder="Enter a temp name"
-                        className={`input input-bordered w-full ${errors.alias ? "input-error" : ""
-                          }`}
+                        className={`input input-bordered w-full ${
+                          errors.alias ? "input-error" : ""
+                        }`}
                       />
                       {errors.alias && (
                         <p className="mt-1 text-sm text-red-500">
@@ -543,8 +574,9 @@ const SignupForm = ({
                           name="did"
                           value={formData.did}
                           placeholder="did:ethr:0x..."
-                          className={`input input-bordered w-full ${errors.did ? "input-error" : ""
-                            } bg-gray-100`}
+                          className={`input input-bordered w-full ${
+                            errors.did ? "input-error" : ""
+                          } bg-gray-100`}
                           readOnly={true}
                         />
                         {formData.did && (
@@ -591,8 +623,9 @@ const SignupForm = ({
                           value={formData.firmware_version}
                           onChange={handleChange}
                           placeholder="v1.0.0"
-                          className={`input input-bordered w-full ${errors.firmware_version ? "input-error" : ""
-                            }`}
+                          className={`input input-bordered w-full ${
+                            errors.firmware_version ? "input-error" : ""
+                          }`}
                         />
                         {errors.firmware_version && (
                           <p className="mt-1 text-sm text-red-500">

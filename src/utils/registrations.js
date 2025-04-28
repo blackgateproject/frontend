@@ -40,8 +40,8 @@ export const submitDID = async (formData) => {
 };
 
 // Poll for request status
-export const pollForRequestStatus = async (did_str) => {
-  console.log("Polling for request status...");
+export const pollForRequestStatus = async (did_str, proof_type) => {
+  console.log(`Polling for ${proof_type} request status...`);
 
   return fetch(`${connectorURL}/auth/v1/poll/${did_str}`)
     .then((response) => {
