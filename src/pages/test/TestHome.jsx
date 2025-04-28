@@ -8,6 +8,7 @@ const TestDashboard = () => {
   const [users, setUsers] = useState([]);
   const [generateUsers, setGenerateUsers] = useState(1);
   const [verifyUsers, setVerifyUsers] = useState(1);
+  const [proofType, setProofType] = useState("merkle"); // <-- Add this line
   const [successfulVerifications, setSuccessfulVerifications] = useState(0);
   const [failedVerifications, setFailedVerifications] = useState(0);
 
@@ -51,6 +52,7 @@ const TestDashboard = () => {
           Math.random() * 10
         )}.${Math.floor(Math.random() * 10)}`,
         testMode: true,
+        proof_type: proofType, // <-- Add this line
       };
 
       const submitResult = await submitDID(formData);
@@ -280,6 +282,25 @@ const TestDashboard = () => {
                 onChange={(e) => setGenerateUsers(e.target.value)}
                 className="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
+            </div>
+            {/* ZKP Proof Type Selection */}
+            <div className="flex flex-col">
+              <label
+                htmlFor="proofType"
+                className="mb-2 font-medium text-gray-700"
+              >
+                ZKP proof type:
+              </label>
+              <select
+                id="proofType"
+                name="proofType"
+                value={proofType}
+                onChange={(e) => setProofType(e.target.value)}
+                className="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              >
+                <option value="merkle">merkle</option>
+                <option value="smt">sparse merkle tree</option>
+              </select>
             </div>
             <button
               type="submit"
