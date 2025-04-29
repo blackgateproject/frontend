@@ -259,9 +259,9 @@ const SignupForm = ({
 
         try {
           // Await the result of pollForRequestStatus_MerkleTree
-          if (formData.proof_type === "merkle") {
-            console.log("Polling for Merkle Tree status...");
-          }
+          // if (formData.proof_type === "merkle") {
+          //   console.log("Polling for Merkle Tree status...");
+          // }
           const status = await pollForRequestStatus(
             formData.did,
             formData.proof_type
@@ -540,7 +540,7 @@ const SignupForm = ({
                       >
                         <option value="merkle">Merkle</option>
                         <option value="smt">Sparse Merkle Tree</option>
-                        {/* <option value="acc">Accumulator</option> */}
+                        <option value="accumulator">Accumulator</option>
                       </select>
                     </div>
                     <div>
