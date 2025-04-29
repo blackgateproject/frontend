@@ -1,11 +1,10 @@
-import { animated } from "@react-spring/web";
+import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import SignupForm from "../components/SignupForm";
 import { verifyMerkleProof } from "../utils/verification";
-
 const LoginPage = () => {
   // non state
   let did = "";
@@ -37,15 +36,13 @@ const LoginPage = () => {
   const [shapes, setShapes] = useState([]);
   const shapeCount = 100; // Define the number of shapes to generate
   const colorPalette = [
-    "#00d969", // Primary color
-    "#009648", // Secondary color
-    "#076034", // Accent color
-    "#06753d", // Base-200 color
-    "#004D29", // Base-300 color
-    "#5F6368", // Slate-900 color
-    "#4A4E51", // Slate-950 color
+    "#0068ff", // Primary color
+    "#0040ff", // Secondary color
+    "#AE4AFF", // Accent color
+    "#000000", // Base-200 color
+    // "#F4F4F4", // Slate-900 color
+    // "#F3F3F3", // Slate-950 color
   ];
-
   // Check if merkle proof and hash exist in local storage
   useEffect(() => {
     const checkLocalStorage = () => {
@@ -88,7 +85,7 @@ const LoginPage = () => {
     const generateShapes = () => {
       let shapesArray = [];
       for (let i = 0; i < shapeCount; i++) {
-        const randomSize = Math.random() * 8 + 2; // Random size between 2px and 10px
+        const randomSize = Math.random() * 25 + 4; // Random size between 2px and 10px
         const randomX = Math.random() * window.innerWidth;
         const randomY = Math.random() * window.innerHeight;
 
@@ -131,7 +128,7 @@ const LoginPage = () => {
 
         return updatedShapes;
       });
-    }, 15); // Update positions every 15ms
+    }, 5); // Update positions every 15ms
 
     return () => clearInterval(intervalId); // Clean up on unmount
   }, []); // Empty dependency array ensures this runs once on mount
@@ -142,11 +139,13 @@ const LoginPage = () => {
 
     let merkleHash = null;
     let did = null;
+    let ZKP = null;
 
     // Only try to parse if verifiable_credential exists
     if (verifiable_credential) {
       try {
         const parsedVC = JSON.parse(verifiable_credential);
+        ZKP = parsedVC.credential?.credentialSubject?.ZKP;
         merkleHash = parsedVC.credential?.credentialSubject?.ZKP?.userHash;
         did = parsedVC.credential?.credentialSubject?.did;
       } catch (error) {
@@ -164,7 +163,7 @@ const LoginPage = () => {
         setCurrentPage("signup");
       }
     } else {
-      if (merkleHash && did) {
+      if (ZKP && did) {
         // Handle verification
         verifyMerkleProof(
           setIsLoadingTx,
@@ -199,11 +198,17 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-400 to-bg-primary relative overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98, y: 30 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.98, y: 30 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-400 to-bg-primary relative overflow-hidden "
+    >
       {/* Animated shapes with different colors */}
       <div className="absolute top-0 left-0 w-full h-full z-0">
         {shapes.map((shape) => (
-          <animated.div
+          <motion.div
             key={shape.id}
             style={{
               position: "absolute",
@@ -213,6 +218,16 @@ const LoginPage = () => {
               width: shape.size,
               height: shape.size,
               borderRadius: "50%",
+            }}
+            animate={{
+              x: shape.x,
+              y: shape.y,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 60,
+              damping: 20,
+              mass: 0.5,
             }}
           />
         ))}
@@ -227,18 +242,34 @@ const LoginPage = () => {
           </button>
         )}
         {currentPage === "signup" ? (
-          <SignupForm
-            walletExists={walletExists}
-            setWalletExists={setWalletExists}
-            setWallet={setWallet}
-            setSigner={setSigner}
-            setIsWalletLoaded={setIsWalletLoaded}
-            setErrorMessage={setErrorMessage}
-            setIsErrorModalOpen={setIsErrorModalOpen}
-            wallet={wallet} // Pass wallet to SignupForm
-          />
+          <motion.div
+            key="signup"
+            initial={{ opacity: 0, scale: 0.95, y: 40 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 40 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden"
+          >
+            <SignupForm
+              walletExists={walletExists}
+              setWalletExists={setWalletExists}
+              setWallet={setWallet}
+              setSigner={setSigner}
+              setIsWalletLoaded={setIsWalletLoaded}
+              setErrorMessage={setErrorMessage}
+              setIsErrorModalOpen={setIsErrorModalOpen}
+              wallet={wallet}
+            />
+          </motion.div>
         ) : currentPage === "auth1" ? (
-          <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
+          <motion.div
+            key="auth1"
+            initial={{ opacity: 0, scale: 0.95, y: 40 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 40 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden"
+          >
             <h2 className="text-center text-3xl font-bold text-Black">
               Verify via ZKP
             </h2>
@@ -278,23 +309,36 @@ const LoginPage = () => {
                 <p className="mt-2">Verifying...</p>
               </div>
             )}
-          </div>
+          </motion.div>
         ) : currentPage === "auth2" ? (
-          <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
+          <motion.div
+            key="auth2"
+            initial={{ opacity: 0, scale: 0.95, y: 40 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 40 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden"
+          >
             {/* <h2 className="text-center text-3xl font-bold text-Black">
             Verify via VC
           </h2> */}
             {/* Add your VC verification component or logic here */}
-          </div>
+          </motion.div>
         ) : (
-          <div className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden">
+          <motion.div
+            key="main"
+            initial={{ opacity: 0, scale: 0.95, y: 40 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 40 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden"
+          >
             <div className="flex justify-center items-center mb-4">
               <img src={logo} alt="logo" className="w-24" />
             </div>
             <h2 className="text-center text-3xl font-bold  text-Black">
               {walletExists ? "BLACKGATE" : "Welcome to BLACKGATE"}
             </h2>
-
             <div className=" text-center">
               <div>
                 <p className="text-black mb-4">
@@ -358,7 +402,7 @@ const LoginPage = () => {
                 <Loader2 className="animate-spin" />
               </div>
             )}
-          </div>
+          </motion.div>
         )}
 
         <dialog id="error-modal" className="modal">
@@ -377,7 +421,7 @@ const LoginPage = () => {
           </div>
         </dialog>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
