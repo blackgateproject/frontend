@@ -45,7 +45,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const [shapes, setShapes] = useState([]);
-  const shapeCount = 5; // Define the number of shapes to generate
+  const shapeCount = 100; // Define the number of shapes to generate
   // Check if merkle proof and hash exist in local storage
   useEffect(() => {
     const checkLocalStorage = () => {
@@ -89,8 +89,9 @@ const LoginPage = () => {
       let shapesArray = [];
       // Use 10% to 20% of the smaller window dimension for circle size
       const minDim = Math.min(window.innerWidth, window.innerHeight);
-      const minSizeLimit = 0.4;
-      const maxSizeLimit = 0.7;
+      const circleSizeVariance = 0.1
+      const minSizeLimit = 0;
+      const maxSizeLimit = minSizeLimit + circleSizeVariance;
       const minSize = minDim * minSizeLimit;
       const maxSize = minDim * maxSizeLimit;
 
