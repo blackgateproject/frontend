@@ -42,6 +42,7 @@ const LoginPage = () => {
   const [showDebugBoxes, setShowDebugBoxes] = useState(false); // Add this flag
   const [aabbScale, setAabbScale] = useState(0.65); // 1 = same as circle, <1 = smaller, >1 = bigger
   const [aabbOffset, setAabbOffset] = useState(0); // px offset for all sides
+  const [mouse, setMouse] = useState({ x: null, y: null }); // Track mouse position
   const navigate = useNavigate();
 
   const [shapes, setShapes] = useState([]);
@@ -83,13 +84,22 @@ const LoginPage = () => {
     }
   }, [isErrorModalOpen]);
 
+  // Track mouse position
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMouse({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
   // Generate shapes with random sizes, positions, and colors
   useEffect(() => {
     const generateShapes = () => {
       let shapesArray = [];
       // Use 10% to 20% of the smaller window dimension for circle size
       const minDim = Math.min(window.innerWidth, window.innerHeight);
-      const circleSizeVariance = 0.1
+      const circleSizeVariance = 0.1;
       const minSizeLimit = 0;
       const maxSizeLimit = minSizeLimit + circleSizeVariance;
       const minSize = minDim * minSizeLimit;
@@ -154,7 +164,26 @@ const LoginPage = () => {
           let newX = shape.x + newVx;
           let newY = shape.y + newVy;
 
-          // Calculate AABB with scale and offset
+          // --- Mouse repulsion logic ---
+          let repelled = false;
+          if (mouse.x !== null && mouse.y !== null) {
+            const cx = newX + shape.size / 2;
+            const cy = newY + shape.size / 2;
+            const dx = cx - mouse.x;
+            const dy = cy - mouse.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const repelRadius = shape.size * 1.5; // Repel if within this radius
+
+            if (dist < repelRadius && dist > 0) {
+              // Repel: push away from mouse
+              const force = 1.5 * (1 - dist / repelRadius); // Stronger when closer
+              newVx += (dx / dist) * force;
+              newVy += (dy / dist) * force;
+              repelled = true;
+            }
+          }
+
+          // --- Bounce logic (unchanged) ---
           const aabbSize = shape.size * aabbScale + aabbOffset * 2;
           const aabbLeft =
             newX - (shape.size * (aabbScale - 1)) / 2 - aabbOffset;
@@ -163,7 +192,6 @@ const LoginPage = () => {
             newY - (shape.size * (aabbScale - 1)) / 2 - aabbOffset;
           const aabbBottom = aabbTop + aabbSize;
 
-          // Bounce off the left and right edges using AABB
           if (aabbLeft < 0) {
             newX = 0 + (shape.size * (aabbScale - 1)) / 2 + aabbOffset;
             newVx = -newVx;
@@ -176,7 +204,6 @@ const LoginPage = () => {
             newVx = -newVx;
           }
 
-          // Bounce off the top and bottom edges using AABB
           if (aabbTop < 0) {
             newY = 0 + (shape.size * (aabbScale - 1)) / 2 + aabbOffset;
             newVy = -newVy;
@@ -189,6 +216,13 @@ const LoginPage = () => {
             newVy = -newVy;
           }
 
+          // Only dampen velocity if repelled by mouse
+          if (repelled) {
+            const dampenRatio = 0.80; // Adjust this value to control the damping effect
+            newVx *= dampenRatio;
+            newVy *= dampenRatio;
+          }
+
           return { ...shape, x: newX, y: newY, vx: newVx, vy: newVy };
         });
 
@@ -197,7 +231,7 @@ const LoginPage = () => {
     }, 5);
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [mouse, aabbScale, aabbOffset]);
 
   const handleButtonClick = () => {
     const encryptedWallet = localStorage.getItem("encryptedWallet");
