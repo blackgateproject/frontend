@@ -299,6 +299,7 @@ const TestDashboard = () => {
               >
                 <option value="merkle">merkle</option>
                 <option value="smt">sparse merkle tree</option>
+                <option value="accumulator">accumulator</option>
               </select>
             </div>
             <button
