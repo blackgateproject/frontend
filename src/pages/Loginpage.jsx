@@ -34,19 +34,20 @@ const LoginPage = () => {
   const [hasVC, setHasVC] = useState(false);
   const [isBackendInSetupMode, setIsBackendInSetupMode] = useState(false);
   const [isCheckingBackendStatus, setIsCheckingBackendStatus] = useState(false); // Set to true to enable setup mode
-
+  
   const [showAuthButtons, setShowAuthButtons] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const [previousPage, setPreviousPage] = useState(null);
   const [currentPage, setCurrentPage] = useState("main");
   const [showDebugBoxes, setShowDebugBoxes] = useState(false); // Add this flag
-  const [aabbScale, setAabbScale] = useState(0.65); // 1 = same as circle, <1 = smaller, >1 = bigger
+  const [aabbScale, setAabbScale] = useState(0.05); // 1 = same as circle, <1 = smaller, >1 = bigger
+  // const [aabbScale, setAabbScale] = useState(0.65); // 1 = same as circle, <1 = smaller, >1 = bigger
   const [aabbOffset, setAabbOffset] = useState(0); // px offset for all sides
   const [mouse, setMouse] = useState({ x: null, y: null }); // Track mouse position
   const navigate = useNavigate();
 
   const [shapes, setShapes] = useState([]);
-  const shapeCount = 100; // Define the number of shapes to generate
+  const shapeCount = 3; // Define the number of shapes to generate
   // Check if merkle proof and hash exist in local storage
   useEffect(() => {
     const checkLocalStorage = () => {
@@ -100,7 +101,7 @@ const LoginPage = () => {
       // Use 10% to 20% of the smaller window dimension for circle size
       const minDim = Math.min(window.innerWidth, window.innerHeight);
       const circleSizeVariance = 0.1;
-      const minSizeLimit = 0;
+      const minSizeLimit = 2.5;
       const maxSizeLimit = minSizeLimit + circleSizeVariance;
       const minSize = minDim * minSizeLimit;
       const maxSize = minDim * maxSizeLimit;
@@ -218,7 +219,7 @@ const LoginPage = () => {
 
           // Only dampen velocity if repelled by mouse
           if (repelled) {
-            const dampenRatio = 0.80; // Adjust this value to control the damping effect
+            const dampenRatio = 0.8; // Adjust this value to control the damping effect
             newVx *= dampenRatio;
             newVy *= dampenRatio;
           }

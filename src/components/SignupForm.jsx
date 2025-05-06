@@ -42,6 +42,10 @@ const SignupForm = ({
   const { performSubmitDID } = useVeramoOperations();
   const [showProgress, setShowProgress] = useState(false); // State to show progress indicator
   const [currentStep, setCurrentStep] = useState(0); // Add currentStep state
+  const [walletTimings, setWalletTimings] = useState({
+    createTime: 0,
+    encryptTime: 0,
+  });
   const steps = [
     "Generate DID📝",
     // "Resolve DID ✅",
@@ -109,6 +113,7 @@ const SignupForm = ({
         setFormData({
           ...formData,
           did: `did:ethr:${walletObj.publicKey}`,
+          walletTimes: walletTimings,
           // publicKey: walletObj.publicKey || `0x${address.substring(2)}`,
         });
 
@@ -146,7 +151,7 @@ const SignupForm = ({
         });
 
         // Create encrypted wallet
-        await createNewWallet(walletPassword, setWalletExists, setWallet);
+        await createNewWallet(walletPassword, setWalletExists, setWallet, setWalletTimings);
 
         setShowWalletPasswordModal(false);
       } catch (error) {

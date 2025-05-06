@@ -19,17 +19,24 @@ export const providerInstance = async (providerType) => {
 export const createNewWallet = async (
   walletPassword,
   setWalletExists,
-  setWallet
+  setWallet,
+  setWalletTimings
   // setAccount
 ) => {
   console.log("Creating new wallet with password:", walletPassword);
+  const startTime = performance.now();
   const newWallet = ethers.Wallet.createRandom();
+  const walletCreateTime = performance.now() - startTime;
   const encryptedWallet = await newWallet.encrypt(walletPassword);
+  const walletEncryptTime = performance.now() - startTime - walletCreateTime;
+  setWalletTimings({ walletCreateTime, walletEncryptTime });
   localStorage.setItem("encryptedWallet", encryptedWallet);
   setWalletExists(true);
   setWallet(newWallet);
   // setAccount(newWallet.address);
   console.log("New wallet created:", newWallet);
+  console.info("Wallet Create Time:", walletCreateTime);
+  console.info("Wallet Encrypt Time:", walletEncryptTime);
 };
 
 export const loadWallet = async (
