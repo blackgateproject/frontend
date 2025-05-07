@@ -1,9 +1,12 @@
-import { ethers } from "ethers";
 import { KeySquare, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
 import { useVeramoOperations } from "../hooks/useVeramoOperations";
-import { createNewWallet, loadWallet } from "../utils/contractInteractions";
+import {
+  createNewWallet,
+  encryptAndStoreWallet,
+  loadWallet,
+} from "../utils/contractInteractions";
 import { pollForRequestStatus } from "../utils/registrations";
 import VerticalProgressIndicator from "./VerticalProgressIndicator"; // Import the progress indicator
 
@@ -93,7 +96,12 @@ const SignupForm = ({
       }
 
       try {
-        const { wallet: walletObj, signer: signerObj } = await loadWallet(
+        const {
+          wallet: walletObj,
+          signer: signerObj,
+          walletCreateTime,
+          walletEncryptTime,
+        } = await loadWallet(
           localStorage.getItem("encryptedWallet"),
           walletPassword,
           setWallet, // Now properly defined
@@ -108,13 +116,10 @@ const SignupForm = ({
         setSignerLocal(signerObj);
 
         // Get wallet address and use it to create DID
-        // const address = walletObj.address;
-
         setFormData({
           ...formData,
           did: `did:ethr:${walletObj.publicKey}`,
-          walletTimes: walletTimings,
-          // publicKey: walletObj.publicKey || `0x${address.substring(2)}`,
+          walletTimes: { walletCreateTime, walletEncryptTime },
         });
 
         setShowWalletPasswordModal(false);
@@ -125,6 +130,8 @@ const SignupForm = ({
       }
     } else {
       // Create a new wallet
+
+      // Check if password is provided
       if (!walletPassword) {
         setErrors({ walletPassword: "Password is required" });
         setIsGeneratingKeys(false);
@@ -132,6 +139,7 @@ const SignupForm = ({
         return;
       }
 
+      // Check if confirm password is provided
       if (walletPassword !== confirmWalletPassword) {
         setErrors({ confirmWalletPassword: "Passwords do not match" });
         setIsGeneratingKeys(false);
@@ -140,18 +148,31 @@ const SignupForm = ({
       }
 
       try {
-        // Create a new random wallet
-        const randomWallet = ethers.Wallet.createRandom();
-
-        // Set the DID and public key
+        // Create wallet and get timings
+        const {
+          wallet: newWallet,
+          walletCreateTime,
+          walletEncryptTime,
+        } = await createNewWallet(
+          walletPassword,
+          setWalletExists,
+          setWallet,
+          setWalletTimings
+        );
+        // Set the DID and public key using the returned wallet object
         setFormData({
           ...formData,
-          did: `did:ethr:blackgate:${randomWallet.publicKey}`,
-          // publicKey: randomWallet.publicKey,
+          did: `did:ethr:blackgate:${newWallet.publicKey}`,
+          walletTimes: { walletCreateTime, walletEncryptTime },
         });
 
-        // Create encrypted wallet
-        await createNewWallet(walletPassword, setWalletExists, setWallet, setWalletTimings);
+        // // Ensure wallet is encrypted & stored after sending to server
+        // await encryptAndStoreWallet(
+        //   newWallet,
+        //   walletPassword,
+        //   setWalletExists,
+        //   setWalletTimings
+        // );
 
         setShowWalletPasswordModal(false);
       } catch (error) {
@@ -231,15 +252,17 @@ const SignupForm = ({
         proof_type: formData.proof_type,
       };
 
-      // console.warn("Form Data:", updatedFormData);
-
-      // Generate DID
-      // const didDoc = await performGenerateDID(wallet);
-      // const did = didDoc.did;
-
       // Submit DID + VC
       setCurrentStep(1);
       await performSubmitDID(updatedFormData);
+
+      // Encrypt and store wallet after DID submission
+      await encryptAndStoreWallet(
+        wallet,
+        walletPassword,
+        setWalletExists,
+        setWalletTimings
+      );
 
       setCurrentStep(2);
       console.log("Form submitted:", updatedFormData);

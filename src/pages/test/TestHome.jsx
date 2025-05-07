@@ -1,7 +1,7 @@
-import { ethers } from "ethers";
 import FileSaver from "file-saver";
 import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "../../components/Sidebar";
+import { createNewWallet } from "../../utils/contractInteractions";
 import { connectorURL } from "../../utils/readEnv";
 import { submitDID } from "../../utils/registrations";
 const TestDashboard = () => {
@@ -36,11 +36,25 @@ const TestDashboard = () => {
     let fastestTime = Infinity;
     let longestTime = 0;
 
+    // Dummy state setters for createNewWallet (since this is a test page)
+    const setWalletExists = () => {};
+    const setWallet = () => {};
+    const setWalletTimings = () => {};
+
     for (let i = 0; i < generateUsers; i++) {
       const startTime = performance.now();
       console.error("Registering user", i + 1);
 
-      const newWallet = ethers.Wallet.createRandom();
+      const {
+        wallet: newWallet,
+        walletCreateTime,
+        walletEncryptTime,
+      } = await createNewWallet(
+        "password",
+        setWalletExists,
+        setWallet,
+        setWalletTimings
+      );
       const did = `did:ethr:${newWallet.publicKey}`;
 
       const roles = ["user", "admin", "device"];
@@ -53,6 +67,10 @@ const TestDashboard = () => {
         )}.${Math.floor(Math.random() * 10)}`,
         proof_type: proofType, // <-- Add this line
         testMode: true,
+        walletTimes: {
+          walletCreateTime: walletCreateTime,
+          walletEncryptTime: walletEncryptTime,
+        },
       };
 
       const submitResult = await submitDID(formData);
