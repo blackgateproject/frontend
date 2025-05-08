@@ -1,3 +1,5 @@
+import { connectorURL } from "./readEnv"
+
 export const logUserInfo = async () => {
   const userInfo = {
     user_agent: "",
@@ -33,8 +35,10 @@ export const logUserInfo = async () => {
   }
 
   // Log IP Address
+  // Make sure X-Forwarded-For is sent if using a proxy server
   try {
-    const response = await fetch("https://api.ipify.org?format=json");
+    const response = await fetch(`${connectorURL}/get-ip`);
+    // const response = await fetch(`https://api.ipify.org?format=json`);
     const data = await response.json();
     userInfo.ip_address = data.ip;
   } catch (error) {
