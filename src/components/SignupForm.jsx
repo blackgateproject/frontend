@@ -29,7 +29,7 @@ const SignupForm = ({
     selected_role: "",
     alias: "",
     firmware_version: "",
-    deviceId: "", // <-- Add this line
+    device_id: "", // <-- Add this line
     proof_type: "merkle",
     // publicKey: "",
   });
@@ -213,8 +213,8 @@ const SignupForm = ({
     }
 
     if (selected_role === "device") {
-      if (!formData.deviceId) {
-        newErrors.deviceId = "Device ID is required";
+      if (!formData.device_id) {
+        newErrors.device_id = "Device ID is required";
       }
       if (!formData.firmware_version) {
         newErrors.firmware_version = "Firmware version is required";
@@ -647,17 +647,17 @@ const SignupForm = ({
                         </label>
                         <input
                           type="text"
-                          name="deviceId"
-                          value={formData.deviceId}
+                          name="device_id"
+                          value={formData.device_id}
                           onChange={handleChange}
                           placeholder="Enter device ID"
                           className={`input input-bordered w-full ${
-                            errors.deviceId ? "input-error" : ""
+                            errors.device_id ? "input-error" : ""
                           }`}
                         />
-                        {errors.deviceId && (
+                        {errors.device_id && (
                           <p className="mt-1 text-sm text-red-500">
-                            {errors.deviceId}
+                            {errors.device_id}
                           </p>
                         )}
                       </div>
