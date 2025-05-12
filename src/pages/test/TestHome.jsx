@@ -27,6 +27,7 @@ const TestDashboard = () => {
   const intervalRef = useRef(null);
 
   const [loadedVC, setLoadedVC] = useState(null);
+  const [loadedWallet, setLoadedWallet] = useState(null); // NEW
   const [generatedVP, setGeneratedVP] = useState(null);
   const [waitingForVC, setWaitingForVC] = useState(false);
 
@@ -39,6 +40,7 @@ const TestDashboard = () => {
   useEffect(() => {
     if (waitingForVC && users.length > 0) {
       setLoadedVC(users[users.length - 1].verifiable_credential);
+      setLoadedWallet(users[users.length - 1].wallet || null); // <-- Add this line
       setWaitingForVC(false);
     }
   }, [users, waitingForVC]);
@@ -70,7 +72,7 @@ const TestDashboard = () => {
         setWallet,
         setWalletTimings
       );
-      const did = `did:ethr:${newWallet.publicKey}`;
+      const did = `did:ethr:blackgate:${newWallet.publicKey}`;
 
       const roles = ["user", "admin", "device"];
       const formData = {
@@ -112,16 +114,21 @@ const TestDashboard = () => {
           verifiable_credential: data.verifiable_credential,
           request_status: data.request_status,
           message: data.message,
+          wallet: newWallet, // Always include wallet
+          did,
         };
 
         setUsers((prevUsers) => [...prevUsers, user]);
         console.log("Added new user:", user);
       } catch (error) {
         console.error("Error fetching data:", error);
+
         const user = {
-          verifiable_credential: data.verifiable_credential,
-          request_status: data.request_status,
-          message: data.message,
+          verifiable_credential: null,
+          request_status: null,
+          message: error.message,
+          wallet: newWallet,
+          did,
         };
 
         setUsers((prevUsers) => [...prevUsers, user]);
@@ -291,8 +298,15 @@ const TestDashboard = () => {
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const vc = JSON.parse(event.target.result);
-        setLoadedVC(vc);
+        const data = JSON.parse(event.target.result);
+        // If file contains both VC and wallet, expect { vc, wallet }
+        if (data.vc && data.wallet) {
+          setLoadedVC(data.vc);
+          setLoadedWallet(data.wallet);
+        } else {
+          setLoadedVC(data);
+          setLoadedWallet(null);
+        }
         alert("VC loaded successfully!");
       } catch (err) {
         alert("Failed to parse VC file.");
@@ -307,7 +321,8 @@ const TestDashboard = () => {
       return;
     }
     try {
-      const vp = await performCreatePresentation(loadedVC);
+      // Pass both VC and wallet
+      const vp = await performCreatePresentation(loadedVC, loadedWallet);
       setGeneratedVP(vp);
       alert("VP generated! See console for details.");
       console.log("Generated VP:", vp);
@@ -321,6 +336,10 @@ const TestDashboard = () => {
     setGenerateUsers(1);
     setWaitingForVC(true);
     await handleGenerateSubmit({ preventDefault: () => {} });
+    // After user is generated, also store wallet if available
+    if (users.length > 0 && users[users.length - 1].wallet) {
+      setLoadedWallet(users[users.length - 1].wallet);
+    }
   };
 
   const avgRegisterTime = totalRegisterTime / generateUsers;
@@ -537,23 +556,41 @@ const TestDashboard = () => {
               Register User and Load VC
             </button>
             {loadedVC && (
-              <div className="bg-gray-100 rounded p-2 text-xs mb-2">
-                <div className="font-bold mb-1">credentialSubject Preview:</div>
-                <pre>
-                  {JSON.stringify(
-                    loadedVC.credential?.credentialSubject ||
-                      loadedVC.credentialSubject,
-                    null,
-                    2
-                  )
-                    .split("\n")
-                    .slice(0, 6)
-                    .join("\n")}
-                  {Object.keys(
-                    loadedVC.credential?.credentialSubject ||
-                      loadedVC.credentialSubject
-                  ).length > 6 && "\n..."}
-                </pre>
+              <div className="flex flex-col sm:flex-row gap-4 mb-2">
+                {/* credentialSubject Preview */}
+                <div className="bg-gray-100 rounded p-2 text-xs flex-1">
+                  <div className="font-bold mb-1">
+                    credentialSubject Preview:
+                  </div>
+                  <pre>
+                    {JSON.stringify(
+                      loadedVC.credential?.credentialSubject ||
+                        loadedVC.credentialSubject,
+                      null,
+                      2
+                    )
+                      .split("\n")
+                      .slice(0, 6)
+                      .join("\n")}
+                    {Object.keys(
+                      loadedVC.credential?.credentialSubject ||
+                        loadedVC.credentialSubject
+                    ).length > 6 && "\n..."}
+                  </pre>
+                </div>
+                {/* Wallet Preview */}
+                {loadedWallet && (
+                  <div className="bg-gray-100 rounded p-2 text-xs flex-1">
+                    <div className="font-bold mb-1">Wallet Preview:</div>
+                    <pre>
+                      {JSON.stringify(loadedWallet, null, 2)
+                        .split("\n")
+                        .slice(0, 8)
+                        .join("\n")}
+                      {Object.keys(loadedWallet).length > 8 && "\n..."}
+                    </pre>
+                  </div>
+                )}
               </div>
             )}
             <button
@@ -563,8 +600,12 @@ const TestDashboard = () => {
             >
               Generate VP from Loaded VC
             </button>
+            {/* VP Preview */}
             {generatedVP && (
               <div className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-x-auto">
+                <div className="font-bold mb-1">
+                  Verifiable Presentation Preview:
+                </div>
                 <pre>{JSON.stringify(generatedVP, null, 2)}</pre>
               </div>
             )}

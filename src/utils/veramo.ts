@@ -9,6 +9,7 @@ import {
   VerifiablePresentation,
 } from "@veramo/core";
 import { ICredentialIssuer } from "@veramo/credential-w3c";
+import { Wallet } from "ethers";
 import { v4 as uuidv4 } from "uuid";
 // import { MY_CUSTOM_CONTEXT_URI } from "../veramo/create-agent";
 
@@ -153,7 +154,8 @@ export async function verifyLDCredential(
 
 export async function createPresentationFromCredential(
   vc: VerifiableCredential,
-  agent: TAgent<ICredentialIssuer>
+  agent: TAgent<ICredentialIssuer>,
+  wallet: Wallet
 ): Promise<VerifiablePresentation> {
   console.warn("Creating presentation from credential");
   console.log("Credential: ", vc);
@@ -188,6 +190,29 @@ export async function createPresentationFromCredential(
   }
   console.log("Verifier: ", verifier);
 
+  // We'll import the DID into the agent's DID manager
+  const privateKey = wallet.privateKey;
+  const publicKey = (holder || "").replace("did:ethr:", "");
+  console.warn("PrivateKey: ", privateKey);
+  console.warn("PublicKey: ", publicKey);
+
+  // Import the DID into the agent's DID manager
+  const identifier = await agent.didManagerImport({
+    did: holder,
+    alias: uuidv4().slice(0, 6),
+    provider: "did:ethr:blackgate",
+    keys: [
+      {
+        kid: publicKey,
+        publicKeyHex: publicKey,
+        privateKeyHex: privateKey,
+        kms: "local",
+        type: "Secp256k1" as TKeyType,
+      },
+    ],
+  });
+  console.log("Identifier: ", identifier);
+
   const presentation = await agent.createVerifiablePresentation({
     presentation: {
       holder,
@@ -199,7 +224,7 @@ export async function createPresentationFromCredential(
       verifiableCredential: [actualVC],
     },
     proofFormat: "jwt",
-    save: true,
+    // save: true,
   });
   return presentation;
 }

@@ -9,8 +9,8 @@ export function useVeramoOperations() {
     return submitDID(formData);
   }, []);
 
-  const performCreatePresentation = useCallback(async (vc) => {
-    return createPresentationFromCredential(vc, agent);
+  const performCreatePresentation = useCallback(async (vc, wallet) => {
+    return createPresentationFromCredential(vc, agent, wallet);
   }, []);
   return {
     performSubmitDID,
