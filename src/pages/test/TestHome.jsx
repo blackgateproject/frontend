@@ -1,14 +1,16 @@
 import FileSaver from "file-saver";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Sidebar from "../../components/Sidebar";
+import { useVeramoOperations } from "../../hooks/useVeramoOperations";
 import { createNewWallet } from "../../utils/contractInteractions";
 import { connectorURL } from "../../utils/readEnv";
 import { submitDID } from "../../utils/registrations";
+
 const TestDashboard = () => {
   const [users, setUsers] = useState([]);
   const [generateUsers, setGenerateUsers] = useState(1);
   const [verifyUsers, setVerifyUsers] = useState(1);
-  const [proofType, setProofType] = useState("merkle"); // <-- Add this line
+  const [proofType, setProofType] = useState("merkle");
   const [successfulVerifications, setSuccessfulVerifications] = useState(0);
   const [failedVerifications, setFailedVerifications] = useState(0);
 
@@ -20,13 +22,26 @@ const TestDashboard = () => {
   const [fastestVerifyTime, setFastestVerifyTime] = useState(Infinity);
   const [longestVerifyTime, setLongestVerifyTime] = useState(0);
 
-  const [intervalCount, setIntervalCount] = useState(1); // Number of times to run
+  const [intervalCount, setIntervalCount] = useState(1);
   const [isIntervalRunning, setIsIntervalRunning] = useState(false);
   const intervalRef = useRef(null);
+
+  const [loadedVC, setLoadedVC] = useState(null);
+  const [generatedVP, setGeneratedVP] = useState(null);
+  const [waitingForVC, setWaitingForVC] = useState(false);
+
+  const { performCreatePresentation, agent } = useVeramoOperations();
 
   useEffect(() => {
     console.log("All users:", users);
   }, [users]);
+
+  useEffect(() => {
+    if (waitingForVC && users.length > 0) {
+      setLoadedVC(users[users.length - 1].verifiable_credential);
+      setWaitingForVC(false);
+    }
+  }, [users, waitingForVC]);
 
   const handleGenerateSubmit = async (e) => {
     e.preventDefault();
@@ -65,14 +80,14 @@ const TestDashboard = () => {
         firmware_version: `${Math.floor(Math.random() * 10)}.${Math.floor(
           Math.random() * 10
         )}.${Math.floor(Math.random() * 10)}`,
-        proof_type: proofType, // <-- Add this line
+        proof_type: proofType,
         testMode: true,
         walletTimes: {
           walletCreateTime: walletCreateTime,
           walletEncryptTime: walletEncryptTime,
         },
+        device_id: `${i + 1}`,
       };
-
       const submitResult = await submitDID(formData);
       if (!submitResult) {
         console.error("Failed to submit DID and VC");
@@ -246,7 +261,7 @@ const TestDashboard = () => {
         }
         handleVerifySubmit(new Event("submit"));
         runs++;
-      }, 1000); // Runs every second
+      }, 1000);
       setIsIntervalRunning(true);
     }
   };
@@ -268,6 +283,44 @@ const TestDashboard = () => {
       setUsers(loadedUsers);
     };
     reader.readAsText(file);
+  };
+
+  const handleLoadVC = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const vc = JSON.parse(event.target.result);
+        setLoadedVC(vc);
+        alert("VC loaded successfully!");
+      } catch (err) {
+        alert("Failed to parse VC file.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleGenerateVP = async () => {
+    if (!loadedVC) {
+      alert("No VC loaded!");
+      return;
+    }
+    try {
+      const vp = await performCreatePresentation(loadedVC);
+      setGeneratedVP(vp);
+      alert("VP generated! See console for details.");
+      console.log("Generated VP:", vp);
+    } catch (err) {
+      alert("Failed to generate VP.");
+      console.error(err);
+    }
+  };
+
+  const handleRegisterAndLoadVC = async () => {
+    setGenerateUsers(1);
+    setWaitingForVC(true);
+    await handleGenerateSubmit({ preventDefault: () => {} });
   };
 
   const avgRegisterTime = totalRegisterTime / generateUsers;
@@ -300,7 +353,6 @@ const TestDashboard = () => {
                 className="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
             </div>
-            {/* ZKP Proof Type Selection */}
             <div className="flex flex-col">
               <label
                 htmlFor="proofType"
@@ -471,6 +523,52 @@ const TestDashboard = () => {
             onChange={handleLoadUsers}
             className="mt-4"
           />
+        </div>
+
+        <div className="p-6 bg-white rounded-lg shadow-sm mt-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">
+            VC/VP Utilities
+          </h2>
+          <div className="flex flex-col gap-4">
+            <button
+              onClick={handleRegisterAndLoadVC}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              Register User and Load VC
+            </button>
+            {loadedVC && (
+              <div className="bg-gray-100 rounded p-2 text-xs mb-2">
+                <div className="font-bold mb-1">credentialSubject Preview:</div>
+                <pre>
+                  {JSON.stringify(
+                    loadedVC.credential?.credentialSubject ||
+                      loadedVC.credentialSubject,
+                    null,
+                    2
+                  )
+                    .split("\n")
+                    .slice(0, 6)
+                    .join("\n")}
+                  {Object.keys(
+                    loadedVC.credential?.credentialSubject ||
+                      loadedVC.credentialSubject
+                  ).length > 6 && "\n..."}
+                </pre>
+              </div>
+            )}
+            <button
+              onClick={handleGenerateVP}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              disabled={!loadedVC}
+            >
+              Generate VP from Loaded VC
+            </button>
+            {generatedVP && (
+              <div className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-x-auto">
+                <pre>{JSON.stringify(generatedVP, null, 2)}</pre>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </Sidebar>
