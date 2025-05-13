@@ -29,9 +29,11 @@ const TestDashboard = () => {
   const [loadedVC, setLoadedVC] = useState(null);
   const [loadedWallet, setLoadedWallet] = useState(null); // NEW
   const [generatedVP, setGeneratedVP] = useState(null);
+  const [vpVerificationResult, setVpVerificationResult] = useState(null);
   const [waitingForVC, setWaitingForVC] = useState(false);
 
-  const { performCreatePresentation, agent } = useVeramoOperations();
+  const { performCreatePresentation, verifyPresentationWithConnector, agent } =
+    useVeramoOperations();
 
   useEffect(() => {
     console.log("All users:", users);
@@ -324,11 +326,27 @@ const TestDashboard = () => {
       // Pass both VC and wallet
       const vp = await performCreatePresentation(loadedVC, loadedWallet);
       setGeneratedVP(vp);
-      alert("VP generated! See console for details.");
+      // alert("VP generated! See console for details.");
       console.log("Generated VP:", vp);
     } catch (err) {
       alert("Failed to generate VP.");
       console.error(err);
+    }
+  };
+
+  const handleVerifyVP = async () => {
+    if (!generatedVP) {
+      alert("No VP generated!");
+      return;
+    }
+    setVpVerificationResult(null);
+    try {
+      const result = await verifyPresentationWithConnector(generatedVP);
+      setVpVerificationResult(result);
+      console.log("VP Verification Result:", result);
+    } catch (err) {
+      setVpVerificationResult({ error: err.message });
+      console.error("VP Verification Error:", err);
     }
   };
 
@@ -600,6 +618,13 @@ const TestDashboard = () => {
             >
               Generate VP from Loaded VC
             </button>
+            <button
+              onClick={handleVerifyVP}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              disabled={!generatedVP}
+            >
+              Verify Generated VP
+            </button>
             {/* VP Preview */}
             {generatedVP && (
               <div className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-x-auto">
@@ -607,6 +632,13 @@ const TestDashboard = () => {
                   Verifiable Presentation Preview:
                 </div>
                 <pre>{JSON.stringify(generatedVP, null, 2)}</pre>
+              </div>
+            )}
+            {/* VP Verification Result */}
+            {vpVerificationResult && (
+              <div className="mt-2 p-2 bg-green-100 rounded text-xs overflow-x-auto">
+                <div className="font-bold mb-1">VP Verification Result:</div>
+                <pre>{JSON.stringify(vpVerificationResult, null, 2)}</pre>
               </div>
             )}
           </div>

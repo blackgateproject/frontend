@@ -213,7 +213,7 @@ export async function createPresentationFromCredential(
   });
   console.log("Identifier: ", identifier);
 
-  const presentation = await agent.createVerifiablePresentation({
+  const VerifiablePresentation = await agent.createVerifiablePresentation({
     presentation: {
       holder,
       verifier: verifier ? [verifier] : [],
@@ -226,5 +226,5 @@ export async function createPresentationFromCredential(
     proofFormat: "jwt",
     // save: true,
   });
-  return presentation;
+  return VerifiablePresentation;
 }

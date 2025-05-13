@@ -73,3 +73,26 @@ export const pollForRequestStatus = async (did_str, proof_type) => {
       };
     });
 };
+
+
+
+/**
+ * Send a Verifiable Presentation (VP) to the connector server for verification.
+ * @param {object} vp - The Verifiable Presentation object.
+ * @returns {Promise<object>} - The verification result from the server.
+ */
+export async function verifyPresentation(vp) {
+  try {
+    const response = await fetch(`${connectorURL}/auth/v1/verify-vp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(vp),
+    });
+    if (!response.ok) {
+      throw new Error(`Verification failed: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (err) {
+    return { error: err.message };
+  }
+}
