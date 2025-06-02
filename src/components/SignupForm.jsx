@@ -1,5 +1,5 @@
 import { KeySquare, Loader2 } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import logo from "../assets/logo.png";
 import { useVeramoOperations } from "../hooks/useVeramoOperations";
 import {
@@ -29,6 +29,7 @@ const SignupForm = ({
     selected_role: "",
     alias: "",
     firmware_version: "",
+    device_id: "", // <-- Add this line
     proof_type: "merkle",
     // publicKey: "",
   });
@@ -212,10 +213,9 @@ const SignupForm = ({
     }
 
     if (selected_role === "device") {
-      // if (!formData.deviceId) {
-      //   newErrors.deviceId = "Device ID is required";
-      // }
-
+      if (!formData.device_id) {
+        newErrors.device_id = "Device ID is required";
+      }
       if (!formData.firmware_version) {
         newErrors.firmware_version = "Firmware version is required";
       }
@@ -641,6 +641,26 @@ const SignupForm = ({
 
                   {selected_role === "device" && (
                     <div className="space-y-4 animate-fadeIn">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Device ID
+                        </label>
+                        <input
+                          type="text"
+                          name="device_id"
+                          value={formData.device_id}
+                          onChange={handleChange}
+                          placeholder="Enter device ID"
+                          className={`input input-bordered w-full ${
+                            errors.device_id ? "input-error" : ""
+                          }`}
+                        />
+                        {errors.device_id && (
+                          <p className="mt-1 text-sm text-red-500">
+                            {errors.device_id}
+                          </p>
+                        )}
+                      </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Firmware Version
