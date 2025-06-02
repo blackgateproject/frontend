@@ -10,7 +10,7 @@ const TestDashboard = () => {
   const [users, setUsers] = useState([]);
   const [generateUsers, setGenerateUsers] = useState(1);
   const [verifyUsers, setVerifyUsers] = useState(1);
-  const [proofType, setProofType] = useState("merkle");
+  const [proofType, setProofType] = useState("smt");
   const [successfulVerifications, setSuccessfulVerifications] = useState(0);
   const [failedVerifications, setFailedVerifications] = useState(0);
 
@@ -576,7 +576,7 @@ const TestDashboard = () => {
             {loadedVC && (
               <div className="flex flex-col sm:flex-row gap-4 mb-2">
                 {/* credentialSubject Preview */}
-                <div className="bg-gray-100 rounded p-2 text-xs flex-1">
+                <div className="bg-gray-100 rounded p-2 text-xs flex-1 h-40 overflow-y-auto">
                   <div className="font-bold mb-1">
                     credentialSubject Preview:
                   </div>
@@ -598,7 +598,7 @@ const TestDashboard = () => {
                 </div>
                 {/* Wallet Preview */}
                 {loadedWallet && (
-                  <div className="bg-gray-100 rounded p-2 text-xs flex-1">
+                  <div className="bg-gray-100 rounded p-2 text-xs flex-1 h-40 overflow-y-auto">
                     <div className="font-bold mb-1">Wallet Preview:</div>
                     <pre>
                       {JSON.stringify(loadedWallet, null, 2)
@@ -627,7 +627,7 @@ const TestDashboard = () => {
             </button>
             {/* VP Preview */}
             {generatedVP && (
-              <div className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-x-auto">
+              <div className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-x-auto h-40 overflow-y-auto">
                 <div className="font-bold mb-1">
                   Verifiable Presentation Preview:
                 </div>
@@ -636,7 +636,7 @@ const TestDashboard = () => {
             )}
             {/* VP Verification Result */}
             {vpVerificationResult && (
-              <div className="mt-2 p-2 bg-green-100 rounded text-xs overflow-x-auto">
+              <div className="mt-2 p-2 bg-green-100 rounded text-xs overflow-x-auto h-40 overflow-y-auto">
                 <div className="font-bold mb-1">VP Verification Result:</div>
                 <pre>{JSON.stringify(vpVerificationResult, null, 2)}</pre>
               </div>

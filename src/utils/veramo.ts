@@ -3,6 +3,7 @@ import {
   IDIDManager,
   IIdentifier,
   IResolver,
+  IVerifyPresentationArgs,
   TAgent,
   TKeyType,
   VerifiableCredential,
@@ -154,7 +155,7 @@ export async function verifyLDCredential(
 
 export async function createPresentationFromCredential(
   vc: VerifiableCredential,
-  agent: TAgent<ICredentialIssuer>,
+  agent: TAgent<ICredentialIssuer & IVerifyPresentationArgs>,
   wallet: Wallet
 ): Promise<VerifiablePresentation> {
   console.warn("Creating presentation from credential");
@@ -215,15 +216,21 @@ export async function createPresentationFromCredential(
 
   const VerifiablePresentation = await agent.createVerifiablePresentation({
     presentation: {
-      holder,
-      verifier: verifier ? [verifier] : [],
-      "@context": ["https://www.w3.org/2018/credentials/v1"],
-      type: ["VerifiablePresentation"],
-      issuanceDate: new Date().toISOString(),
-      expirationDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       verifiableCredential: [actualVC],
+      holder: holder,
+      verifier: verifier ? [verifier] : [],
+      // verifier: [],
+      iat: Math.floor(Date.now() / 1000),
+      nbf: Math.floor(new Date(actualVC.issuanceDate).getTime() / 1000),
+      // expirationDate: new Date(Date.now() - 24 * 60 *60 *60 *1000).toISOString(),
+      expirationDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     },
     proofFormat: "jwt",
+    // Setup a nonce for challenge; randomly generated each time
+    challenge: uuidv4(),
+    // domain: "http://127.0.0.1:5000"
+    // removeOriginalFields: false,
+      
     // save: true,
   });
   return VerifiablePresentation;
