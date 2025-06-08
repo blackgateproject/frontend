@@ -1,8 +1,8 @@
 import React from 'react'
 
-const ApplicationsGrid = ({applications}) => {
+const ApplicationsGrid = ({ applications }) => {
   return (
-      <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 gap-6">
+    <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 gap-6">
       {/* replace this with dynamic data fetched from the backend */}
       {applications.map((app, index) => (
         <div

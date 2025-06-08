@@ -12,13 +12,20 @@ import {
   User,
   Users,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/logo.png";
 import { connectorURL } from "../utils/readEnv";
 const Sidebar = ({ role, children }) => {
   const location = useLocation();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(() => {
+    const saved = localStorage.getItem('sidebarExpanded');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('sidebarExpanded', JSON.stringify(isExpanded));
+  }, [isExpanded]);
 
   const adminLinks = [
     { name: "Dashboard", path: "/admin/dashboard", icon: <ChartArea /> },
@@ -67,10 +74,10 @@ const Sidebar = ({ role, children }) => {
     role === "admin"
       ? adminLinks
       : role === "device"
-      ? devicelinks
-      : role === "test"
-      ? testlinks
-      : userLinks;
+        ? devicelinks
+        : role === "test"
+          ? testlinks
+          : userLinks;
   const logoutPath = role === "admin" ? "/" : "/";
 
   const handleLogout = async () => {
@@ -98,15 +105,13 @@ const Sidebar = ({ role, children }) => {
       <div className="flex h-screen max-sm:hidden">
         {/* Sidebar */}
         <div
-          className={`bg-base-100 ${
-            isExpanded ? "w-64" : "w-20"
-          } h-screen flex flex-col justify-between py-4 shadow-lg transition-width duration-200`}
+          className={`bg-base-100 ${isExpanded ? "w-64" : "w-20"
+            } h-screen flex flex-col justify-between py-4 shadow-lg transition-all duration-300 ease-in-out`}
         >
           {/* Logo and Toggle Button */}
           <div
-            className={`flex flex-col gap-4 ${
-              !isExpanded && "items-center"
-            } justify-between px-4`}
+            className={`flex flex-col gap-4 ${!isExpanded && "items-center"
+              } justify-between px-4`}
           >
             <div className="flex items-center">
               <img src={logo} alt="Company Logo" className="w-10 h-10" />
@@ -116,7 +121,11 @@ const Sidebar = ({ role, children }) => {
             </div>
             <button
               className="btn btn-ghost btn-square"
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={() => {
+                const newState = !isExpanded;
+                setIsExpanded(newState);
+                localStorage.setItem('sidebarExpanded', JSON.stringify(newState));
+              }}
             >
               {isExpanded ? <ChevronLeft /> : <ChevronRight />}
             </button>
@@ -127,13 +136,11 @@ const Sidebar = ({ role, children }) => {
             {links.map((link) => (
               <Link to={link.path} key={link.name} title={link.name}>
                 <div
-                  className={`w-full flex items-center ml-4 ${
-                    isExpanded ? "px-4" : "pl-5"
-                  } py-3 rounded-lg ${
-                    location.pathname === link.path
+                  className={`w-full flex items-center ml-4 ${isExpanded ? "px-4" : "pl-5"
+                    } py-3 rounded-lg ${location.pathname === link.path
                       ? "bg-gradient-to-br from-primary to-secondary text-white"
                       : "hover:bg-base-200 text-primary ring-base-200 ring-1 shadow"
-                  }`}
+                    }`}
                 >
                   {link.icon}
                   {isExpanded && <span className="ml-4">{link.name}</span>}
@@ -146,9 +153,8 @@ const Sidebar = ({ role, children }) => {
           <div className="mb-4">
             <button
               onClick={handleLogout}
-              className={`w-full flex items-center ${
-                isExpanded ? "px-4" : "justify-center"
-              } py-2 rounded-lg hover:bg-base-200 text-primary`}
+              className={`w-full flex items-center ${isExpanded ? "px-4" : "justify-center"
+                } py-2 rounded-lg hover:bg-base-200 text-primary`}
             >
               <LogOut />
               {isExpanded && <span className="ml-4">Logout</span>}
@@ -208,11 +214,10 @@ const Sidebar = ({ role, children }) => {
                 <Link to={link.path} key={link.name} className="group">
                   <div
                     className={`w-12 h-12 flex items-center justify-center rounded-lg 
-                  ${
-                    location.pathname === link.path
-                      ? "bg-gradient-to-br from-primary to-secondary text-white"
-                      : "shadow-sm shadow-primary text-primary"
-                  } group-hover:scale-105 transition-transform`}
+                  ${location.pathname === link.path
+                        ? "bg-gradient-to-br from-primary to-secondary text-white"
+                        : "shadow-sm shadow-primary text-primary"
+                      } group-hover:scale-105 transition-transform`}
                   >
                     {link.icon}
                   </div>

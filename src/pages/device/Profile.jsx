@@ -310,329 +310,63 @@ const AdminProfile = () => {
         </div>
 
         {/* Cards Section */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Personal Information Card */}
-          <div className="bg-base-100 rounded-2xl shadow-md p-6 relative">
-            <div className="absolute top-4 right-4">
-              {editingPersonal ? (
-                <div className="space-x-2">
-                  <button
-                    className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
-                    onClick={() => {
-                      setEditingPersonal(false);
-                      setEditForm({ ...profile });
-                      setErrors({});
-                    }}
-                    disabled={isLoading}
-                  >
-                    <X size={16} />
-                    Cancel
-                  </button>
-                  <button
-                    className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
-                    onClick={handleSavePersonal}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="animate-spin" size={16} />
-                    ) : (
-                      <Check size={16} />
-                    )}
-                    Save
-                  </button>
-                </div>
-              ) : (
-                <button
-                  className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
-                  onClick={() => setEditingPersonal(true)}
-                >
-                  <Edit size={16} />
-                  Edit
-                </button>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <SquareUserRound size={32} className="text-primary" />
-              <h2 className="text-xl font-bold text-[#333333]">
-                Personal Information
-              </h2>
-            </div>
-            <div className="mt-6">
-              <div className="grid grid-cols-3 gap-y-4 items-center">
-                {/* First Name */}
-                <p className="font-semibold">First name:</p>
-                <div className="col-span-2">
-                  {editingPersonal ? (
-                    <>
-                      <input
-                        type="text"
-                        value={editForm.firstName}
-                        onChange={(e) =>
-                          setEditForm({
-                            ...editForm,
-                            firstName: e.target.value,
-                          })
-                        }
-                        className="input input-bordered w-full"
-                      />
-                      {errors.firstName && (
-                        <p className="text-red-500 text-sm">
-                          {errors.firstName}
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <p>{profile.firstName}</p>
-                  )}
-                </div>
 
-                {/* Last Name */}
-                <p className="font-semibold">Last name:</p>
-                <div className="col-span-2">
-                  {editingPersonal ? (
-                    <>
-                      <input
-                        type="text"
-                        value={editForm.lastName}
-                        onChange={(e) =>
-                          setEditForm({ ...editForm, lastName: e.target.value })
-                        }
-                        className="input input-bordered w-full"
-                      />
-                      {errors.lastName && (
-                        <p className="text-red-500 text-sm">
-                          {errors.lastName}
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <p>{profile.lastName}</p>
-                  )}
-                </div>
 
-                {/* Email */}
-                <p className="font-semibold">Email:</p>
-                <div className="col-span-2">
-                  {editingPersonal ? (
-                    <>
-                      <input
-                        type="email"
-                        value={editForm.email}
-                        onChange={(e) =>
-                          setEditForm({ ...editForm, email: e.target.value })
-                        }
-                        className="input input-bordered w-full"
-                      />
-                      {errors.email && (
-                        <p className="text-red-500 text-sm">{errors.email}</p>
-                      )}
-                    </>
-                  ) : (
-                    <p>{profile.email}</p>
-                  )}
-                </div>
-
-                {/* Phone Number */}
-                <p className="font-semibold">Phone No.:</p>
-                <div className="col-span-2">
-                  {editingPersonal ? (
-                    <>
-                      <input
-                        type="tel"
-                        value={editForm.phone}
-                        onChange={(e) =>
-                          setEditForm({ ...editForm, phone: e.target.value })
-                        }
-                        className="input input-bordered w-full"
-                      />
-                      {errors.phone && (
-                        <p className="text-red-500 text-sm">{errors.phone}</p>
-                      )}
-                    </>
-                  ) : (
-                    <p>{profile.phone}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Authentication Card */}
-          <div className="bg-base-100 rounded-2xl shadow-md p-6 relative">
-            <div className="absolute top-4 right-4">
-              {editingAuth ? (
-                <div className="space-x-2">
-                  <button
-                    className="btn bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
-                    onClick={() => {
-                      setEditingAuth(false);
-                      setAuthForm({
-                        newPassword: "",
-                        confirmPassword: "",
-                        twoFactorAuth: profile.twoFactorAuth,
-                      });
-                      setErrors({});
-                    }}
-                    disabled={isLoading}
-                  >
-                    <X size={16} />
-                    Cancel
-                  </button>
-                  <button
-                    className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
-                    onClick={handleSaveAuth}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="animate-spin" size={16} />
-                    ) : (
-                      <Check size={16} />
-                    )}
-                    Save
-                  </button>
-                </div>
-              ) : (
-                <button
-                  className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
-                  onClick={() => setEditingAuth(true)}
-                >
-                  <Edit size={16} />
-                  Edit
-                </button>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <KeyRound size={32} className="text-primary" />
-              <h2 className="text-xl font-bold text-[#333333]">
-                Authentication
-              </h2>
-            </div>
-            <div className="mt-6">
-              <div className="grid grid-cols-3 gap-y-4 items-center">
-                {/* Password */}
-                <p className="font-semibold">Password:</p>
-                <div className="col-span-2">
-                  {editingAuth ? (
-                    <>
-                      <input
-                        type="password"
-                        placeholder="New Password"
-                        value={authForm.newPassword}
-                        onChange={(e) =>
-                          setAuthForm({
-                            ...authForm,
-                            newPassword: e.target.value,
-                          })
-                        }
-                        className="input input-bordered w-full"
-                      />
-                      <input
-                        type="password"
-                        placeholder="Confirm Password"
-                        value={authForm.confirmPassword}
-                        onChange={(e) =>
-                          setAuthForm({
-                            ...authForm,
-                            confirmPassword: e.target.value,
-                          })
-                        }
-                        className="input input-bordered w-full mt-2"
-                      />
-                      {errors.password && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.password}
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <p>{profile.passwordSet ? "Set" : "Not Set"}</p>
-                  )}
-                </div>
-
-                {/* 2-Factor Auth */}
-                <p className="font-semibold">2-Factor Auth:</p>
-                <div className="col-span-2">
-                  {editingAuth ? (
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={authForm.twoFactorAuth}
-                        onChange={(e) => {
-                          setAuthForm({
-                            ...authForm,
-                            twoFactorAuth: e.target.checked,
-                          });
-                          if (e.target.checked)
-                            document.getElementById("qr-modal").showModal();
-                        }}
-                        className="checkbox checkbox-primary"
-                      />
-                      <span>Enable 2-Factor Authentication</span>
-                    </div>
-                  ) : (
-                    <p>{profile.twoFactorAuth ? "Enabled" : "Disabled"}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Wallet Card */}
-          <div className="bg-base-100 rounded-2xl shadow-md p-6 relative">
-            <div className="absolute top-4 right-4">
-              <button
-                className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
-                onClick={handleOpenPasswordModal}
-              >
-                {walletExists ? "Load Wallet" : "Create Wallet"}
-              </button>
-            </div>
-            <div className="flex gap-2">
+        {/* Wallet Card */}
+        <div className="bg-base-100 min-w-[30rem] max-w-fit rounded-2xl shadow-md p-6 relative">
+          {/* Top row with flex and justify-between */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex gap-2 items-center">
               <KeyRound size={32} className="text-primary" />
               <h2 className="text-xl font-bold text-[#333333]">Wallet</h2>
             </div>
-            <div className="mt-6">
-              <div className="grid grid-cols-3 gap-y-4 items-center">
-                <p className="font-semibold">Wallet:</p>
-                <div className="col-span-2">
-                  <p>{account}</p>
-                </div>
-                {wallet && (
-                  <>
-                    <p className="font-semibold">Private Key:</p>
-                    <div className="col-span-2">
-                      <p>{wallet.privateKey}</p>
-                    </div>
-                    <p className="font-semibold">Public Key:</p>
-                    <div className="col-span-2">
-                      <p>{wallet.publicKey}</p>
-                    </div>
-                  </>
-                )}
-                {didDetails && (
-                  <>
-                    <p className="font-semibold">DID Document:</p>
-                    <div className="col-span-2">
-                      <pre>
-                        {JSON.stringify(didDetails.didDocument, null, 2)}
-                      </pre>
-                    </div>
-                    <p className="font-semibold">Credential:</p>
-                    <div className="col-span-2">
-                      <pre>
-                        {JSON.stringify(didDetails.credential, null, 2)}
-                      </pre>
-                    </div>
-                    <p className="font-semibold">Proof Options:</p>
-                    <div className="col-span-2">
-                      <pre>
-                        {JSON.stringify(didDetails.proof_options, null, 2)}
-                      </pre>
-                    </div>
-                  </>
-                )}
-              </div>
+            <button
+              className="btn bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
+              onClick={handleOpenPasswordModal}
+            >
+              {walletExists ? "Load Wallet" : "Create Wallet"}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-y-4 items-center">
+            <p className="font-semibold">Wallet:</p>
+            <div className="col-span-2">
+              <p>{account}</p>
             </div>
+            {wallet && (
+              <>
+                <p className="font-semibold">Private Key:</p>
+                <div className="col-span-2">
+                  <PasswordField value={wallet.privateKey} />
+                </div>
+                <p className="font-semibold">Public Key:</p>
+                <div className="col-span-2">
+                  <PasswordField value={wallet.publicKey} />
+                </div>
+              </>
+            )}
+            {didDetails && (
+              <>
+                <p className="font-semibold">DID Document:</p>
+                <div className="col-span-2">
+                  <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-32">
+                    {JSON.stringify(didDetails.didDocument, null, 2)}
+                  </pre>
+                </div>
+                <p className="font-semibold">Credential:</p>
+                <div className="col-span-2">
+                  <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-32">
+                    {JSON.stringify(didDetails.credential, null, 2)}
+                  </pre>
+                </div>
+                <p className="font-semibold">Proof Options:</p>
+                <div className="col-span-2">
+                  <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-32">
+                    {JSON.stringify(didDetails.proof_options, null, 2)}
+                  </pre>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

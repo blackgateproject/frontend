@@ -5,6 +5,9 @@ import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import SignupForm from "../components/SignupForm";
 import { verifyMerkleProof } from "../utils/verification";
+
+import backgroundImage from '../assets/background-circles.gif'
+
 const colorPalette = [
   "#ADD8E6", // Light Blue
   "#87CEEB", // Sky Blue
@@ -34,7 +37,7 @@ const LoginPage = () => {
   const [hasVC, setHasVC] = useState(false);
   const [isBackendInSetupMode, setIsBackendInSetupMode] = useState(false);
   const [isCheckingBackendStatus, setIsCheckingBackendStatus] = useState(false); // Set to true to enable setup mode
-  
+
   const [showAuthButtons, setShowAuthButtons] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const [previousPage, setPreviousPage] = useState(null);
@@ -95,144 +98,144 @@ const LoginPage = () => {
   }, []);
 
   // Generate shapes with random sizes, positions, and colors
-  useEffect(() => {
-    const generateShapes = () => {
-      let shapesArray = [];
-      // Use 10% to 20% of the smaller window dimension for circle size
-      const minDim = Math.min(window.innerWidth, window.innerHeight);
-      const circleSizeVariance = 0.1;
-      const minSizeLimit = 2.5;
-      const maxSizeLimit = minSizeLimit + circleSizeVariance;
-      const minSize = minDim * minSizeLimit;
-      const maxSize = minDim * maxSizeLimit;
+  // useEffect(() => {
+  //   const generateShapes = () => {
+  //     let shapesArray = [];
+  //     // Use 10% to 20% of the smaller window dimension for circle size
+  //     const minDim = Math.min(window.innerWidth, window.innerHeight);
+  //     const circleSizeVariance = 0.1;
+  //     const minSizeLimit = 2.5;
+  //     const maxSizeLimit = minSizeLimit + circleSizeVariance;
+  //     const minSize = minDim * minSizeLimit;
+  //     const maxSize = minDim * maxSizeLimit;
 
-      for (let i = 0; i < shapeCount; i++) {
-        const randomSize = Math.random() * (maxSize - minSize) + minSize;
-        const maxX = Math.max(0, window.innerWidth - randomSize);
-        const maxY = Math.max(0, window.innerHeight - randomSize);
-        const randomX = Math.random() * maxX;
-        const randomY = Math.random() * maxY;
+  //     for (let i = 0; i < shapeCount; i++) {
+  //       const randomSize = Math.random() * (maxSize - minSize) + minSize;
+  //       const maxX = Math.max(0, window.innerWidth - randomSize);
+  //       const maxY = Math.max(0, window.innerHeight - randomSize);
+  //       const randomX = Math.random() * maxX;
+  //       const randomY = Math.random() * maxY;
 
-        const randomColor =
-          colorPalette[Math.floor(Math.random() * colorPalette.length)];
+  //       const randomColor =
+  //         colorPalette[Math.floor(Math.random() * colorPalette.length)];
 
-        shapesArray.push({
-          id: i,
-          x: randomX,
-          y: randomY,
-          size: randomSize,
-          color: randomColor,
-          vx: Math.random() * 0.5 - 0.25,
-          vy: Math.random() * 0.5 - 0.25,
-        });
-      }
-      setShapes(shapesArray);
-    };
+  //       shapesArray.push({
+  //         id: i,
+  //         x: randomX,
+  //         y: randomY,
+  //         size: randomSize,
+  //         color: randomColor,
+  //         vx: Math.random() * 0.5 - 0.25,
+  //         vy: Math.random() * 0.5 - 0.25,
+  //       });
+  //     }
+  //     setShapes(shapesArray);
+  //   };
 
-    generateShapes();
-  }, [shapeCount, colorPalette]);
+  //   generateShapes();
+  // }, [shapeCount, colorPalette]);
 
   // Only update size and clamp positions on resize, keep velocities
-  useEffect(() => {
-    const handleResize = () => {
-      setShapes((prevShapes) => {
-        const minDim = Math.min(window.innerWidth, window.innerHeight);
-        return prevShapes.map((shape) => {
-          // Calculate the original ratio of this shape's size to the old minDim
-          const oldMinDim = shape.size / (shape.size / minDim);
-          const sizeRatio = shape.size / oldMinDim || 0.15; // fallback to 0.15 if NaN
-          const newSize = minDim * sizeRatio;
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     setShapes((prevShapes) => {
+  //       const minDim = Math.min(window.innerWidth, window.innerHeight);
+  //       return prevShapes.map((shape) => {
+  //         // Calculate the original ratio of this shape's size to the old minDim
+  //         const oldMinDim = shape.size / (shape.size / minDim);
+  //         const sizeRatio = shape.size / oldMinDim || 0.15; // fallback to 0.15 if NaN
+  //         const newSize = minDim * sizeRatio;
 
-          const maxX = Math.max(0, window.innerWidth - newSize);
-          const maxY = Math.max(0, window.innerHeight - newSize);
-          const newX = Math.min(shape.x, maxX);
-          const newY = Math.min(shape.y, maxY);
-          return { ...shape, x: newX, y: newY, size: newSize };
-        });
-      });
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  //         const maxX = Math.max(0, window.innerWidth - newSize);
+  //         const maxY = Math.max(0, window.innerHeight - newSize);
+  //         const newX = Math.min(shape.x, maxX);
+  //         const newY = Math.min(shape.y, maxY);
+  //         return { ...shape, x: newX, y: newY, size: newSize };
+  //       });
+  //     });
+  //   };
+  //   window.addEventListener("resize", handleResize);
+  //   return () => window.removeEventListener("resize", handleResize);
+  // }, []);
 
   // Handle shape movement and collision detection
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setShapes((prevShapes) => {
-        const updatedShapes = prevShapes.map((shape) => {
-          let newVx = shape.vx;
-          let newVy = shape.vy;
-          let newX = shape.x + newVx;
-          let newY = shape.y + newVy;
+  // useEffect(() => {
+  //   const intervalId = setInterval(() => {
+  //     setShapes((prevShapes) => {
+  //       const updatedShapes = prevShapes.map((shape) => {
+  //         let newVx = shape.vx;
+  //         let newVy = shape.vy;
+  //         let newX = shape.x + newVx;
+  //         let newY = shape.y + newVy;
 
-          // --- Mouse repulsion logic ---
-          let repelled = false;
-          if (mouse.x !== null && mouse.y !== null) {
-            const cx = newX + shape.size / 2;
-            const cy = newY + shape.size / 2;
-            const dx = cx - mouse.x;
-            const dy = cy - mouse.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const repelRadius = shape.size * 1.5; // Repel if within this radius
+  //         // --- Mouse repulsion logic ---
+  //         let repelled = false;
+  //         if (mouse.x !== null && mouse.y !== null) {
+  //           const cx = newX + shape.size / 2;
+  //           const cy = newY + shape.size / 2;
+  //           const dx = cx - mouse.x;
+  //           const dy = cy - mouse.y;
+  //           const dist = Math.sqrt(dx * dx + dy * dy);
+  //           const repelRadius = shape.size * 1.5; // Repel if within this radius
 
-            if (dist < repelRadius && dist > 0) {
-              // Repel: push away from mouse
-              const force = 1.5 * (1 - dist / repelRadius); // Stronger when closer
-              newVx += (dx / dist) * force;
-              newVy += (dy / dist) * force;
-              repelled = true;
-            }
-          }
+  //           if (dist < repelRadius && dist > 0) {
+  //             // Repel: push away from mouse
+  //             const force = 1.5 * (1 - dist / repelRadius); // Stronger when closer
+  //             newVx += (dx / dist) * force;
+  //             newVy += (dy / dist) * force;
+  //             repelled = true;
+  //           }
+  //         }
 
-          // --- Bounce logic (unchanged) ---
-          const aabbSize = shape.size * aabbScale + aabbOffset * 2;
-          const aabbLeft =
-            newX - (shape.size * (aabbScale - 1)) / 2 - aabbOffset;
-          const aabbRight = aabbLeft + aabbSize;
-          const aabbTop =
-            newY - (shape.size * (aabbScale - 1)) / 2 - aabbOffset;
-          const aabbBottom = aabbTop + aabbSize;
+  //         // --- Bounce logic (unchanged) ---
+  //         const aabbSize = shape.size * aabbScale + aabbOffset * 2;
+  //         const aabbLeft =
+  //           newX - (shape.size * (aabbScale - 1)) / 2 - aabbOffset;
+  //         const aabbRight = aabbLeft + aabbSize;
+  //         const aabbTop =
+  //           newY - (shape.size * (aabbScale - 1)) / 2 - aabbOffset;
+  //         const aabbBottom = aabbTop + aabbSize;
 
-          if (aabbLeft < 0) {
-            newX = 0 + (shape.size * (aabbScale - 1)) / 2 + aabbOffset;
-            newVx = -newVx;
-          } else if (aabbRight > window.innerWidth) {
-            newX =
-              window.innerWidth -
-              aabbSize +
-              (shape.size * (aabbScale - 1)) / 2 +
-              aabbOffset;
-            newVx = -newVx;
-          }
+  //         if (aabbLeft < 0) {
+  //           newX = 0 + (shape.size * (aabbScale - 1)) / 2 + aabbOffset;
+  //           newVx = -newVx;
+  //         } else if (aabbRight > window.innerWidth) {
+  //           newX =
+  //             window.innerWidth -
+  //             aabbSize +
+  //             (shape.size * (aabbScale - 1)) / 2 +
+  //             aabbOffset;
+  //           newVx = -newVx;
+  //         }
 
-          if (aabbTop < 0) {
-            newY = 0 + (shape.size * (aabbScale - 1)) / 2 + aabbOffset;
-            newVy = -newVy;
-          } else if (aabbBottom > window.innerHeight) {
-            newY =
-              window.innerHeight -
-              aabbSize +
-              (shape.size * (aabbScale - 1)) / 2 +
-              aabbOffset;
-            newVy = -newVy;
-          }
+  //         if (aabbTop < 0) {
+  //           newY = 0 + (shape.size * (aabbScale - 1)) / 2 + aabbOffset;
+  //           newVy = -newVy;
+  //         } else if (aabbBottom > window.innerHeight) {
+  //           newY =
+  //             window.innerHeight -
+  //             aabbSize +
+  //             (shape.size * (aabbScale - 1)) / 2 +
+  //             aabbOffset;
+  //           newVy = -newVy;
+  //         }
 
-          // Only dampen velocity if repelled by mouse
-          if (repelled) {
-            const dampenRatio = 0.8; // Adjust this value to control the damping effect
-            newVx *= dampenRatio;
-            newVy *= dampenRatio;
-          }
+  //         // Only dampen velocity if repelled by mouse
+  //         if (repelled) {
+  //           const dampenRatio = 0.8; // Adjust this value to control the damping effect
+  //           newVx *= dampenRatio;
+  //           newVy *= dampenRatio;
+  //         }
 
-          return { ...shape, x: newX, y: newY, vx: newVx, vy: newVy };
-        });
+  //         return { ...shape, x: newX, y: newY, vx: newVx, vy: newVy };
+  //       });
 
-        return updatedShapes;
-      });
-    }, 5);
+  //       return updatedShapes;
+  //     });
+  //   }, 5);
 
-    return () => clearInterval(intervalId);
-  }, [mouse, aabbScale, aabbOffset]);
+  //   return () => clearInterval(intervalId);
+  // }, [mouse, aabbScale, aabbOffset]);
 
   const handleButtonClick = () => {
     const encryptedWallet = localStorage.getItem("encryptedWallet");
@@ -300,51 +303,16 @@ const LoginPage = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.98, y: 30 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.98, y: 30 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-400 to-bg-primary relative overflow-hidden "
+      className="h-screen flex items-center justify-center relative overflow-hidden"
+      style={{
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
     >
-      {/* Animated shapes with different colors */}
-      <div className="absolute top-0 left-0 w-full h-full z-0">
-        {shapes.map((shape) => (
-          <React.Fragment key={shape.id}>
-            {/* Circle */}
-            <div
-              style={{
-                position: "absolute",
-                left: shape.x,
-                top: shape.y,
-                backgroundColor: shape.color,
-                width: shape.size,
-                height: shape.size,
-                borderRadius: "50%",
-                pointerEvents: "none",
-                mixBlendMode: "multiply",
-              }}
-            />
-            {/* AABB bounding box for debugging */}
-            {showDebugBoxes && (
-              <div
-                style={{
-                  position: "absolute",
-                  left:
-                    shape.x - (shape.size * (aabbScale - 1)) / 2 - aabbOffset,
-                  top:
-                    shape.y - (shape.size * (aabbScale - 1)) / 2 - aabbOffset,
-                  width: shape.size * aabbScale + aabbOffset * 2,
-                  height: shape.size * aabbScale + aabbOffset * 2,
-                  border: "2px dashed red",
-                  pointerEvents: "none",
-                  boxSizing: "border-box",
-                  zIndex: 1,
-                }}
-              />
-            )}
-          </React.Fragment>
-        ))}
-      </div>
+      {/* Animated shapes with different colors */} {/** REMOVED */}
+
       {/* Debug controls */}
       {showDebugBoxes && (
         <div style={{ position: "absolute", top: 10, right: 10, zIndex: 100 }}>
@@ -387,7 +355,7 @@ const LoginPage = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 40 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden"
+            className="bg-base-100 p-10 rounded-2xl shadow-xl w-[30rem] "
           >
             <SignupForm
               walletExists={walletExists}
@@ -407,7 +375,7 @@ const LoginPage = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 40 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden"
+            className="bg-base-100 p-10 rounded-2xl shadow-xl w-96"
           >
             <h2 className="text-center text-3xl font-bold text-Black">
               Verify via ZKP
@@ -456,7 +424,7 @@ const LoginPage = () => {
             animate={{ opacity: 1, scale: 0.95, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 40 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden"
+            className="bg-base-100 p-10 rounded-2xl shadow-xl w-96"
           >
             {/* <h2 className="text-center text-3xl font-bold text-Black">
             Verify via VC
@@ -470,7 +438,7 @@ const LoginPage = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 40 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="bg-base-100 p-10 rounded-2xl shadow-xl w-96 overflow-hidden"
+            className="bg-base-100 p-10 rounded-2xl shadow-xl w-96"
           >
             <div className="flex justify-center items-center mb-4">
               <img src={logo} alt="logo" className="w-24" />

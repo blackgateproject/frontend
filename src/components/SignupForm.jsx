@@ -1,4 +1,4 @@
-import { KeySquare, Loader2 } from "lucide-react";
+import { Copy, KeySquare, Loader2 } from "lucide-react";
 import { useState } from "react";
 import logo from "../assets/logo.png";
 import { useVeramoOperations } from "../hooks/useVeramoOperations";
@@ -108,7 +108,7 @@ const SignupForm = ({
           setWallet, // Now properly defined
           setIsWalletLoaded,
           setIsLoadingWallet,
-          () => {},
+          () => { },
           setSigner // Now properly defined
         );
 
@@ -364,7 +364,7 @@ const SignupForm = ({
   };
 
   return (
-    <div className="bg-base-100 p-8 rounded-2xl shadow-xl w-full max-w-md mx-auto max-h-[85vh] overflow-y-auto">
+    <div className="bg-base-100 rounded-2xl w-full max-w-md mx-auto max-h-[85vh] ">
       <div className="flex justify-center items-center mb-4">
         <img
           src={logo}
@@ -456,9 +456,8 @@ const SignupForm = ({
                       type="password"
                       value={walletPassword}
                       onChange={(e) => setWalletPassword(e.target.value)}
-                      className={`input input-bordered w-full ${
-                        errors.walletPassword ? "input-error" : ""
-                      }`}
+                      className={`input input-bordered w-full ${errors.walletPassword ? "input-error" : ""
+                        }`}
                       placeholder="Enter wallet password"
                     />
                     {errors.walletPassword && (
@@ -479,9 +478,8 @@ const SignupForm = ({
                         onChange={(e) =>
                           setConfirmWalletPassword(e.target.value)
                         }
-                        className={`input input-bordered w-full ${
-                          errors.confirmWalletPassword ? "input-error" : ""
-                        }`}
+                        className={`input input-bordered w-full ${errors.confirmWalletPassword ? "input-error" : ""
+                          }`}
                         placeholder="Confirm wallet password"
                       />
                       {errors.confirmWalletPassword && (
@@ -581,9 +579,8 @@ const SignupForm = ({
                         value={formData.alias}
                         onChange={handleChange}
                         placeholder="Enter a temp name"
-                        className={`input input-bordered w-full ${
-                          errors.alias ? "input-error" : ""
-                        }`}
+                        className={`input input-bordered w-full ${errors.alias ? "input-error" : ""
+                          }`}
                       />
                       {errors.alias && (
                         <p className="mt-1 text-sm text-red-500">
@@ -596,38 +593,24 @@ const SignupForm = ({
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         DID
                       </label>
-                      <div className="flex">
+                      <div className="flex items-stretch gap-2">
                         <input
                           type="text"
                           name="did"
                           value={formData.did}
                           placeholder="did:ethr:0x..."
-                          className={`input input-bordered w-full ${
-                            errors.did ? "input-error" : ""
-                          } bg-gray-100`}
+                          className={`input input-bordered w-full ${errors.did ? "input-error" : ""
+                            } bg-gray-100`}
                           readOnly={true}
                         />
                         {formData.did && (
                           <button
                             type="button"
-                            className="btn btn-square btn-sm ml-2"
+                            className="btn px-3"
                             onClick={() => copyToClipboard(formData.did)}
                             title="Copy to clipboard"
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5"
-                              fill="none"
-                              viewBox="0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
-                              />
-                            </svg>
+                            <Copy className="h-4 w-4" />
                           </button>
                         )}
                       </div>
@@ -651,9 +634,8 @@ const SignupForm = ({
                           value={formData.device_id}
                           onChange={handleChange}
                           placeholder="Enter device ID"
-                          className={`input input-bordered w-full ${
-                            errors.device_id ? "input-error" : ""
-                          }`}
+                          className={`input input-bordered w-full ${errors.device_id ? "input-error" : ""
+                            }`}
                         />
                         {errors.device_id && (
                           <p className="mt-1 text-sm text-red-500">
@@ -671,9 +653,8 @@ const SignupForm = ({
                           value={formData.firmware_version}
                           onChange={handleChange}
                           placeholder="v1.0.0"
-                          className={`input input-bordered w-full ${
-                            errors.firmware_version ? "input-error" : ""
-                          }`}
+                          className={`input input-bordered w-full ${errors.firmware_version ? "input-error" : ""
+                            }`}
                         />
                         {errors.firmware_version && (
                           <p className="mt-1 text-sm text-red-500">
