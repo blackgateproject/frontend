@@ -46,6 +46,7 @@
     "react-qr-code": "^2.0.15",
     "react-qrcode-logo": "^3.0.0",
     "react-router-dom": "^6.26.2",
+    "react-spinners": "^0.17.0",
     "supabase": "^2.19.7",
     "typeorm": "^0.3.23",
     "uuid": "^11.1.0",

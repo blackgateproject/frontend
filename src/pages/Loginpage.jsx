@@ -224,15 +224,6 @@ const LoginPage = () => {
               </div>
             )}
           </motion.div>
-        ) : currentPage === "auth2" ? (
-          <motion.div
-            key="auth2"
-            initial={{ opacity: 0, scale: 0.95, y: 40 }}
-            animate={{ opacity: 1, scale: 0.95, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 40 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="bg-base-100 p-10 rounded-2xl shadow-xl w-96"
-          ></motion.div>
         ) : (
           <motion.div
             key="main"
