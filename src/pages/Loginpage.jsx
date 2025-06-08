@@ -1,21 +1,13 @@
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import SignupForm from "../components/SignupForm";
 import { verifyMerkleProof } from "../utils/verification";
 
-import backgroundImage from '../assets/background-circles.gif'
+import backgroundImage from "../assets/background-circles.gif";
 
-const colorPalette = [
-  "#ADD8E6", // Light Blue
-  "#87CEEB", // Sky Blue
-  "#87CEFA", // Light Sky Blue
-  "#4682B4", // Steel Blue
-  "#5F9EA0", // Cadet Blue
-  "#6495ED", // Cornflower Blue
-];
 const LoginPage = () => {
   // non state
   let did = "";
@@ -35,22 +27,14 @@ const LoginPage = () => {
   const [isLoadingTx, setIsLoadingTx] = useState(false);
   const [showSignupForm, setShowSignupForm] = useState(false);
   const [hasVC, setHasVC] = useState(false);
-  const [isBackendInSetupMode, setIsBackendInSetupMode] = useState(false);
   const [isCheckingBackendStatus, setIsCheckingBackendStatus] = useState(false); // Set to true to enable setup mode
 
   const [showAuthButtons, setShowAuthButtons] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const [previousPage, setPreviousPage] = useState(null);
   const [currentPage, setCurrentPage] = useState("main");
-  const [showDebugBoxes, setShowDebugBoxes] = useState(false); // Add this flag
-  const [aabbScale, setAabbScale] = useState(0.05); // 1 = same as circle, <1 = smaller, >1 = bigger
-  // const [aabbScale, setAabbScale] = useState(0.65); // 1 = same as circle, <1 = smaller, >1 = bigger
-  const [aabbOffset, setAabbOffset] = useState(0); // px offset for all sides
-  const [mouse, setMouse] = useState({ x: null, y: null }); // Track mouse position
   const navigate = useNavigate();
 
-  const [shapes, setShapes] = useState([]);
-  const shapeCount = 3; // Define the number of shapes to generate
   // Check if merkle proof and hash exist in local storage
   useEffect(() => {
     const checkLocalStorage = () => {
@@ -87,16 +71,6 @@ const LoginPage = () => {
       document.getElementById("error-modal").close();
     }
   }, [isErrorModalOpen]);
-
-  // Track mouse position
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMouse({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
 
   const handleButtonClick = () => {
     const encryptedWallet = localStorage.getItem("encryptedWallet");
@@ -167,39 +141,11 @@ const LoginPage = () => {
       className="h-screen flex items-center justify-center relative overflow-hidden"
       style={{
         backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
     >
-      {/* Animated shapes with different colors */} {/** REMOVED */}
-
-      {/* Debug controls */}
-      {showDebugBoxes && (
-        <div style={{ position: "absolute", top: 10, right: 10, zIndex: 100 }}>
-          <label>
-            Scale:
-            <input
-              type="number"
-              step="0.05"
-              min="0.1"
-              value={aabbScale}
-              onChange={(e) => setAabbScale(Number(e.target.value))}
-              style={{ width: 60, marginLeft: 4 }}
-            />
-          </label>
-          <label style={{ marginLeft: 12 }}>
-            Offset:
-            <input
-              type="number"
-              step="1"
-              value={aabbOffset}
-              onChange={(e) => setAabbOffset(Number(e.target.value))}
-              style={{ width: 60, marginLeft: 4 }}
-            />
-          </label>
-        </div>
-      )}
       <div className="z-10">
         {currentPage !== "main" && (
           <button
@@ -286,12 +232,7 @@ const LoginPage = () => {
             exit={{ opacity: 0, scale: 0.95, y: 40 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
             className="bg-base-100 p-10 rounded-2xl shadow-xl w-96"
-          >
-            {/* <h2 className="text-center text-3xl font-bold text-Black">
-            Verify via VC
-          </h2> */}
-            {/* Add your VC verification component or logic here */}
-          </motion.div>
+          ></motion.div>
         ) : (
           <motion.div
             key="main"
@@ -312,7 +253,7 @@ const LoginPage = () => {
                 <p className="text-black mb-4">
                   {walletExists
                     ? hasVC
-                      ? "Please choose a verification method to continue."
+                      ? "Valid VC detected! Please proceed with the authentication."
                       : "Wallet detected, but registration is incomplete. Please complete your registration."
                     : "To get started, please create a wallet."}
                 </p>
@@ -327,15 +268,6 @@ const LoginPage = () => {
                     >
                       Verify via ZKP
                     </button>
-                    {/* <button
-                    onClick={() => {
-                      setPreviousPage("main");
-                      setCurrentPage("auth2");
-                    }}
-                    className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-1`}
-                  >
-                    Verify via VC
-                  </button> */}
                   </div>
                 ) : (
                   <button
