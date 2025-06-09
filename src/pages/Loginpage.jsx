@@ -2,11 +2,11 @@ import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import backgroundImage from "../assets/background-circles.gif";
 import logo from "../assets/logo.png";
 import SignupForm from "../components/SignupForm";
+import { useVeramoOperations } from "../hooks/useVeramoOperations";
 import { verifyMerkleProof } from "../utils/verification";
-
-import backgroundImage from "../assets/background-circles.gif";
 
 const LoginPage = () => {
   // non state
@@ -28,12 +28,29 @@ const LoginPage = () => {
   const [showSignupForm, setShowSignupForm] = useState(false);
   const [hasVC, setHasVC] = useState(false);
   const [isCheckingBackendStatus, setIsCheckingBackendStatus] = useState(false); // Set to true to enable setup mode
-
   const [showAuthButtons, setShowAuthButtons] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const [previousPage, setPreviousPage] = useState(null);
   const [currentPage, setCurrentPage] = useState("main");
+  const [showWalletPasswordModal, setShowWalletPasswordModal] = useState(false);
+  const [walletPassword, setWalletPassword] = useState("");
+  const [isLoadingWallet, setIsLoadingWallet] = useState(false);
+  const [walletUnlockError, setWalletUnlockError] = useState("");
+  const [rememberWalletPassword, setRememberWalletPassword] = useState(
+    !!localStorage.getItem("rememberedWalletPassword")
+  );
+
+  const { agent } = useVeramoOperations();
   const navigate = useNavigate();
+
+  // Prefill Password if remembered when modal opens
+  useEffect(() => {
+    if (showWalletPasswordModal) {
+      const remembered = localStorage.getItem("rememberedWalletPassword");
+      if (remembered) setWalletPassword(remembered);
+      else setWalletPassword("");
+    }
+  }, [showWalletPasswordModal]);
 
   // Check if merkle proof and hash exist in local storage
   useEffect(() => {
@@ -125,6 +142,56 @@ const LoginPage = () => {
     setShowAuthButtons(false);
   };
 
+  // Function to unlock wallet before verification
+  const handleUnlockAndVerify = async (e) => {
+    e.preventDefault();
+    setIsLoadingWallet(true);
+    setWalletUnlockError("");
+    try {
+      const { loadWallet } = await import("../utils/contractInteractions");
+      const encryptedWallet = localStorage.getItem("encryptedWallet");
+      if (!walletPassword) {
+        setWalletUnlockError("Password is required");
+        setIsLoadingWallet(false);
+        return;
+      }
+      // Store or remove password based on checkbox
+      if (rememberWalletPassword) {
+        localStorage.setItem("rememberedWalletPassword", walletPassword);
+      } else {
+        localStorage.removeItem("rememberedWalletPassword");
+      }
+      const { wallet: unlockedWallet } = await loadWallet(
+        encryptedWallet,
+        walletPassword,
+        setWallet,
+        () => {},
+        setIsLoadingWallet,
+        () => {},
+        setSigner
+      );
+      setWallet(unlockedWallet);
+      setShowWalletPasswordModal(false);
+      setWalletPassword("");
+      // Now call verifyMerkleProof with unlocked wallet
+      console.warn("Wallet unlocked successfully:", unlockedWallet);
+      verifyMerkleProof(
+        setIsLoadingTx,
+        setCurrentStep,
+        setErrorMessage,
+        setIsErrorModalOpen,
+        navigate,
+        unlockedWallet,
+        agent
+      );
+    } catch (error) {
+      setWalletUnlockError(
+        "Failed to unlock wallet. Please check your password."
+      );
+    }
+    setIsLoadingWallet(false);
+  };
+
   if (isCheckingBackendStatus) {
     return (
       <div className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-400 to-black">
@@ -191,15 +258,7 @@ const LoginPage = () => {
               Click below to verify using zero-knowledge proof.
             </p>
             <button
-              onClick={() => {
-                verifyMerkleProof(
-                  setIsLoadingTx,
-                  setCurrentStep,
-                  setErrorMessage,
-                  setIsErrorModalOpen,
-                  navigate
-                );
-              }}
+              onClick={() => setShowWalletPasswordModal(true)}
               className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-4`}
               disabled={isLoadingTx}
             >
@@ -222,6 +281,71 @@ const LoginPage = () => {
                 <Loader2 className="animate-spin mx-auto" />
                 <p className="mt-2">Verifying...</p>
               </div>
+            )}
+
+            {/* Wallet Unlock Modal */}
+            {showWalletPasswordModal && (
+              <dialog open className="modal">
+                <form
+                  onSubmit={handleUnlockAndVerify}
+                  className="modal-box space-y-4"
+                >
+                  <h3 className="text-lg font-bold text-center mb-4">
+                    Enter Wallet Password
+                  </h3>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Wallet Password
+                    </label>
+                    <input
+                      type="password"
+                      value={walletPassword}
+                      onChange={(e) => setWalletPassword(e.target.value)}
+                      className={`input input-bordered w-full ${
+                        walletUnlockError ? "input-error" : ""
+                      }`}
+                      placeholder="Enter wallet password"
+                    />
+                    {walletUnlockError && (
+                      <p className="mt-1 text-sm text-red-500">
+                        {walletUnlockError}
+                      </p>
+                    )}
+                    <label className="flex items-center mt-2">
+                      <input
+                        type="checkbox"
+                        checked={rememberWalletPassword}
+                        onChange={(e) =>
+                          setRememberWalletPassword(e.target.checked)
+                        }
+                        className="mr-2"
+                      />
+                      Remember password
+                    </label>
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowWalletPasswordModal(false)}
+                      className="btn flex-1 bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
+                      disabled={isLoadingWallet}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn flex-1 bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
+                      disabled={isLoadingWallet}
+                    >
+                      {isLoadingWallet ? (
+                        <Loader2 className="animate-spin" />
+                      ) : (
+                        "Unlock & Verify"
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </dialog>
             )}
           </motion.div>
         ) : (

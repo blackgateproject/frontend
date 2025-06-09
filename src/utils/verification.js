@@ -1,11 +1,13 @@
 import { connectorURL } from "../utils/readEnv";
-
+import { createPresentationFromCredential } from "./veramo";
 export const verifyMerkleProof = async (
   setIsLoadingTx,
   setCurrentStep,
   setErrorMessage,
   setIsErrorModalOpen,
-  navigate
+  navigate,
+  wallet,
+  agent
 ) => {
   setIsLoadingTx(true);
   try {
@@ -17,13 +19,37 @@ export const verifyMerkleProof = async (
       );
     }
 
-    console.log("sending data:", verifiable_credential);
+    // Parse the credential before passing
+    const parsedCredential = JSON.parse(verifiable_credential);
+
+    // Run checks on the wallet
+    if (!wallet) {
+      throw new Error("[VC Verify ERR]: Wallet is not connected");
+    } else if (wallet) {
+      console.log("Wallet is connected:", wallet.address);
+      console.log("Wallet Key", wallet.privateKey);
+    }
+
+    // Generate a VP from the given VC
+    const verifiable_presentation = await createPresentationFromCredential(
+      parsedCredential,
+      agent,
+      wallet
+    );
+    console.log("Verifiable Presentation created:", verifiable_presentation);
+    if (!verifiable_presentation) {
+      throw new Error(
+        "[VC Verify ERR]: Failed to create Verifiable Presentation"
+      );
+    }
+
+    console.log("sending data:", verifiable_presentation);
     const response = await fetch(`${connectorURL}/auth/v1/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: verifiable_credential,
+      body: JSON.stringify(verifiable_presentation),
     });
 
     const data = await response.json();
