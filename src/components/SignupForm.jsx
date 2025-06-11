@@ -161,11 +161,21 @@ const SignupForm = ({
           setWalletTimings
         );
         // Set the DID and public key using the returned wallet object
-        setFormData({
+        const mergedData = {
           ...formData,
           did: `did:ethr:blackgate:${newWallet.publicKey}`,
-          walletTimes: { walletCreateTime, walletEncryptTime },
+          walletCreateTime,
+          walletEncryptTime,
+        };
+
+        Object.keys(mergedData).forEach((key) => {
+          const value = mergedData[key];
+          if (value === null || value === undefined || Number.isNaN(value)) {
+            delete mergedData[key];
+          }
         });
+        
+        setFormData(mergedData);
 
         // // Ensure wallet is encrypted & stored after sending to server
         // await encryptAndStoreWallet(
