@@ -89,9 +89,17 @@ export const verifyMerkleProof = async (
       console.log("Got response", data);
 
       // Update smt_proofs in localStorage if new proofs are returned
-      if (data.proofs) {
-        localStorage.setItem("smt_proofs", JSON.stringify(data.proofs));
-        console.log("Updated smt_proofs in localStorage from server response");
+      if (data.smt_proofs) {
+        const existingProofs =
+          JSON.parse(localStorage.getItem("smt_proofs")) || [];
+        const newProofs = data.smt_proofs;
+
+        if (JSON.stringify(existingProofs) !== JSON.stringify(newProofs)) {
+          console.warn("SMT proofs do not match. Updating localStorage.");
+          localStorage.setItem("smt_proofs", JSON.stringify(newProofs));
+        } else {
+          console.warn("SMT proofs match, no update needed.");
+        }
       }
 
       // Debug the results structure
@@ -164,7 +172,18 @@ export const verifyMerkleProof = async (
 
       if (data.smt_proofs) {
         console.log("Update proofs available:", data.smt_proofs);
-        localStorage.setItem("smt_proofs", JSON.stringify(data.smt_proofs));
+
+        // Compare the recieved smt_proofs with the existing ones in localStorage
+        const existingProofs =
+          JSON.parse(localStorage.getItem("smt_proofs")) || [];
+        const newProofs = data.smt_proofs;
+
+        if (JSON.stringify(existingProofs) !== JSON.stringify(newProofs)) {
+          console.warn("SMT proofs do not match. Updating localStorage.");
+          localStorage.setItem("smt_proofs", JSON.stringify(newProofs));
+        } else {
+          console.log("SMT proofs match, no update needed.");
+        }
         // Retry only if not already retried
         if (!hasRetried) {
           return await verifyMerkleProof(
