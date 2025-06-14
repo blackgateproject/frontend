@@ -161,21 +161,11 @@ const SignupForm = ({
           setWalletTimings
         );
         // Set the DID and public key using the returned wallet object
-        const mergedData = {
+        setFormData({
           ...formData,
           did: `did:ethr:blackgate:${newWallet.publicKey}`,
-          walletCreateTime,
-          walletEncryptTime,
-        };
-
-        Object.keys(mergedData).forEach((key) => {
-          const value = mergedData[key];
-          if (value === null || value === undefined || Number.isNaN(value)) {
-            delete mergedData[key];
-          }
+          walletTimes: { walletCreateTime, walletEncryptTime },
         });
-        
-        setFormData(mergedData);
 
         // // Ensure wallet is encrypted & stored after sending to server
         // await encryptAndStoreWallet(
@@ -236,149 +226,143 @@ const SignupForm = ({
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log("Form Submitted");
-    if (!validateForm()) {
-      console.log("Validation Failed");
-      return;
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  console.log("Form Submitted");
+  
+  if (!validateForm()) {
+    console.log("Validation Failed");
+    return;
+  }
+
+  setShowProgress(true);
+  setIsLoading(true);
+
+  try {
+    // Check if wallet is initialized
+    if (!wallet) {
+      throw new Error(
+        "Wallet not initialized. Please generate or unlock keys first."
+      );
     }
 
-    setShowProgress(true); // Show progress indicator when registration starts
+    const updatedFormData = {
+      ...formData,
+      selected_role: selected_role,
+      proof_type: formData.proof_type,
+    };
 
-    setIsLoading(true);
+    // Step 1: Submit DID + VC
+    setCurrentStep(1);
+    await new Promise(resolve => setTimeout(resolve, 500)); // 0.5 second delay
+    await performSubmitDID(updatedFormData);
+
+    // Step 2: Encrypt and store wallet
+    setCurrentStep(2);
+    await new Promise(resolve => setTimeout(resolve, 500)); // 0.5 second delay
+    await encryptAndStoreWallet(
+      wallet,
+      walletPassword,
+      setWalletExists,
+      setWalletTimings
+    );
+
+    console.log("Form submitted:", updatedFormData);
+
+    // Step 3: Start polling
+    setCurrentStep(3);
+    await new Promise(resolve => setTimeout(resolve, 500)); // 0.5 second delay
+    console.log("Starting polling for request status...");
+
+    // Polling logic with proper async handling
+    await pollForApproval(updatedFormData);
+
+  } catch (error) {
+    console.error("Error submitting form:", error);
+    setErrorMessage(error.message || "Failed to register with connector");
+    setIsErrorModalOpen(true);
+    setIsLoading(false);
+    setShowProgress(false);
+  }
+};
+
+// Separate polling function for better organization
+const pollForApproval = async (formData) => {
+  const maxAttempts = 30;
+  let attempts = 0;
+
+  const checkRequestStatus = async () => {
+    if (attempts >= maxAttempts) {
+      throw new Error("Request timed out. Please try again later.");
+    }
+
+    attempts++;
+    console.log(`Polling attempt ${attempts}/${maxAttempts}`);
 
     try {
-      // Check if wallet is initialized
-      if (!wallet) {
-        throw new Error(
-          "Wallet not initialized. Please generate or unlock keys first."
-        );
-      }
-
-      const updatedFormData = {
-        ...formData,
-        selected_role: selected_role,
-        proof_type: formData.proof_type,
-      };
-
-      // Submit DID + VC
-      setCurrentStep(1);
-      await performSubmitDID(updatedFormData);
-
-      // Encrypt and store wallet after DID submission
-      await encryptAndStoreWallet(
-        wallet,
-        walletPassword,
-        setWalletExists,
-        setWalletTimings
+      const status = await pollForRequestStatus(
+        formData.did,
+        formData.proof_type
       );
+      console.log("Polling result:", status);
 
-      setCurrentStep(2);
-      console.log("Form submitted:", updatedFormData);
+      if (status && status.request_status) {
+        console.warn("Request Status:", status.request_status);
 
-      // Set up polling for request status
-      console.log("Starting polling for request status...");
+        switch (status.request_status) {
+          case "approved":
+            console.log("Request approved!");
+            
+            localStorage.setItem(
+              "verifiable_credential",
+              JSON.stringify(status.verifiable_credential)
+            );
 
-      // Maximum polling attempts (30 attempts * 5 seconds = 150 seconds total)
-      const maxAttempts = 30;
-      let attempts = 0;
-
-      const checkRequestStatus = async () => {
-        if (attempts >= maxAttempts) {
-          setErrorMessage("Request timed out. Please try again later.");
-          setIsErrorModalOpen(true);
-          setIsLoading(false);
-          return;
-        }
-
-        attempts++;
-        console.log(`Polling attempt ${attempts}/${maxAttempts}`);
-
-        try {
-          // Await the result of pollForRequestStatus_MerkleTree
-          // if (formData.proof_type === "merkle") {
-          //   console.log("Polling for Merkle Tree status...");
-          // }
-          const status = await pollForRequestStatus(
-            formData.did,
-            formData.proof_type
-          );
-          console.log("Polling result:", status);
-
-          if (status && status.request_status) {
-            console.warn("Request Status:", status.request_status);
-
-            switch (status.request_status) {
-              case "approved":
-                console.log("Request approved!");
-
-                // Store merkle proof and hash in local storage
-                // localStorage.setItem("merkleHash", status.merkle_hash);
-                // localStorage.setItem(
-                //   "merkleProof",
-                //   JSON.stringify(status.merkle_proof)
-                // );
-                // localStorage.setItem("merkleRoot", status.merkle_root);
-                // localStorage.setItem("did", did);
-                localStorage.setItem(
-                  "verifiable_credential",
-                  JSON.stringify(status.verifiable_credential)
-                );
-                localStorage.setItem(
-                  "smt_proofs",
-                  JSON.stringify(status.smt_proofs)
-                );
-
-                setShowProgress(false); // Hide progress indicator
-                setIsSuccess(true);
-                setIsLoading(false);
-                if (onClose) {
-                  setTimeout(onClose, 2000);
-                }
-                break;
-
-              case "rejected":
-                console.log("Request rejected");
-                setShowProgress(false); // Hide progress indicator
-                setIsRejected(true);
-                setIsLoading(false);
-                break;
-
-              case "pending":
-                console.log("Request still pending, continuing to poll...");
-                setTimeout(checkRequestStatus, 5000);
-                break;
-
-              default:
-                console.log(`Unknown status: ${status}`);
-                setErrorMessage(`Unexpected status: ${status}`);
-                setIsErrorModalOpen(true);
-                setIsLoading(false);
+            setShowProgress(false);
+            setIsSuccess(true);
+            setIsLoading(false);
+            
+            if (onClose) {
+              setTimeout(onClose, 2000);
             }
-          } else {
-            console.log("Invalid status response format:", status);
-            setTimeout(checkRequestStatus, 5000);
-          }
-        } catch (error) {
-          console.error("Error polling for status:", error);
-          setTimeout(checkRequestStatus, 5000);
-        }
-      };
+            return; // Exit the polling loop
 
-      // Start the polling process
-      setCurrentStep(3);
-      checkRequestStatus();
+          case "rejected":
+            console.log("Request rejected");
+            setShowProgress(false);
+            setIsRejected(true);
+            setIsLoading(false);
+            return; // Exit the polling loop
+
+          case "pending":
+            console.log("Request still pending, continuing to poll...");
+            // Wait 5 seconds before next poll
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            return checkRequestStatus(); // Recursive call
+
+          default:
+            throw new Error(`Unexpected status: ${status.request_status}`);
+        }
+      } else {
+        console.log("Invalid status response format:", status);
+        // Wait 5 seconds before retry
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        return checkRequestStatus(); // Recursive call
+      }
     } catch (error) {
-      console.error("Error submitting form:", error);
-      setErrorMessage(error.message || "Failed to register with connector");
-      setIsErrorModalOpen(true);
-      setIsLoading(false);
+      console.error("Error polling for status:", error);
+      // Wait 5 seconds before retry
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      return checkRequestStatus(); // Recursive call
     }
   };
 
+  // Start polling
+  await checkRequestStatus();
+};
+
   return (
-    <div className="bg-base-100 rounded-2xl w-full max-w-md mx-auto max-h-[85vh] ">
+    <div className="bg-base-100 rounded-2xl w-full max-w-md mx-auto max-h-[85vh]  ">
       <div className="flex justify-center items-center mb-4">
         <img
           src={logo}

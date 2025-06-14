@@ -270,8 +270,8 @@ const Requests = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -50 }}
           className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${notification.type === "success"
-              ? "bg-green-100 border-l-4 border-green-500 text-green-700"
-              : "bg-red-100 border-l-4 border-red-500 text-red-700"
+            ? "bg-green-100 border-l-4 border-green-500 text-green-700"
+            : "bg-red-100 border-l-4 border-red-500 text-red-700"
             }`}
         >
           <div className="flex items-center">
@@ -382,8 +382,8 @@ const Requests = () => {
                   </p>
                   <div
                     className={`badge ${detailsModal.request.isVCSent
-                        ? "badge-success"
-                        : "badge-warning"
+                      ? "badge-success"
+                      : "badge-warning"
                       }`}
                   >
                     {detailsModal.request.isVCSent ? "Yes" : "No"}
@@ -848,8 +848,8 @@ const Requests = () => {
                     key={number + 1}
                     onClick={() => paginate(number + 1)}
                     className={`btn btn-sm join-item ${currentPage === number + 1
-                        ? "btn-primary text-white"
-                        : "btn-ghost"
+                      ? "btn-primary text-white"
+                      : "btn-ghost"
                       }`}
                   >
                     {number + 1}
@@ -884,8 +884,8 @@ const Requests = () => {
                         key={number + 1}
                         onClick={() => paginate(number + 1)}
                         className={`btn btn-sm join-item ${currentPage === number + 1
-                            ? "btn-primary text-white"
-                            : "btn-ghost"
+                          ? "btn-primary text-white"
+                          : "btn-ghost"
                           }`}
                       >
                         {number + 1}
@@ -901,8 +901,8 @@ const Requests = () => {
                   <button
                     onClick={() => paginate(totalPages)}
                     className={`btn btn-sm join-item ${currentPage === totalPages
-                        ? "btn-primary text-white"
-                        : "btn-ghost"
+                      ? "btn-primary text-white"
+                      : "btn-ghost"
                       }`}
                   >
                     {totalPages}

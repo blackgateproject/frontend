@@ -1,4 +1,4 @@
-import { ActivityIcon, CheckSquare, Search, Users } from "lucide-react";
+import { ActivityIcon, ChartAreaIcon, CheckSquare, Search, TrendingUp, Users } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
@@ -54,10 +54,13 @@ const Dashboard = () => {
   return (
     <Sidebar role={"admin"}>
       {/* Main Content */}
-      <div className="col-span-12">
+      <div className="container mx-auto px-4 py-6">
         {/* Header Row */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-[#333333]">Dashboard</h1>
+        <div className="flex flex-wrap items-center justify-between mb-8">
+          <div className="flex items-center space-x-4 mb-4 lg:mb-0">
+            <ChartAreaIcon className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
+          </div>
           <div className="relative">
             {/* Search Icon inside the input field */}
             <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

@@ -1,13 +1,21 @@
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import backgroundImage from "../assets/background-circles.gif";
 import logo from "../assets/logo.png";
 import SignupForm from "../components/SignupForm";
-import { useVeramoOperations } from "../hooks/useVeramoOperations";
 import { verifyMerkleProof } from "../utils/verification";
 
+import backgroundImage from '../assets/background-circles.gif'
+
+const colorPalette = [
+  "#ADD8E6", // Light Blue
+  "#87CEEB", // Sky Blue
+  "#87CEFA", // Light Sky Blue
+  "#4682B4", // Steel Blue
+  "#5F9EA0", // Cadet Blue
+  "#6495ED", // Cornflower Blue
+];
 const LoginPage = () => {
   // non state
   let did = "";
@@ -27,31 +35,22 @@ const LoginPage = () => {
   const [isLoadingTx, setIsLoadingTx] = useState(false);
   const [showSignupForm, setShowSignupForm] = useState(false);
   const [hasVC, setHasVC] = useState(false);
+  const [isBackendInSetupMode, setIsBackendInSetupMode] = useState(false);
   const [isCheckingBackendStatus, setIsCheckingBackendStatus] = useState(false); // Set to true to enable setup mode
+
   const [showAuthButtons, setShowAuthButtons] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const [previousPage, setPreviousPage] = useState(null);
   const [currentPage, setCurrentPage] = useState("main");
-  const [showWalletPasswordModal, setShowWalletPasswordModal] = useState(false);
-  const [walletPassword, setWalletPassword] = useState("");
-  const [isLoadingWallet, setIsLoadingWallet] = useState(false);
-  const [walletUnlockError, setWalletUnlockError] = useState("");
-  const [rememberWalletPassword, setRememberWalletPassword] = useState(
-    !!localStorage.getItem("rememberedWalletPassword")
-  );
-
-  const { agent } = useVeramoOperations();
+  const [showDebugBoxes, setShowDebugBoxes] = useState(false); // Add this flag
+  const [aabbScale, setAabbScale] = useState(0.05); // 1 = same as circle, <1 = smaller, >1 = bigger
+  // const [aabbScale, setAabbScale] = useState(0.65); // 1 = same as circle, <1 = smaller, >1 = bigger
+  const [aabbOffset, setAabbOffset] = useState(0); // px offset for all sides
+  const [mouse, setMouse] = useState({ x: null, y: null }); // Track mouse position
   const navigate = useNavigate();
 
-  // Prefill Password if remembered when modal opens
-  useEffect(() => {
-    if (showWalletPasswordModal) {
-      const remembered = localStorage.getItem("rememberedWalletPassword");
-      if (remembered) setWalletPassword(remembered);
-      else setWalletPassword("");
-    }
-  }, [showWalletPasswordModal]);
-
+  const [shapes, setShapes] = useState([]);
+  const shapeCount = 3; // Define the number of shapes to generate
   // Check if merkle proof and hash exist in local storage
   useEffect(() => {
     const checkLocalStorage = () => {
@@ -88,6 +87,155 @@ const LoginPage = () => {
       document.getElementById("error-modal").close();
     }
   }, [isErrorModalOpen]);
+
+  // Track mouse position
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMouse({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  // Generate shapes with random sizes, positions, and colors
+  // useEffect(() => {
+  //   const generateShapes = () => {
+  //     let shapesArray = [];
+  //     // Use 10% to 20% of the smaller window dimension for circle size
+  //     const minDim = Math.min(window.innerWidth, window.innerHeight);
+  //     const circleSizeVariance = 0.1;
+  //     const minSizeLimit = 2.5;
+  //     const maxSizeLimit = minSizeLimit + circleSizeVariance;
+  //     const minSize = minDim * minSizeLimit;
+  //     const maxSize = minDim * maxSizeLimit;
+
+  //     for (let i = 0; i < shapeCount; i++) {
+  //       const randomSize = Math.random() * (maxSize - minSize) + minSize;
+  //       const maxX = Math.max(0, window.innerWidth - randomSize);
+  //       const maxY = Math.max(0, window.innerHeight - randomSize);
+  //       const randomX = Math.random() * maxX;
+  //       const randomY = Math.random() * maxY;
+
+  //       const randomColor =
+  //         colorPalette[Math.floor(Math.random() * colorPalette.length)];
+
+  //       shapesArray.push({
+  //         id: i,
+  //         x: randomX,
+  //         y: randomY,
+  //         size: randomSize,
+  //         color: randomColor,
+  //         vx: Math.random() * 0.5 - 0.25,
+  //         vy: Math.random() * 0.5 - 0.25,
+  //       });
+  //     }
+  //     setShapes(shapesArray);
+  //   };
+
+  //   generateShapes();
+  // }, [shapeCount, colorPalette]);
+
+  // Only update size and clamp positions on resize, keep velocities
+  // useEffect(() => {
+  //   const handleResize = () => {
+  //     setShapes((prevShapes) => {
+  //       const minDim = Math.min(window.innerWidth, window.innerHeight);
+  //       return prevShapes.map((shape) => {
+  //         // Calculate the original ratio of this shape's size to the old minDim
+  //         const oldMinDim = shape.size / (shape.size / minDim);
+  //         const sizeRatio = shape.size / oldMinDim || 0.15; // fallback to 0.15 if NaN
+  //         const newSize = minDim * sizeRatio;
+
+  //         const maxX = Math.max(0, window.innerWidth - newSize);
+  //         const maxY = Math.max(0, window.innerHeight - newSize);
+  //         const newX = Math.min(shape.x, maxX);
+  //         const newY = Math.min(shape.y, maxY);
+  //         return { ...shape, x: newX, y: newY, size: newSize };
+  //       });
+  //     });
+  //   };
+  //   window.addEventListener("resize", handleResize);
+  //   return () => window.removeEventListener("resize", handleResize);
+  // }, []);
+
+  // Handle shape movement and collision detection
+  // useEffect(() => {
+  //   const intervalId = setInterval(() => {
+  //     setShapes((prevShapes) => {
+  //       const updatedShapes = prevShapes.map((shape) => {
+  //         let newVx = shape.vx;
+  //         let newVy = shape.vy;
+  //         let newX = shape.x + newVx;
+  //         let newY = shape.y + newVy;
+
+  //         // --- Mouse repulsion logic ---
+  //         let repelled = false;
+  //         if (mouse.x !== null && mouse.y !== null) {
+  //           const cx = newX + shape.size / 2;
+  //           const cy = newY + shape.size / 2;
+  //           const dx = cx - mouse.x;
+  //           const dy = cy - mouse.y;
+  //           const dist = Math.sqrt(dx * dx + dy * dy);
+  //           const repelRadius = shape.size * 1.5; // Repel if within this radius
+
+  //           if (dist < repelRadius && dist > 0) {
+  //             // Repel: push away from mouse
+  //             const force = 1.5 * (1 - dist / repelRadius); // Stronger when closer
+  //             newVx += (dx / dist) * force;
+  //             newVy += (dy / dist) * force;
+  //             repelled = true;
+  //           }
+  //         }
+
+  //         // --- Bounce logic (unchanged) ---
+  //         const aabbSize = shape.size * aabbScale + aabbOffset * 2;
+  //         const aabbLeft =
+  //           newX - (shape.size * (aabbScale - 1)) / 2 - aabbOffset;
+  //         const aabbRight = aabbLeft + aabbSize;
+  //         const aabbTop =
+  //           newY - (shape.size * (aabbScale - 1)) / 2 - aabbOffset;
+  //         const aabbBottom = aabbTop + aabbSize;
+
+  //         if (aabbLeft < 0) {
+  //           newX = 0 + (shape.size * (aabbScale - 1)) / 2 + aabbOffset;
+  //           newVx = -newVx;
+  //         } else if (aabbRight > window.innerWidth) {
+  //           newX =
+  //             window.innerWidth -
+  //             aabbSize +
+  //             (shape.size * (aabbScale - 1)) / 2 +
+  //             aabbOffset;
+  //           newVx = -newVx;
+  //         }
+
+  //         if (aabbTop < 0) {
+  //           newY = 0 + (shape.size * (aabbScale - 1)) / 2 + aabbOffset;
+  //           newVy = -newVy;
+  //         } else if (aabbBottom > window.innerHeight) {
+  //           newY =
+  //             window.innerHeight -
+  //             aabbSize +
+  //             (shape.size * (aabbScale - 1)) / 2 +
+  //             aabbOffset;
+  //           newVy = -newVy;
+  //         }
+
+  //         // Only dampen velocity if repelled by mouse
+  //         if (repelled) {
+  //           const dampenRatio = 0.8; // Adjust this value to control the damping effect
+  //           newVx *= dampenRatio;
+  //           newVy *= dampenRatio;
+  //         }
+
+  //         return { ...shape, x: newX, y: newY, vx: newVx, vy: newVy };
+  //       });
+
+  //       return updatedShapes;
+  //     });
+  //   }, 5);
+
+  //   return () => clearInterval(intervalId);
+  // }, [mouse, aabbScale, aabbOffset]);
 
   const handleButtonClick = () => {
     const encryptedWallet = localStorage.getItem("encryptedWallet");
@@ -142,56 +290,6 @@ const LoginPage = () => {
     setShowAuthButtons(false);
   };
 
-  // Function to unlock wallet before verification
-  const handleUnlockAndVerify = async (e) => {
-    e.preventDefault();
-    setIsLoadingWallet(true);
-    setWalletUnlockError("");
-    try {
-      const { loadWallet } = await import("../utils/contractInteractions");
-      const encryptedWallet = localStorage.getItem("encryptedWallet");
-      if (!walletPassword) {
-        setWalletUnlockError("Password is required");
-        setIsLoadingWallet(false);
-        return;
-      }
-      // Store or remove password based on checkbox
-      if (rememberWalletPassword) {
-        localStorage.setItem("rememberedWalletPassword", walletPassword);
-      } else {
-        localStorage.removeItem("rememberedWalletPassword");
-      }
-      const { wallet: unlockedWallet } = await loadWallet(
-        encryptedWallet,
-        walletPassword,
-        setWallet,
-        () => {},
-        setIsLoadingWallet,
-        () => {},
-        setSigner
-      );
-      setWallet(unlockedWallet);
-      setShowWalletPasswordModal(false);
-      setWalletPassword("");
-      // Now call verifyMerkleProof with unlocked wallet
-      console.warn("Wallet unlocked successfully:", unlockedWallet);
-      verifyMerkleProof(
-        setIsLoadingTx,
-        setCurrentStep,
-        setErrorMessage,
-        setIsErrorModalOpen,
-        navigate,
-        unlockedWallet,
-        agent
-      );
-    } catch (error) {
-      setWalletUnlockError(
-        "Failed to unlock wallet. Please check your password."
-      );
-    }
-    setIsLoadingWallet(false);
-  };
-
   if (isCheckingBackendStatus) {
     return (
       <div className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-400 to-black">
@@ -208,11 +306,38 @@ const LoginPage = () => {
       className="h-screen flex items-center justify-center relative overflow-hidden"
       style={{
         backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
       }}
     >
+
+      {/* Debug controls */}
+      {showDebugBoxes && (
+        <div style={{ position: "absolute", top: 10, right: 10, zIndex: 100 }}>
+          <label>
+            Scale:
+            <input
+              type="number"
+              step="0.05"
+              min="0.1"
+              value={aabbScale}
+              onChange={(e) => setAabbScale(Number(e.target.value))}
+              style={{ width: 60, marginLeft: 4 }}
+            />
+          </label>
+          <label style={{ marginLeft: 12 }}>
+            Offset:
+            <input
+              type="number"
+              step="1"
+              value={aabbOffset}
+              onChange={(e) => setAabbOffset(Number(e.target.value))}
+              style={{ width: 60, marginLeft: 4 }}
+            />
+          </label>
+        </div>
+      )}
       <div className="z-10">
         {currentPage !== "main" && (
           <button
@@ -225,12 +350,11 @@ const LoginPage = () => {
         {currentPage === "signup" ? (
           <motion.div
             key="signup"
-            initial={{ opacity: 0, scale: 0.95, y: 40 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 40 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="bg-base-100 p-10 rounded-2xl shadow-xl w-[30rem] "
-          >
+            // initial={{ opacity: 0, scale: 0.95, y: 40 }}
+            // animate={{ opacity: 1, scale: 1, y: 0 }}
+            // exit={{ opacity: 0, scale: 0.95, y: 40 }}
+            // transition={{ duration: 0.5, ease: "easeOut" }}
+            className="bg-base-100 p-10 rounded-2xl shadow-xl max-h-[75vh] overflow-auto scrollbar-hide w-[30rem]"          >
             <SignupForm
               walletExists={walletExists}
               setWalletExists={setWalletExists}
@@ -258,7 +382,15 @@ const LoginPage = () => {
               Click below to verify using zero-knowledge proof.
             </p>
             <button
-              onClick={() => setShowWalletPasswordModal(true)}
+              onClick={() => {
+                verifyMerkleProof(
+                  setIsLoadingTx,
+                  setCurrentStep,
+                  setErrorMessage,
+                  setIsErrorModalOpen,
+                  navigate
+                );
+              }}
               className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-4`}
               disabled={isLoadingTx}
             >
@@ -282,71 +414,20 @@ const LoginPage = () => {
                 <p className="mt-2">Verifying...</p>
               </div>
             )}
-
-            {/* Wallet Unlock Modal */}
-            {showWalletPasswordModal && (
-              <dialog open className="modal">
-                <form
-                  onSubmit={handleUnlockAndVerify}
-                  className="modal-box space-y-4"
-                >
-                  <h3 className="text-lg font-bold text-center mb-4">
-                    Enter Wallet Password
-                  </h3>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Wallet Password
-                    </label>
-                    <input
-                      type="password"
-                      value={walletPassword}
-                      onChange={(e) => setWalletPassword(e.target.value)}
-                      className={`input input-bordered w-full ${
-                        walletUnlockError ? "input-error" : ""
-                      }`}
-                      placeholder="Enter wallet password"
-                    />
-                    {walletUnlockError && (
-                      <p className="mt-1 text-sm text-red-500">
-                        {walletUnlockError}
-                      </p>
-                    )}
-                    <label className="flex items-center mt-2">
-                      <input
-                        type="checkbox"
-                        checked={rememberWalletPassword}
-                        onChange={(e) =>
-                          setRememberWalletPassword(e.target.checked)
-                        }
-                        className="mr-2"
-                      />
-                      Remember password
-                    </label>
-                  </div>
-                  <div className="flex gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowWalletPasswordModal(false)}
-                      className="btn flex-1 bg-base-100 hover:bg-base-100 text-[#333333] p-2 rounded-2xl px-4"
-                      disabled={isLoadingWallet}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn flex-1 bg-primary/75 hover:bg-primary text-base-100 p-2 rounded-2xl px-4"
-                      disabled={isLoadingWallet}
-                    >
-                      {isLoadingWallet ? (
-                        <Loader2 className="animate-spin" />
-                      ) : (
-                        "Unlock & Verify"
-                      )}
-                    </button>
-                  </div>
-                </form>
-              </dialog>
-            )}
+          </motion.div>
+        ) : currentPage === "auth2" ? (
+          <motion.div
+            key="auth2"
+            initial={{ opacity: 0, scale: 0.95, y: 40 }}
+            animate={{ opacity: 1, scale: 0.95, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 40 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="bg-base-100 p-10 rounded-2xl shadow-xl w-96"
+          >
+            {/* <h2 className="text-center text-3xl font-bold text-Black">
+            Verify via VC
+          </h2> */}
+            {/* Add your VC verification component or logic here */}
           </motion.div>
         ) : (
           <motion.div
@@ -368,7 +449,7 @@ const LoginPage = () => {
                 <p className="text-black mb-4">
                   {walletExists
                     ? hasVC
-                      ? "Valid VC detected! Please proceed with the authentication."
+                      ? "Please choose a verification method to continue."
                       : "Wallet detected, but registration is incomplete. Please complete your registration."
                     : "To get started, please create a wallet."}
                 </p>
@@ -383,6 +464,15 @@ const LoginPage = () => {
                     >
                       Verify via ZKP
                     </button>
+                    {/* <button
+                    onClick={() => {
+                      setPreviousPage("main");
+                      setCurrentPage("auth2");
+                    }}
+                    className={`btn w-full bg-primary/75 hover:bg-primary text-base-100 rounded-2xl mt-1`}
+                  >
+                    Verify via VC
+                  </button> */}
                   </div>
                 ) : (
                   <button
