@@ -171,22 +171,9 @@ export const verifyMerkleProof = async (
       document.getElementById("error-modal").showModal();
 
       if (data.smt_proofs) {
-        console.log("Update proofs available:", data.smt_proofs);
-
-        // Compare the recieved smt_proofs with the existing ones in localStorage
-        const existingProofs =
-          JSON.parse(localStorage.getItem("smt_proofs")) || [];
-        const newProofs = data.smt_proofs;
-
-        if (JSON.stringify(existingProofs) !== JSON.stringify(newProofs)) {
-          console.warn("SMT proofs do not match. Updating localStorage.");
-          localStorage.setItem("smt_proofs", JSON.stringify(newProofs));
-        } else {
-          console.log("SMT proofs match, no update needed.");
-        }
         // Retry only if not already retried
         if (!hasRetried) {
-          return await verifyMerkleProof(
+          const result = await verifyMerkleProof(
             setIsLoadingTx,
             setCurrentStep,
             setErrorMessage,
@@ -196,6 +183,20 @@ export const verifyMerkleProof = async (
             agent,
             true // Set flag to true on retry
           );
+          console.log("Update proofs available:", data.smt_proofs);
+
+          // Compare the recieved smt_proofs with the existing ones in localStorage
+          const existingProofs =
+            JSON.parse(localStorage.getItem("smt_proofs")) || [];
+          const newProofs = data.smt_proofs;
+
+          if (JSON.stringify(existingProofs) !== JSON.stringify(newProofs)) {
+            console.warn("SMT proofs do not match. Updating localStorage.");
+            localStorage.setItem("smt_proofs", JSON.stringify(newProofs));
+          } else {
+            console.log("SMT proofs match, no update needed.");
+          }
+          return result;
         } else {
           // Show error modal and message if retry fails
           const errorMsg = "SMT proof is corrupted or invalid after retry.";
