@@ -1,4 +1,4 @@
-import { Search, Shapes } from "lucide-react";
+import { Search } from "lucide-react";
 import React, { useState } from "react";
 import facebookLogo from "../../assets/facebook.png";
 import githubLogo from "../../assets/github.png";
@@ -34,13 +34,10 @@ const Applications = () => {
   return (
     <Sidebar role={"user"}>
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-6">
+      <div className="col-span-12">
         {/* Header Row */}
-        <div className="flex flex-wrap items-center justify-between mb-8">
-          <div className="flex items-center space-x-4 mb-4 lg:mb-0">
-            <Shapes className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-gray-800">Applications</h1>
-          </div>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-[#333333]">Applications</h1>
           <div className="flex gap-3">
             <div className="flex items-center space-x-4">
               <div className="relative">

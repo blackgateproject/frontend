@@ -1,4 +1,4 @@
-import { Edit, Search, Trash2, UsersIcon } from "lucide-react";
+import { Edit, Search, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Loader from "../../components/Loader"; // Import the Loader component
@@ -170,19 +170,10 @@ const AdminUsers = () => {
   return (
     <Sidebar role={"admin"}>
       {/* Main Content */}
-
-      {/* Main Content */}
-
-      {/* Header Row */}
-
-
-      <div className="container mx-auto px-4 py-6">
+      <div className="col-span-12">
         {/* Header Row */}
-        <div className="flex flex-wrap items-center justify-between mb-8">
-          <div className="flex items-center space-x-4 mb-4 lg:mb-0">
-            <UsersIcon className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-gray-800">Users</h1>
-          </div>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-[#333333]">Users</h1>
           <div className="flex items-center space-x-4">
             <button
               className="btn bg-primary/75 hover:bg-primary text-base-100 rounded-2xl px-4"
@@ -223,8 +214,9 @@ const AdminUsers = () => {
                     <p className="text-sm text-gray-500">{user.role}</p>
                   </div>
                   <div
-                    className={`w-3 h-3 rounded-full ${user.online ? "bg-green-300" : "bg-gray-400"
-                      }`}
+                    className={`w-3 h-3 rounded-full ${
+                      user.online ? "bg-green-300" : "bg-gray-400"
+                    }`}
                   ></div>
                 </div>
                 <div className="flex space-x-2">
