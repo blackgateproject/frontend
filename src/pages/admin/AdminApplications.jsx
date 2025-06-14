@@ -1,4 +1,7 @@
-import { Search } from "lucide-react";
+import { Search, ShapesIcon } from "lucide-react";
+import React, { useState } from "react";
+import facebookLogo from "../../assets/facebook.png";
+import githubLogo from "../../assets/github.png";
 import React, { useState } from "react";
 import facebookLogo from "../../assets/facebook.png";
 import githubLogo from "../../assets/github.png";
@@ -54,10 +57,13 @@ const Applications = () => {
       </dialog>
 
       {/* Main Content */}
-      <div className="col-span-12">
+      <div className="container mx-auto px-4 py-6">
         {/* Header Row */}
-        <div className="flex justify-between lg:flex-row flex-col lg:items-center mb-6">
-          <h1 className="text-3xl font-bold text-[#333333]">Applications</h1>
+        <div className="flex flex-wrap items-center justify-between mb-8">
+          <div className="flex items-center space-x-4 mb-4 lg:mb-0">
+            <ShapesIcon className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold text-gray-800">Applications</h1>
+          </div>
           <div className="lg:mt-0 mt-5 flex items-center space-x-4">
             <button
               className="btn bg-primary/75 hover:bg-primary text-base-100 rounded-2xl px-4"
@@ -82,7 +88,6 @@ const Applications = () => {
             </div>
           </div>
         </div>
-
         {/* Applications Grid */}
         {filteredApplications.length > 0 ? (
           <ApplicationsGrid applications={filteredApplications} />
