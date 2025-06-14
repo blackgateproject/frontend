@@ -225,10 +225,10 @@ const LoginPage = () => {
         {currentPage === "signup" ? (
           <motion.div
             key="signup"
-            initial={{ opacity: 0, scale: 0.95, y: 40 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 40 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            // initial={{ opacity: 0, scale: 0.95, y: 40 }}
+            // animate={{ opacity: 1, scale: 1, y: 0 }}
+            // exit={{ opacity: 0, scale: 0.95, y: 40 }}
+            // transition={{ duration: 0.5, ease: "easeOut" }}
             className="bg-base-100 p-10 rounded-2xl shadow-xl max-h-[75vh] overflow-auto scrollbar-hide w-[30rem]"
           >
             <SignupForm

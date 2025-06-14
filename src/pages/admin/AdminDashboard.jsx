@@ -1,4 +1,10 @@
-import { ActivityIcon, CheckSquare, Search, Users } from "lucide-react";
+import {
+  ActivityIcon,
+  ChartAreaIcon,
+  CheckSquare,
+  Search,
+  Users,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";

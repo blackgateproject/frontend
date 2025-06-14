@@ -1,8 +1,5 @@
 import { Search, ShapesIcon } from "lucide-react";
-import React, { useState } from "react";
-import facebookLogo from "../../assets/facebook.png";
-import githubLogo from "../../assets/github.png";
-import React, { useState } from "react";
+import { useState } from "react";
 import facebookLogo from "../../assets/facebook.png";
 import githubLogo from "../../assets/github.png";
 import hfLogo from "../../assets/hf.png";
