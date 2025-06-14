@@ -156,7 +156,8 @@ export async function verifyLDCredential(
 export async function createPresentationFromCredential(
   vc: VerifiableCredential,
   agent: TAgent<ICredentialIssuer & IVerifyPresentationArgs>,
-  wallet: Wallet
+  wallet: Wallet,
+  smt_proofs: any[] = []
 ): Promise<VerifiablePresentation> {
   console.warn("Creating presentation from credential");
   console.log("Credential: ", vc);
@@ -224,6 +225,7 @@ export async function createPresentationFromCredential(
       nbf: Math.floor(new Date(actualVC.issuanceDate).getTime() / 1000),
       // expirationDate: new Date(Date.now() - 24 * 60 *60 *60 *1000).toISOString(),
       expirationDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      smt_proofs: smt_proofs,
     },
     proofFormat: "jwt",
     // Setup a nonce for challenge; randomly generated each time

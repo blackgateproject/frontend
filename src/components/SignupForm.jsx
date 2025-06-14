@@ -325,6 +325,10 @@ const SignupForm = ({
                   "verifiable_credential",
                   JSON.stringify(status.verifiable_credential)
                 );
+                localStorage.setItem(
+                  "smt_proofs",
+                  JSON.stringify(status.smt_proofs)
+                );
 
                 setShowProgress(false); // Hide progress indicator
                 setIsSuccess(true);

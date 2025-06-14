@@ -30,11 +30,36 @@ export const verifyMerkleProof = async (
       console.log("Wallet Key", wallet.privateKey);
     }
 
+
+    // Load the smt_proofs from localStorage
+    const smt_proofs = localStorage.getItem("smt_proofs");
+    console.log("SMT Proofs exists in localStorage:", !!smt_proofs);
+    if (!smt_proofs) {
+      throw new Error("[VC Verify ERR]: smt_proofs not found in localStorage");
+    }
+
+
+    // Parse the smt_proofs
+    const parsedSmtProofs = JSON.parse(smt_proofs);
+    if (!parsedSmtProofs || !parsedSmtProofs.proof || !parsedSmtProofs.key) {
+      throw new Error("[VC Verify ERR]: Invalid smt_proofs structure");
+    }
+    console.log("Parsed SMT Proofs:", parsedSmtProofs);
+
+    // Validate the structure of the parsed credential
+    if (
+      !parsedCredential.credential ||
+      !parsedCredential.credential.credentialSubject
+    ) {
+      throw new Error("[VC Verify ERR]: Invalid credential structure");
+    }
+  
     // Generate a VP from the given VC
     const verifiable_presentation = await createPresentationFromCredential(
       parsedCredential,
       agent,
-      wallet
+      wallet,
+      parsedSmtProofs
     );
     console.log("Verifiable Presentation created:", verifiable_presentation);
     if (!verifiable_presentation) {
@@ -43,6 +68,7 @@ export const verifyMerkleProof = async (
       );
     }
 
+    // Send the Verifiable Presentation to the Connector for verification
     console.log("sending data:", verifiable_presentation);
     const response = await fetch(`${connectorURL}/auth/v1/verify`, {
       method: "POST",
@@ -52,6 +78,7 @@ export const verifyMerkleProof = async (
       body: JSON.stringify(verifiable_presentation),
     });
 
+    // Response handling
     const data = await response.json();
 
     if (response.ok) {

@@ -41,7 +41,7 @@ export const submitDID = async (formData) => {
 
 // Poll for request status
 export const pollForRequestStatus = async (did_str, proof_type) => {
-  console.log(`Polling for ${proof_type} request status...`);
+  console.log(`Polling for "${proof_type}" request status...`);
 
   return fetch(`${connectorURL}/auth/v1/poll/${did_str}`)
     .then((response) => {
@@ -54,11 +54,12 @@ export const pollForRequestStatus = async (did_str, proof_type) => {
     .then((data) => {
       if (data) {
         console.log("then data:", data);
-        const { message, verifiable_credential, request_status } = data;
+        const { message, verifiable_credential, request_status, smt_proofs } = data;
         return {
           message,
           verifiable_credential,
           request_status,
+          smt_proofs,
         };
       } else {
         throw new Error("Received null data");
