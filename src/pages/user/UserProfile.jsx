@@ -6,7 +6,6 @@ import {
   Loader2,
   Search,
   SquareUserRound,
-  User,
   X,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -356,13 +355,10 @@ const UserProfile = () => {
         </form>
       </dialog>
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="col-span-12">
         {/* Header Row */}
-        <div className="flex flex-wrap items-center justify-between mb-8">
-          <div className="flex items-center space-x-4 mb-4 lg:mb-0">
-            <User className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-gray-800">Profile</h1>
-          </div>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-[#333333]">Profile</h1>
           <div className="relative">
             {/* Search Icon inside the input field */}
             <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

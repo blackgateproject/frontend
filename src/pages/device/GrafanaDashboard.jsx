@@ -1,7 +1,6 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar";
 import { grafanaURL } from "../../utils/readEnv";
-import { AreaChart } from "lucide-react";
 const GrafanaDashboard = () => {
   // Get the Grafana token and scanId (modify as per your auth mechanism)
   // const bearerToken = sessionStorage.getItem("access_token") || "";
@@ -18,14 +17,9 @@ const GrafanaDashboard = () => {
   return (
     <Sidebar role={"device"}>
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-6">
+      <div className="col-span-12 p-6">
         {/* Heading */}
-        <div className="flex flex-wrap items-center justify-between mb-8">
-          <div className="flex items-center space-x-4 mb-4 lg:mb-0">
-            <AreaChart className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-gray-800">Grafana Dashboard</h1>
-          </div>
-        </div>
+        <h1 className="text-3xl font-bold text-[#333333] mb-4">Dashboard</h1>
 
         {/* Grafana Dashboard Embed */}
         <iframe
