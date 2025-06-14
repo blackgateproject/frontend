@@ -7,8 +7,7 @@ export const verifyMerkleProof = async (
   setIsErrorModalOpen,
   navigate,
   wallet,
-  agent,
-  hasRetried = false // Add a flag to track retry
+  agent
 ) => {
   setIsLoadingTx(true);
   try {
@@ -31,12 +30,14 @@ export const verifyMerkleProof = async (
       console.log("Wallet Key", wallet.privateKey);
     }
 
+
     // Load the smt_proofs from localStorage
     const smt_proofs = localStorage.getItem("smt_proofs");
     console.log("SMT Proofs exists in localStorage:", !!smt_proofs);
     if (!smt_proofs) {
       throw new Error("[VC Verify ERR]: smt_proofs not found in localStorage");
     }
+
 
     // Parse the smt_proofs
     const parsedSmtProofs = JSON.parse(smt_proofs);
@@ -52,7 +53,7 @@ export const verifyMerkleProof = async (
     ) {
       throw new Error("[VC Verify ERR]: Invalid credential structure");
     }
-
+  
     // Generate a VP from the given VC
     const verifiable_presentation = await createPresentationFromCredential(
       parsedCredential,
@@ -78,21 +79,10 @@ export const verifyMerkleProof = async (
     });
 
     // Response handling
-    let data;
-    try {
-      data = await response.json();
-    } catch (e) {
-      throw new Error("Invalid server response");
-    }
+    const data = await response.json();
 
     if (response.ok) {
       console.log("Got response", data);
-
-      // Update smt_proofs in localStorage if new proofs are returned
-      if (data.proofs) {
-        localStorage.setItem("smt_proofs", JSON.stringify(data.proofs));
-        console.log("Updated smt_proofs in localStorage from server response");
-      }
 
       // Debug the results structure
       console.log("Results structure:", data.results);
@@ -152,45 +142,6 @@ export const verifyMerkleProof = async (
         setErrorMessage(data.message);
         setIsErrorModalOpen(true);
         document.getElementById("error-modal").showModal();
-      }
-    } else if (response.status === 409) {
-      // 409: update proofs and retry
-      console.warn("Returned Data:", data);
-      console.error("Verification conflict:", data.message);
-      setCurrentStep(data.message || "Verification conflict");
-      setErrorMessage(data.message || "Verification conflict");
-      setIsErrorModalOpen(true);
-      document.getElementById("error-modal").showModal();
-
-      if (data.smt_proofs) {
-        console.log("Update proofs available:", data.smt_proofs);
-        localStorage.setItem("smt_proofs", JSON.stringify(data.smt_proofs));
-        // Retry only if not already retried
-        if (!hasRetried) {
-          return await verifyMerkleProof(
-            setIsLoadingTx,
-            setCurrentStep,
-            setErrorMessage,
-            setIsErrorModalOpen,
-            navigate,
-            wallet,
-            agent,
-            true // Set flag to true on retry
-          );
-        } else {
-          // Show error modal and message if retry fails
-          const errorMsg = "SMT proof is corrupted or invalid after retry.";
-          setCurrentStep(errorMsg);
-          setErrorMessage(errorMsg);
-          setIsErrorModalOpen(true);
-          if (document.getElementById("error-modal")) {
-            document.getElementById("error-modal").showModal();
-          }
-          console.error(errorMsg);
-          return;
-        }
-      } else {
-        throw new Error("409 received but no smt_proofs provided");
       }
     } else {
       throw new Error(data.message || "Verification failed, Server Error");
