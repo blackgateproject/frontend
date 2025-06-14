@@ -175,7 +175,6 @@ const AdminUsers = () => {
 
       {/* Header Row */}
 
-
       <div className="container mx-auto px-4 py-6">
         {/* Header Row */}
         <div className="flex flex-wrap items-center justify-between mb-8">
@@ -223,8 +222,9 @@ const AdminUsers = () => {
                     <p className="text-sm text-gray-500">{user.role}</p>
                   </div>
                   <div
-                    className={`w-3 h-3 rounded-full ${user.online ? "bg-green-300" : "bg-gray-400"
-                      }`}
+                    className={`w-3 h-3 rounded-full ${
+                      user.online ? "bg-green-300" : "bg-gray-400"
+                    }`}
                   ></div>
                 </div>
                 <div className="flex space-x-2">

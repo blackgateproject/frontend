@@ -1,5 +1,5 @@
-import { ActivityIcon, ChartAreaIcon, CheckSquare, Search, TrendingUp, Users } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { ActivityIcon, CheckSquare, Search, Users } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import UserActivity from "../../components/UserActivity";

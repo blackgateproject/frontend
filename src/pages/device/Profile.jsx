@@ -315,7 +315,6 @@ const AdminProfile = () => {
 
         {/* Cards Section */}
 
-
         {/* Wallet Card */}
         <div className="bg-base-100 min-w-[30rem] max-w-fit rounded-2xl shadow-md p-6 relative">
           {/* Top row with flex and justify-between */}

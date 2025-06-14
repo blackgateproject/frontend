@@ -2,6 +2,9 @@ import { Search, ShapesIcon } from "lucide-react";
 import React, { useState } from "react";
 import facebookLogo from "../../assets/facebook.png";
 import githubLogo from "../../assets/github.png";
+import React, { useState } from "react";
+import facebookLogo from "../../assets/facebook.png";
+import githubLogo from "../../assets/github.png";
 import hfLogo from "../../assets/hf.png";
 import instagramLogo from "../../assets/instagram.jpg";
 import linkedinLogo from "../../assets/linkedin.jpg";
@@ -85,7 +88,6 @@ const Applications = () => {
             </div>
           </div>
         </div>
-
         {/* Applications Grid */}
         {filteredApplications.length > 0 ? (
           <ApplicationsGrid applications={filteredApplications} />

@@ -299,8 +299,8 @@ const UserProfile = () => {
               // logoImage={logo}
               // removeQrCodeBehindLogo={true}
               size={logoSize * 1.5}
-            // logoHeight={logoSize * 0.4}
-            // logoWidth={logoSize * 0.4}
+              // logoHeight={logoSize * 0.4}
+              // logoWidth={logoSize * 0.4}
             />
           </div>
           <p className="text-center mt-4 break-words">{qrCode}</p>
@@ -377,7 +377,6 @@ const UserProfile = () => {
         </div>
 
         {/* Cards Section */}
-
 
         {/* Wallet Card */}
         <div className="bg-base-100 min-w-[30rem] max-w-fit rounded-2xl shadow-md p-6 relative">

@@ -4,9 +4,9 @@ import {
   Edit,
   KeyRound,
   Loader2,
+  UserIcon,
   Search,
   SquareUserRound,
-  UserIcon,
   X,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -292,6 +292,7 @@ const AdminProfile = () => {
           </div>
         </form>
       </dialog>
+
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-wrap items-center justify-between mb-8">
           <div className="flex items-center space-x-4 mb-4 lg:mb-0">
@@ -310,10 +311,7 @@ const AdminProfile = () => {
             />
           </div>
         </div>
-
         {/* Cards Section */}
-
-
         {/* Wallet Card */}
         <div className="bg-base-100 min-w-[30rem] max-w-fit rounded-2xl shadow-md p-6 relative">
           {/* Top row with flex and justify-between */}

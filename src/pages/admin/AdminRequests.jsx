@@ -269,10 +269,11 @@ const Requests = () => {
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -50 }}
-          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${notification.type === "success"
-            ? "bg-green-100 border-l-4 border-green-500 text-green-700"
-            : "bg-red-100 border-l-4 border-red-500 text-red-700"
-            }`}
+          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+            notification.type === "success"
+              ? "bg-green-100 border-l-4 border-green-500 text-green-700"
+              : "bg-red-100 border-l-4 border-red-500 text-red-700"
+          }`}
         >
           <div className="flex items-center">
             {notification.type === "success" ? (
@@ -381,10 +382,11 @@ const Requests = () => {
                     VC Sent
                   </p>
                   <div
-                    className={`badge ${detailsModal.request.isVCSent
-                      ? "badge-success"
-                      : "badge-warning"
-                      }`}
+                    className={`badge ${
+                      detailsModal.request.isVCSent
+                        ? "badge-success"
+                        : "badge-warning"
+                    }`}
                   >
                     {detailsModal.request.isVCSent ? "Yes" : "No"}
                   </div>
@@ -581,11 +583,13 @@ const Requests = () => {
                 checked={autoRefresh}
                 onChange={(e) => setAutoRefresh(e.target.checked)}
               />
-              <label htmlFor="auto-refresh" className="text-sm text-gray-600 cursor-pointer">
+              <label
+                htmlFor="auto-refresh"
+                className="text-sm text-gray-600 cursor-pointer"
+              >
                 Auto-refresh ({AUTO_REFRESH_INTERVAL / 1000}s)
               </label>
             </div>
-
           </div>
         </div>
 
@@ -744,8 +748,7 @@ const Requests = () => {
                       Location
                     </p>
                     <p className="text-gray-800 bg-gray-100 p-2 rounded">
-                      {request.location_lat},{" "}
-                      {request.location_long}
+                      {request.location_lat}, {request.location_long}
                     </p>
                   </div>
                 </div>
@@ -804,10 +807,10 @@ const Requests = () => {
                 {selectedStatus !== "all" && selected_role !== "all"
                   ? `No ${selectedStatus} requests found for ${selected_role} role.`
                   : selectedStatus !== "all"
-                    ? `No ${selectedStatus} requests found.`
-                    : selected_role !== "all"
-                      ? `No requests found for ${selected_role} role.`
-                      : "No requests match your search criteria."}
+                  ? `No ${selectedStatus} requests found.`
+                  : selected_role !== "all"
+                  ? `No requests found for ${selected_role} role.`
+                  : "No requests match your search criteria."}
               </p>
               <button
                 className="btn btn-outline btn-sm mt-4"
@@ -847,10 +850,11 @@ const Requests = () => {
                   <button
                     key={number + 1}
                     onClick={() => paginate(number + 1)}
-                    className={`btn btn-sm join-item ${currentPage === number + 1
-                      ? "btn-primary text-white"
-                      : "btn-ghost"
-                      }`}
+                    className={`btn btn-sm join-item ${
+                      currentPage === number + 1
+                        ? "btn-primary text-white"
+                        : "btn-ghost"
+                    }`}
                   >
                     {number + 1}
                   </button>
@@ -860,8 +864,9 @@ const Requests = () => {
                 <>
                   <button
                     onClick={() => paginate(1)}
-                    className={`btn btn-sm join-item ${currentPage === 1 ? "btn-primary text-white" : "btn-ghost"
-                      }`}
+                    className={`btn btn-sm join-item ${
+                      currentPage === 1 ? "btn-primary text-white" : "btn-ghost"
+                    }`}
                   >
                     1
                   </button>
@@ -883,10 +888,11 @@ const Requests = () => {
                       <button
                         key={number + 1}
                         onClick={() => paginate(number + 1)}
-                        className={`btn btn-sm join-item ${currentPage === number + 1
-                          ? "btn-primary text-white"
-                          : "btn-ghost"
-                          }`}
+                        className={`btn btn-sm join-item ${
+                          currentPage === number + 1
+                            ? "btn-primary text-white"
+                            : "btn-ghost"
+                        }`}
                       >
                         {number + 1}
                       </button>
@@ -900,10 +906,11 @@ const Requests = () => {
 
                   <button
                     onClick={() => paginate(totalPages)}
-                    className={`btn btn-sm join-item ${currentPage === totalPages
-                      ? "btn-primary text-white"
-                      : "btn-ghost"
-                      }`}
+                    className={`btn btn-sm join-item ${
+                      currentPage === totalPages
+                        ? "btn-primary text-white"
+                        : "btn-ghost"
+                    }`}
                   >
                     {totalPages}
                   </button>

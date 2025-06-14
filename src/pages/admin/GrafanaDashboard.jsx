@@ -21,7 +21,9 @@ const GrafanaDashboard = () => {
         <div className="flex flex-wrap items-center justify-between mb-8 mt-2">
           <div className="flex items-center space-x-4 mb-4 lg:mb-0">
             <Database className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-gray-800">Grafana Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-800">
+              Grafana Dashboard
+            </h1>
           </div>
         </div>
 
