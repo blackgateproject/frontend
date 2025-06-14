@@ -7,11 +7,12 @@ import {
   TicketIcon,
   XCircle,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Loader from "../../components/Loader";
 import Modal from "../../components/Modal";
 import Sidebar from "../../components/Sidebar";
 import { connectorURL } from "../../utils/readEnv";
+
 
 const AUTO_REFRESH_INTERVAL = 5000; // 5 seconds - adjust as needed
 
