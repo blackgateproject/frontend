@@ -50,25 +50,10 @@ export const createNewWallet = async (
   const newWallet = ethers.Wallet.createRandom();
   const walletCreateTime = performance.now() - startTime;
 
-  // // Start encryption in the background
-  // (async () => {
-  //   try {
-  //     const walletEncryptTime = await encryptAndStoreWallet(
-  //       newWallet,
-  //       walletPassword,
-  //       setWalletExists,
-  //       setWalletTimings
-  //     );
-  //     setWalletTimings({ walletCreateTime, walletEncryptTime });
-  //   } catch (err) {
-  //     // Error already logged in helper
-  //   }
-  // })();
-
   setWallet(newWallet);
+  setWalletExists(true);
   console.log("New wallet created:", newWallet);
   console.info("Wallet Create Time (walletCreateTime):", walletCreateTime);
-  console.info("walletTimes: ");
   // Return immediately, encryption happens in background
   return { wallet: newWallet, walletCreateTime, walletEncryptTime: 0 };
 };

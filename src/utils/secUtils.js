@@ -7,7 +7,11 @@ export const logUserInfo = async () => {
     location_lat: null,
     location_long: null,
     ip_address: "",
+    user_info_time: 0
   };
+
+  // Set time taken to get user info
+  const startTime = performance.now();
 
   // Log User Agent
   userInfo.user_agent = navigator.userAgent;
@@ -47,6 +51,7 @@ export const logUserInfo = async () => {
   // userInfo.ip_address = ""
 
   // console.log("Network Info:", JSON.stringify(userInfo, null, 2));
-
-  return userInfo
+  const endTime = performance.now();
+  userInfo.user_info_time = endTime - startTime;
+  return userInfo;
 };

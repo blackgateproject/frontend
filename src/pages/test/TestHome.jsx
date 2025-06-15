@@ -2,9 +2,11 @@ import FileSaver from "file-saver";
 import { useEffect, useRef, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import { useVeramoOperations } from "../../hooks/useVeramoOperations";
-import { createNewWallet } from "../../utils/contractInteractions";
-import { connectorURL } from "../../utils/readEnv";
-import { submitDID } from "../../utils/registrations";
+import {
+  createNewWallet,
+  encryptAndStoreWallet,
+} from "../../utils/contractInteractions";
+import { pollForRequestStatus, submitDID } from "../../utils/registrations";
 import { verifyMerkleProof } from "../../utils/verification";
 
 const roles = ["device", "admin", "user"]; // Example roles, adjust as needed
@@ -73,11 +75,7 @@ const TestDashboard = () => {
       const startTime = performance.now();
       console.error("Registering user", i + 1);
 
-      const {
-        wallet: newWallet,
-        walletCreateTime,
-        walletEncryptTime,
-      } = await createNewWallet(
+      const { wallet: newWallet, walletCreateTime } = await createNewWallet(
         "password",
         setWalletExists,
         setWallet,
@@ -96,9 +94,18 @@ const TestDashboard = () => {
         proof_type: proofType,
         testMode: true,
         walletCreateTime: walletCreateTime,
-        walletEncryptTime: walletEncryptTime,
         device_id: `${i + 1}`,
       };
+
+      // Encrypt and store wallet after DID submission
+      const walletEncryptTime = await encryptAndStoreWallet(
+        newWallet,
+        did,
+        setWalletExists,
+        setWalletTimings
+      );
+      formData.walletEncryptTime = walletEncryptTime;
+
       const submitResult = await submitDID(formData);
       if (!submitResult) {
         console.error("Failed to submit DID and VC");
@@ -106,18 +113,27 @@ const TestDashboard = () => {
       }
 
       try {
-        const response = await fetch(`${connectorURL}/auth/v1/poll/${did}`);
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch request status");
-        }
-
-        const data = await response.json();
+        const data = await pollForRequestStatus(
+          did,
+          submitResult.proof_type || proofType
+        );
         if (!data) {
-          throw new Error("Received null data");
+          console.error("No data received from pollForRequestStatus");
+          continue;
         }
-
-        console.log("fetch data:", data);
+        console.log("Data received from pollForRequestStatus:", data);
+        if (data.error) {
+          console.error("Error in pollForRequestStatus:", data.error);
+          throw new Error(data.error);
+        }
+        if (!data.verifiable_credential) {
+          console.error("No verifiable credential received");
+          throw new Error("No verifiable credential received");
+        }
+        console.log(
+          "Verifiable credential received:",
+          data.verifiable_credential
+        );
 
         const user = {
           verifiable_credential: data.verifiable_credential,
@@ -126,6 +142,10 @@ const TestDashboard = () => {
           wallet: newWallet, // Always include wallet
           smt_proofs: data.smt_proofs || null, // Store SMT proofs if available
           did,
+          times: {
+            vc_issuance_time: data.times.vc_issuance_time,
+            smt_onchain_add_time: data.times.smt_onchain_add_time,
+          },
         };
 
         setUsers((prevUsers) => [...prevUsers, user]);

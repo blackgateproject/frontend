@@ -54,27 +54,61 @@ export const verifyMerkleProof = async (
     }
 
     // Generate a VP from the given VC
-    const verifiable_presentation = await createPresentationFromCredential(
+    const start_time = performance.now();
+    const verifiablePresentation = await createPresentationFromCredential(
       parsedCredential,
       agent,
       wallet,
       parsedSmtProofs
     );
-    console.log("Verifiable Presentation created:", verifiable_presentation);
-    if (!verifiable_presentation) {
+    const vp_gen_time = performance.now() - start_time;
+    console.log(
+      "Verifiable Presentation created:",
+      verifiablePresentation,
+      "in ",
+      vp_gen_time,
+      "ms"
+    );
+    if (!verifiablePresentation) {
       throw new Error(
         "[VC Verify ERR]: Failed to create Verifiable Presentation"
       );
     }
 
+    // After generating vp_gen_time and before sending the fetch request:
+    const timesFromLocalStorage =
+      JSON.parse(localStorage.getItem("times")) || {};
+
+    const partial_times = {
+      wallet_gen_time:
+        parsedCredential.credential.credentialSubject.walletCreateTime || null,
+      wallet_enc_time:
+        parsedCredential.credential.credentialSubject.walletEncryptTime || null,
+      network_info_time:
+        parsedCredential.credential.credentialSubject.networkInfo
+          ?.user_info_time || null,
+      smt_local_add_time: timesFromLocalStorage.smt_local_add_time || null,
+      smt_onchain_add_time: timesFromLocalStorage.smt_onchain_add_time || null,
+      vc_issuance_time: timesFromLocalStorage.vc_issuance_time || null,
+      vp_gen_time: vp_gen_time || null,
+    };
+
+    // Now send partial_times alongside the VP (not inside it)
+    const payload = {
+      verifiablePresentation,
+      partial_times,
+    };
+
     // Send the Verifiable Presentation to the Connector for verification
-    console.log("sending data:", verifiable_presentation);
+    console.log("sending data:", payload);
+    const verify_start_time = performance.now();
+    setCurrentStep("Verifying your credentials...");
     const response = await fetch(`${connectorURL}/auth/v1/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(verifiable_presentation),
+      body: JSON.stringify(payload),
     });
 
     // Response handling
@@ -101,6 +135,15 @@ export const verifyMerkleProof = async (
           console.warn("SMT proofs match, no update needed.");
         }
       }
+
+      // Update the times object in localStorage
+      if (data.times) {
+        const existingTimes = JSON.parse(localStorage.getItem("times")) || {};
+        const updatedTimes = { ...existingTimes, ...data.times };
+        localStorage.setItem("times", JSON.stringify(updatedTimes));
+        console.log("Updated times in localStorage:", updatedTimes);
+      }
+
 
       // Debug the results structure
       console.log("Results structure:", data.results);
@@ -150,6 +193,8 @@ export const verifyMerkleProof = async (
           navigate(`/${role}/dashboard`);
 
           console.log("Verification successful");
+          const verification_time = performance.now() - verify_start_time;
+          console.log("Verification completed in", verification_time, "ms");
           setCurrentStep("Verification successful");
         } catch (error) {
           console.error("Error:", error.message);
@@ -196,6 +241,9 @@ export const verifyMerkleProof = async (
           } else {
             console.log("SMT proofs match, no update needed.");
           }
+          console.log("Verification successful");
+          const verification_time = performance.now() - verify_start_time;
+          console.log("Verification completed in", verification_time, "ms");
           return result;
         } else {
           // Show error modal and message if retry fails
@@ -225,6 +273,78 @@ export const verifyMerkleProof = async (
   }
 };
 
+export const updateMetrics = async (
+  verifiable_credential,
+  verifiablePresentation,
+  smt_proofs
+) => {
+  /*
+  class timesOfTime(BaseModel):
+    add_user_time: Optional[float] = None
+    wallet_gen_time: Optional[float] = None
+    wallet_enc_time: Optional[float] = None
+    network_info_time: Optional[float] = None
+    zkp_gen_time: Optional[float] = None
+    proof_gen_time: Optional[float] = None
+    onchain_add_time: Optional[float] = None
+    onchain_verify_time: Optional[float] = None
+    vc_issue_time: Optional[float] = None
+    vc_verify_time: Optional[float] = None
+    vp_gen_time: Optional[float] = None
+    vp_verify_time: Optional[float] = None
+
+    connectorUrl = auth/v1/update-metrics/${did}
+
+    use the VC, VP, and smt_proofs passed to update the metrics on connector
+   */
+  if (!verifiable_credential || !verifiablePresentation || !smt_proofs) {
+    console.error("Missing required parameters for updating metrics.");
+    return;
+  }
+  // Parse out the required times from the verifiable_credential and verifiablePresentation and SMT_proofs, it will be long object
+  const timesOfTime = {
+    add_user_time: verifiable_credential.add_user_time || null,
+    wallet_gen_time: verifiable_credential.wallet_gen_time || null,
+    wallet_enc_time: verifiable_credential.wallet_enc_time || null,
+    network_info_time: verifiable_credential.network_info_time || null,
+    zkp_gen_time: verifiablePresentation.zkp_gen_time || null,
+    proof_gen_time: verifiablePresentation.proof_gen_time || null,
+    onchain_add_time: verifiablePresentation.onchain_add_time || null,
+    onchain_verify_time: verifiablePresentation.onchain_verify_time || null,
+    vc_issue_time: verifiable_credential.vc_issue_time || null,
+    vc_verify_time: verifiable_credential.vc_verify_time || null,
+    vp_gen_time: verifiablePresentation.vp_gen_time || null,
+    vp_verify_time: verifiablePresentation.vp_verify_time || null,
+  };
+
+  try {
+    const response = await fetch(`${connectorURL}/auth/v1/update-metrics`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        verifiable_credential,
+        verifiablePresentation,
+        smt_proofs,
+        timesOfTime,
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Metrics updated successfully:", data);
+    } else {
+      const errorData = await response.json();
+      console.error("Failed to update metrics:", errorData.message);
+    }
+  } catch (error) {
+    console.error("Error updating metrics:", error);
+  }
+
+  console.log("Metrics update request sent.");
+};
+
 export const signChallenge = async (wallet, challenge, navigate) => {
   if (!wallet || !challenge) {
     console.error("Wallet or challenge is not available.");
@@ -251,3 +371,5 @@ export const signChallenge = async (wallet, challenge, navigate) => {
     console.error("Failed to finalize registration");
   }
 };
+
+// export const updateMetrics = async()-> {

@@ -62,13 +62,15 @@ export const pollForRequestStatus = async (did_str, proof_type) => {
     .then((data) => {
       if (data) {
         console.log("then data:", data);
-        const { message, verifiable_credential, request_status, smt_proofs } =
+        const { message, verifiable_credential, request_status, smt_proofs, times } =
           data;
+        localStorage.setItem("times", JSON.stringify(times));
         return {
           message,
           verifiable_credential,
           request_status,
           smt_proofs,
+          times,
         };
       } else {
         throw new Error("Received null data");

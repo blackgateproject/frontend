@@ -245,9 +245,9 @@ const SignupForm = ({
     }
 
     setShowProgress(true); // Show progress indicator when registration starts
-
+    
     setIsLoading(true);
-
+    
     try {
       // Check if wallet is initialized
       if (!wallet) {
@@ -255,24 +255,26 @@ const SignupForm = ({
           "Wallet not initialized. Please generate or unlock keys first."
         );
       }
-
-      const updatedFormData = {
-        ...formData,
-        selected_role: selected_role,
-        proof_type: formData.proof_type,
-      };
-
-      // Submit DID + VC
-      setCurrentStep(1);
-      await performSubmitDID(updatedFormData);
-
       // Encrypt and store wallet after DID submission
-      await encryptAndStoreWallet(
+      const walletEncryptTime = await encryptAndStoreWallet(
         wallet,
         walletPassword,
         setWalletExists,
         setWalletTimings
       );
+      
+      
+      const updatedFormData = {
+        ...formData,
+        selected_role: selected_role,
+        proof_type: formData.proof_type,
+        walletEncryptTime: walletEncryptTime,
+      };
+      
+      // Submit DID + VC
+      setCurrentStep(1);
+      await performSubmitDID(updatedFormData);
+
 
       setCurrentStep(2);
       console.log("Form submitted:", updatedFormData);
