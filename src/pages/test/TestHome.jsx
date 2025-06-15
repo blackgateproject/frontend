@@ -80,7 +80,7 @@ const TestDashboard = () => {
       const formData = {
         did: did,
         selected_role: roles[Math.floor(Math.random() * roles.length)],
-        alias: i + 1,
+        alias: String(i + 1),
         firmware_version: `${Math.floor(Math.random() * 10)}.${Math.floor(
           Math.random() * 10
         )}.${Math.floor(Math.random() * 10)}`,
@@ -99,7 +99,7 @@ const TestDashboard = () => {
       }
 
       try {
-        const response = await fetch(`${connectorURL}/auth/v1/pollTest/${did}`);
+        const response = await fetch(`${connectorURL}/auth/v1/poll/${did}`);
 
         if (!response.ok) {
           throw new Error("Failed to fetch request status");
