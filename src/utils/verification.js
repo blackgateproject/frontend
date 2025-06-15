@@ -90,7 +90,7 @@ export const verifyMerkleProof = async (
       network_info_time:
         parsedCredential.credential.credentialSubject.networkInfo
           ?.user_info_time || null,
-      smt_local_add_time: timesFromLocalStorage.smt_local_add_time || null,
+      smt_local_add_time: timesFromLocalStorage.smt_local_add_time || 0,
       smt_onchain_add_time: timesFromLocalStorage.smt_onchain_add_time || null,
       vc_issuance_time: timesFromLocalStorage.vc_issuance_time || null,
       vp_gen_time: vp_gen_time || null,
