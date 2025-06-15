@@ -86,10 +86,8 @@ const TestDashboard = () => {
         )}.${Math.floor(Math.random() * 10)}`,
         proof_type: proofType,
         testMode: true,
-        walletTimes: {
-          walletCreateTime: walletCreateTime,
-          walletEncryptTime: walletEncryptTime,
-        },
+        walletCreateTime: walletCreateTime,
+        walletEncryptTime: walletEncryptTime,
         device_id: `${i + 1}`,
       };
       const submitResult = await submitDID(formData);

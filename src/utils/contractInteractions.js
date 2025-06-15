@@ -70,7 +70,7 @@ export const createNewWallet = async (
   console.info("Wallet Create Time (walletCreateTime):", walletCreateTime);
   console.info("walletTimes: ");
   // Return immediately, encryption happens in background
-  return { wallet: newWallet, walletCreateTime, walletEncryptTime: null };
+  return { wallet: newWallet, walletCreateTime, walletEncryptTime: 0 };
 };
 
 export const loadWallet = async (
