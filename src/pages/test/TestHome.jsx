@@ -5,6 +5,9 @@ import { useVeramoOperations } from "../../hooks/useVeramoOperations";
 import { createNewWallet } from "../../utils/contractInteractions";
 import { connectorURL } from "../../utils/readEnv";
 import { submitDID } from "../../utils/registrations";
+import { verifyMerkleProof } from "../../utils/verification";
+
+const roles = ["device", "admin", "user"]; // Example roles, adjust as needed
 
 const TestDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -34,6 +37,12 @@ const TestDashboard = () => {
 
   const { performCreatePresentation, verifyPresentationWithConnector, agent } =
     useVeramoOperations();
+
+  // Add these dummy state setters for verifyMerkleProof
+  const [isLoadingTx, setIsLoadingTx] = useState(false);
+  const [currentStep, setCurrentStep] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
 
   useEffect(() => {
     console.log("All users:", users);
@@ -115,6 +124,7 @@ const TestDashboard = () => {
           request_status: data.request_status,
           message: data.message,
           wallet: newWallet, // Always include wallet
+          smt_proofs: data.smt_proofs || null, // Store SMT proofs if available
           did,
         };
 
@@ -168,72 +178,63 @@ const TestDashboard = () => {
     for (let i = 0; i < selectedUsers.length; i++) {
       const startTime = performance.now();
       const user = selectedUsers[i];
-      console.log(`Verifying user ${i + 1}:`);
-      const merkleHash =
-        user.verifiable_credential.credential.credentialSubject.ZKP.userHash;
-      const did = user.verifiable_credential.credential.credentialSubject.did;
+      console.log(`Verifying user ${i + 1}:`, user);
 
-      console.log("Merkle Hash:", merkleHash);
-      console.log("DID:", did);
+      // Save this user's VC and SMT proofs to localStorage for verifyMerkleProof
+      if (user.verifiable_credential) {
+        localStorage.setItem(
+          "verifiable_credential",
+          JSON.stringify(user.verifiable_credential)
+        );
+      }
+      if (user.smt_proofs) {
+        localStorage.setItem("smt_proofs", JSON.stringify(user.smt_proofs));
+      }
+
       try {
-        const response = await fetch(`${connectorURL}/auth/v1/verify`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(user.verifiable_credential),
-        });
-
-        if (!response.ok) {
-          throw new Error(
-            `Verification failed with status: ${response.status}\n${response.statusText}` +
-              `\nResponse: ${await response.text()}`
-          );
-        }
-
-        const sessionData = await response.json();
-        console.log("Verification response:", sessionData);
+        await verifyMerkleProof(
+          setIsLoadingTx,
+          setCurrentStep,
+          setErrorMessage,
+          setIsErrorModalOpen,
+          () => {}, // navigate, you can replace with your navigation logic
+          user.wallet,
+          agent,
+          false
+        );
 
         setUsers((prevUsers) =>
           prevUsers.map((u) => {
             if (u.did === user.did) {
               return {
                 ...u,
-                session: {
-                  message: sessionData.message,
-                  results: sessionData.results,
-                  access_token: sessionData.access_token,
-                  refresh_token: sessionData.refresh_token,
-                  duration: sessionData.duration,
+                verification: {
+                  status: "success",
+                  step: currentStep,
+                  error: null,
                 },
               };
             }
             return u;
           })
         );
-
         setSuccessfulVerifications((prevCount) => prevCount + 1);
       } catch (error) {
-        console.error(
-          `Error verifying user ${user.verifiable_credential.credential.credentialSubject.alias} (DID: ${did}):`,
-          error
-        );
-
         setUsers((prevUsers) =>
           prevUsers.map((u) => {
             if (u.did === user.did) {
               return {
                 ...u,
-                session: {
-                  message: "Verification failed",
-                  error: error.message,
+                verification: {
+                  status: "failed",
+                  step: currentStep,
+                  error: errorMessage || error.message,
                 },
               };
             }
             return u;
           })
         );
-
         setFailedVerifications((prevCount) => prevCount + 1);
       }
 
@@ -248,7 +249,16 @@ const TestDashboard = () => {
     setFastestVerifyTime(fastestTime);
     setLongestVerifyTime(longestTime);
 
-    console.log("Verification complete. Updated users:", users);
+    // Log all users with their respective SMT proofs after verification
+    console.log(
+      "All users:",
+      users.map((u) => ({
+        did: u.did,
+        smt_proofs: u.smt_proofs,
+        alias: u.verifiable_credential?.credential?.credentialSubject?.alias,
+        verification: u.verification,
+      }))
+    );
   };
 
   const handleStartInterval = () => {

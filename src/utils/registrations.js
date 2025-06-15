@@ -25,18 +25,26 @@ export const submitDID = async (formData) => {
 
   console.log("Attempting to send data to connector");
 
+  let result = {};
   if (response.ok) {
     const data = await response.json();
     console.log("Registration finalized:", data);
+    // Return all relevant fields, including smt_proofs if present
+    result = {
+      ...data,
+      smt_proofs: data.smt_proofs || null,
+    };
   } else if (response.status === 500) {
     const errorLog = await response.json();
     console.error("Server Error:", errorLog.error);
     alert(`Server Error: ${errorLog.error}`);
+    result = { error: errorLog.error };
   } else {
     console.error("Failed to finalize registration");
+    result = { error: "Failed to finalize registration" };
   }
   console.log("Registeration Processs End!");
-  return response;
+  return result;
 };
 
 // Poll for request status
@@ -54,7 +62,8 @@ export const pollForRequestStatus = async (did_str, proof_type) => {
     .then((data) => {
       if (data) {
         console.log("then data:", data);
-        const { message, verifiable_credential, request_status, smt_proofs } = data;
+        const { message, verifiable_credential, request_status, smt_proofs } =
+          data;
         return {
           message,
           verifiable_credential,
@@ -74,8 +83,6 @@ export const pollForRequestStatus = async (did_str, proof_type) => {
       };
     });
 };
-
-
 
 /**
  * Send a Verifiable Presentation (VP) to the connector server for verification.
