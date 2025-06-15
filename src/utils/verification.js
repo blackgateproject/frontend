@@ -12,6 +12,9 @@ export const verifyMerkleProof = async (
 ) => {
   setIsLoadingTx(true);
   try {
+    // For smt_total_verify_time
+    const startTime = performance.now();
+
     const verifiable_credential = localStorage.getItem("verifiable_credential");
     console.log("VC exists in localStorage:", !!verifiable_credential);
     if (!verifiable_credential) {
@@ -138,12 +141,16 @@ export const verifyMerkleProof = async (
 
       // Update the times object in localStorage
       if (data.times) {
+        const smt_total_verify_time = performance.now() - startTime;
         const existingTimes = JSON.parse(localStorage.getItem("times")) || {};
-        const updatedTimes = { ...existingTimes, ...data.times };
+        const updatedTimes = {
+          ...existingTimes,
+          ...data.times,
+          smt_total_verify_time,
+        };
         localStorage.setItem("times", JSON.stringify(updatedTimes));
         console.log("Updated times in localStorage:", updatedTimes);
       }
-
 
       // Debug the results structure
       console.log("Results structure:", data.results);
@@ -196,6 +203,7 @@ export const verifyMerkleProof = async (
           const verification_time = performance.now() - verify_start_time;
           console.log("Verification completed in", verification_time, "ms");
           setCurrentStep("Verification successful");
+          await updateMetrics(parsedCredential.credentialSubject.did);
         } catch (error) {
           console.error("Error:", error.message);
         }
@@ -273,49 +281,13 @@ export const verifyMerkleProof = async (
   }
 };
 
-export const updateMetrics = async (
-  verifiable_credential,
-  verifiablePresentation,
-  smt_proofs
-) => {
-  /*
-  class timesOfTime(BaseModel):
-    add_user_time: Optional[float] = None
-    wallet_gen_time: Optional[float] = None
-    wallet_enc_time: Optional[float] = None
-    network_info_time: Optional[float] = None
-    zkp_gen_time: Optional[float] = None
-    proof_gen_time: Optional[float] = None
-    onchain_add_time: Optional[float] = None
-    onchain_verify_time: Optional[float] = None
-    vc_issue_time: Optional[float] = None
-    vc_verify_time: Optional[float] = None
-    vp_gen_time: Optional[float] = None
-    vp_verify_time: Optional[float] = None
-
-    connectorUrl = auth/v1/update-metrics/${did}
-
-    use the VC, VP, and smt_proofs passed to update the metrics on connector
-   */
-  if (!verifiable_credential || !verifiablePresentation || !smt_proofs) {
+export const updateMetrics = async (did_str) => {
+  if (!times) {
     console.error("Missing required parameters for updating metrics.");
     return;
   }
-  // Parse out the required times from the verifiable_credential and verifiablePresentation and SMT_proofs, it will be long object
-  const timesOfTime = {
-    add_user_time: verifiable_credential.add_user_time || null,
-    wallet_gen_time: verifiable_credential.wallet_gen_time || null,
-    wallet_enc_time: verifiable_credential.wallet_enc_time || null,
-    network_info_time: verifiable_credential.network_info_time || null,
-    zkp_gen_time: verifiablePresentation.zkp_gen_time || null,
-    proof_gen_time: verifiablePresentation.proof_gen_time || null,
-    onchain_add_time: verifiablePresentation.onchain_add_time || null,
-    onchain_verify_time: verifiablePresentation.onchain_verify_time || null,
-    vc_issue_time: verifiable_credential.vc_issue_time || null,
-    vc_verify_time: verifiable_credential.vc_verify_time || null,
-    vp_gen_time: verifiablePresentation.vp_gen_time || null,
-    vp_verify_time: verifiablePresentation.vp_verify_time || null,
-  };
+  // Parse out the required times from the times object in localStorage
+  const timesFromLocalStorage = JSON.parse(localStorage.getItem("times")) || {};
 
   try {
     const response = await fetch(`${connectorURL}/auth/v1/update-metrics`, {
@@ -323,12 +295,8 @@ export const updateMetrics = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        verifiable_credential,
-        verifiablePresentation,
-        smt_proofs,
-        timesOfTime,
-      }),
+      // Send did and times as the body
+      body: JSON.stringify({ did: did_str, times: timesFromLocalStorage }),
     });
 
     if (response.ok) {
