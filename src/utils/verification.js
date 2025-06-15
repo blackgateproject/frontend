@@ -196,6 +196,12 @@ export const verifyMerkleProof = async (
           const role =
             parsedCredential.credential.credentialSubject.selected_role;
           console.log("Role:", role);
+          const did = parsedCredential.credential.credentialSubject.did;
+          try {
+            await updateMetrics(did);
+          } catch (error) {
+            console.error("Error updating metrics:", error);
+          }
 
           navigate(`/${role}/dashboard`);
 
@@ -203,7 +209,6 @@ export const verifyMerkleProof = async (
           const verification_time = performance.now() - verify_start_time;
           console.log("Verification completed in", verification_time, "ms");
           setCurrentStep("Verification successful");
-          await updateMetrics(parsedCredential.credentialSubject.did);
         } catch (error) {
           console.error("Error:", error.message);
         }
@@ -282,22 +287,26 @@ export const verifyMerkleProof = async (
 };
 
 export const updateMetrics = async (did_str) => {
-  if (!times) {
-    console.error("Missing required parameters for updating metrics.");
+  if (!did_str) {
+    console.error("DID string is required to update metrics.");
     return;
   }
   // Parse out the required times from the times object in localStorage
-  const timesFromLocalStorage = JSON.parse(localStorage.getItem("times")) || {};
-
+  const metrics = JSON.parse(localStorage.getItem("times")) || {};
+  console.warn("DID String:", did_str);
+  console.log("Metrics from localStorage:", metrics);
   try {
-    const response = await fetch(`${connectorURL}/auth/v1/update-metrics`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      // Send did and times as the body
-      body: JSON.stringify({ did: did_str, times: timesFromLocalStorage }),
-    });
+    const response = await fetch(
+      `${connectorURL}/auth/v1/update-metrics/${did_str}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // Send did and times as the body
+        body: JSON.stringify(metrics),
+      }
+    );
 
     if (response.ok) {
       const data = await response.json();
