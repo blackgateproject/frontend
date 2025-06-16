@@ -6,11 +6,13 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
-import UserActivity from "../../components/UserActivity";
-import { connectorURL, grafanaURL } from "../../utils/readEnv";
+// import UserActivity from "../../components/UserActivity";
+import { connectorURL, grafanaURL} from "../../utils/readEnv";
 const grafanaUrl = `${grafanaURL}/d/cegcehlfn4740c/admin-dash-stats?orgId=1&from=2025-03-18T17:00:00.000Z&to=2025-03-19T07:00:00.000Z&timezone=browser&kiosk&refresh=5s`;
+const grafanaMetrics = `${grafanaURL}/d/c2e71c6f-ce85-4683-8e12-c3b58d085799/metrics?orgId=1&from=2025-06-14T13:08:47.492Z&to=2025-06-16T13:08:47.492Z&timezone=browser&theme=light&kiosk&refresh=5s`;
+
 const Dashboard = () => {
   const accessToken = sessionStorage.getItem("access_token") || "";
   const [stats, setStats] = useState({
@@ -20,7 +22,7 @@ const Dashboard = () => {
   });
 
   const [loading, setLoading] = useState(true);
-  const [pendingrequests, setPendingrequests] = useState(0);
+  // const [pendingrequests, setPendingrequests] = useState(0);
   const [userActivities, setUserActivities] = useState([]);
 
   useEffect(() => {
@@ -120,7 +122,21 @@ const Dashboard = () => {
             frameBorder="0"
           />
         </div>
-        {/* User Activity Section */}
+        {/* Grafana Metrics Dashboard Embed */}
+        <div className="col-span-12 p-6">
+          {/* Heading */}
+          {/* <h1 className="text-3xl font-bold text-[#333333] mb-4">Dashboard</h1> */}
+
+          <iframe
+            title="grafana-metrics-dashboard"
+            // src="http://arborjs.org"
+            src={grafanaMetrics}
+            width="100%"
+            height="900px"
+            frameBorder="0"
+          />
+        </div>
+        {/* User Activity Section
         <div className="bg-base-300 rounded-2xl shadow-md max-h-[34rem] overflow-y-scroll p-6 mb-4">
           <div className="w-full flex justify-between items-center my-3 mb-5">
             <h2 className="text-2xl font-bold mb-4 text-[#333333]">
@@ -137,7 +153,7 @@ const Dashboard = () => {
           <div className=" max-h-full">
             <UserActivity activities={userActivities} />
           </div>
-        </div>
+        </div> */}
       </div>
     </Sidebar>
   );

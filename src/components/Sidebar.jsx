@@ -34,7 +34,7 @@ const Sidebar = ({ role, children }) => {
       path: "/admin/grafana-dashboard",
       icon: <LucideDatabase />,
     },
-    { name: "Applications", path: "/admin/applications", icon: <Shapes /> },
+    // { name: "Applications", path: "/admin/applications", icon: <Shapes /> },
     { name: "Users", path: "/admin/users", icon: <Users /> },
     { name: "Requests", path: "/admin/requests", icon: <Ticket /> },
     { name: "Profile", path: "/admin/profile", icon: <User /> },
@@ -46,7 +46,7 @@ const Sidebar = ({ role, children }) => {
       path: "/user/grafana-dashboard",
       icon: <LucideDatabase />,
     },
-    { name: "Applications", path: "/user/dashboard", icon: <Home /> },
+    // { name: "Applications", path: "/user/dashboard", icon: <Home /> },
     // { name: "Help", path: "/user/help", icon: <HelpCircle /> },
     { name: "Profile", path: "/user/profile", icon: <User /> },
   ];

@@ -8,6 +8,11 @@ export const connectorURL = import.meta.env.VITE_CONNECTOR_URL;
  */
 export const grafanaURL = import.meta.env.VITE_GRAFANA_URL;
 
+// /**
+//  * @type {string} Host address for Grafana
+//  */
+// export const grafanaMetricsURL = import.meta.env.VITE_GRAFANA_METRICS_URL;
+
 /**
  * @type {string} Dashboard ID or path for Grafana
  */
