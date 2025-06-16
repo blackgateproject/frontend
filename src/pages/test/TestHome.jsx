@@ -432,9 +432,9 @@ const TestDashboard = () => {
                 onChange={(e) => setProofType(e.target.value)}
                 className="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               >
-                <option value="merkle">merkle</option>
+                {/* <option value="merkle">merkle</option> */}
                 <option value="smt">sparse merkle tree</option>
-                <option value="accumulator">accumulator</option>
+                {/* <option value="accumulator">accumulator</option> */}
               </select>
             </div>
             <button

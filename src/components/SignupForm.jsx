@@ -580,9 +580,9 @@ const SignupForm = ({
                           })
                         }
                       >
-                        <option value="merkle">Merkle</option>
+                        {/* <option value="merkle">Merkle</option> */}
                         <option value="smt">Sparse Merkle Tree</option>
-                        <option value="accumulator">Accumulator</option>
+                        {/* <option value="accumulator">Accumulator</option> */}
                       </select>
                     </div>
                     <div>
