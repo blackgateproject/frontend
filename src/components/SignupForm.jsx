@@ -30,7 +30,7 @@ const SignupForm = ({
     alias: "",
     firmware_version: "",
     device_id: "", // <-- Add this line
-    proof_type: "merkle",
+    proof_type: "smt",
     // publicKey: "",
   });
   const [errors, setErrors] = useState({});

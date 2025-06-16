@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import sampleQR from "../../assets/sample-QR.png";
 import Sidebar from "../../components/Sidebar";
 import { connectorURL } from "../../utils/readEnv";
+import { loadWallet } from "../../utils/contractInteractions";
 
 const AdminProfile = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -190,34 +191,34 @@ const AdminProfile = () => {
     }
   };
 
-  const loadWallet = async () => {
-    const encryptedWallet = localStorage.getItem("encryptedWallet");
-    if (encryptedWallet) {
-      try {
-        setIsLoadingWallet(true);
-        const wallet = await ethers.Wallet.fromEncryptedJson(
-          encryptedWallet,
-          walletPassword
-        );
-        setWallet(wallet);
-        setAccount(wallet.address);
-        console.log("Wallet loaded:", wallet);
-      } catch (err) {
-        console.error("Error in loadWallet:", err);
-        alert("Failed to load wallet.");
-      } finally {
-        setIsLoadingWallet(false);
-        setIsPasswordModalOpen(false);
-      }
-    } else {
-      alert("No wallet found. Please create a new wallet.");
-    }
-  };
+  // const loadWallet = async () => {
+  //   const encryptedWallet = localStorage.getItem("encryptedWallet");
+  //   if (encryptedWallet) {
+  //     try {
+  //       setIsLoadingWallet(true);
+  //       const wallet = await ethers.Wallet.fromEncryptedJson(
+  //         encryptedWallet,
+  //         walletPassword
+  //       );
+  //       setWallet(wallet);
+  //       setAccount(wallet.address);
+  //       console.log("Wallet loaded:", wallet);
+  //     } catch (err) {
+  //       console.error("Error in loadWallet:", err);
+  //       alert("Failed to load wallet.");
+  //     } finally {
+  //       setIsLoadingWallet(false);
+  //       setIsPasswordModalOpen(false);
+  //     }
+  //   } else {
+  //     alert("No wallet found. Please create a new wallet.");
+  //   }
+  // };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (walletExists) {
-      loadWallet();
+      loadWallet(localStorage.getItem("encryptedWallet"), walletPassword);
     } else {
       createWallet();
     }
