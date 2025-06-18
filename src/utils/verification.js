@@ -8,6 +8,9 @@ export const verifyMerkleProof = async (
   navigate,
   wallet,
   agent,
+  smt_proofs, // <-- Accept as argument
+  verifiable_credential, // <-- Accept as argument
+  verifiablePresentation, // <-- Accept as argument
   hasRetried = false // Add a flag to track retry
 ) => {
   setIsLoadingTx(true);
@@ -15,36 +18,37 @@ export const verifyMerkleProof = async (
     // For smt_total_verify_time
     const startTime = performance.now();
 
-    const verifiable_credential = localStorage.getItem("verifiable_credential");
-    console.log("VC exists in localStorage:", !!verifiable_credential);
+    // Use the passed verifiable_credential argument
     if (!verifiable_credential) {
-      throw new Error(
-        "[VC Verify ERR]: verifiable_credential not found in localStorage"
-      );
+      throw new Error("[VC NOT FOUND ERR]: verifiable_credential not provided");
     }
+    console.log("VC provided:", !!verifiable_credential);
 
     // Parse the credential before passing
-    const parsedCredential = JSON.parse(verifiable_credential);
+    const parsedCredential =
+      typeof verifiable_credential === "string"
+        ? JSON.parse(verifiable_credential)
+        : verifiable_credential;
 
     // Run checks on the wallet
     if (!wallet) {
-      throw new Error("[VC Verify ERR]: Wallet is not connected");
+      throw new Error("[WALLET ERR]: Wallet is not connected");
     } else if (wallet) {
       console.log("Wallet is connected:", wallet.address);
       console.log("Wallet Key", wallet.privateKey);
     }
 
-    // Load the smt_proofs from localStorage
-    const smt_proofs = localStorage.getItem("smt_proofs");
-    console.log("SMT Proofs exists in localStorage:", !!smt_proofs);
+    // Use the passed smt_proofs argument
     if (!smt_proofs) {
-      throw new Error("[VC Verify ERR]: smt_proofs not found in localStorage");
+      throw new Error("[SMT NOT FOUND ERR]: smt_proofs not provided");
     }
+    console.log("SMT Proofs provided:", !!smt_proofs);
 
     // Parse the smt_proofs
-    const parsedSmtProofs = JSON.parse(smt_proofs);
+    const parsedSmtProofs =
+      typeof smt_proofs === "string" ? JSON.parse(smt_proofs) : smt_proofs;
     if (!parsedSmtProofs || !parsedSmtProofs.proof || !parsedSmtProofs.key) {
-      throw new Error("[VC Verify ERR]: Invalid smt_proofs structure");
+      throw new Error("[SMT Verify ERR]: Invalid smt_proofs structure");
     }
     console.log("Parsed SMT Proofs:", parsedSmtProofs);
 
@@ -56,26 +60,33 @@ export const verifyMerkleProof = async (
       throw new Error("[VC Verify ERR]: Invalid credential structure");
     }
 
-    // Generate a VP from the given VC
-    const start_time = performance.now();
-    const verifiablePresentation = await createPresentationFromCredential(
-      parsedCredential,
-      agent,
-      wallet,
-      parsedSmtProofs
-    );
-    const vp_gen_time = performance.now() - start_time;
-    console.log(
-      "Verifiable Presentation created:",
-      verifiablePresentation,
-      "in ",
-      vp_gen_time,
-      "ms"
-    );
-    if (!verifiablePresentation) {
-      throw new Error(
-        "[VC Verify ERR]: Failed to create Verifiable Presentation"
+    // Use the passed verifiablePresentation argument or generate if not provided
+    let vp = verifiablePresentation;
+    let vp_gen_time = null;
+    if (!vp) {
+      const start_time = performance.now();
+      vp = await createPresentationFromCredential(
+        parsedCredential,
+        agent,
+        wallet,
+        parsedSmtProofs
       );
+      vp_gen_time = performance.now() - start_time;
+      console.log(
+        "Verifiable Presentation created:",
+        vp,
+        "in ",
+        vp_gen_time,
+        "ms"
+      );
+      if (!vp) {
+        throw new Error(
+          "[VP Create ERR]: Failed to create Verifiable Presentation"
+        );
+      }
+    } else {
+      vp_gen_time = null; // If provided, skip timing
+      console.log("Verifiable Presentation provided:", vp);
     }
 
     // After generating vp_gen_time and before sending the fetch request:
@@ -93,12 +104,12 @@ export const verifyMerkleProof = async (
       smt_local_add_time: timesFromLocalStorage.smt_local_add_time || 0,
       smt_onchain_add_time: timesFromLocalStorage.smt_onchain_add_time || null,
       vc_issuance_time: timesFromLocalStorage.vc_issuance_time || null,
-      vp_gen_time: vp_gen_time || null,
+      vp_gen_time: vp_gen_time,
     };
 
     // Now send partial_times alongside the VP (not inside it)
     const payload = {
-      verifiablePresentation,
+      verifiablePresentation: vp,
       partial_times,
     };
 
@@ -127,11 +138,9 @@ export const verifyMerkleProof = async (
 
       // Update smt_proofs in localStorage if new proofs are returned
       if (data.smt_proofs) {
-        const existingProofs =
-          JSON.parse(localStorage.getItem("smt_proofs")) || [];
         const newProofs = data.smt_proofs;
-
-        if (JSON.stringify(existingProofs) !== JSON.stringify(newProofs)) {
+        // Only update if the passed-in proofs do NOT match the returned ones
+        if (JSON.stringify(smt_proofs) !== JSON.stringify(newProofs)) {
           console.warn("SMT proofs do not match. Updating localStorage.");
           localStorage.setItem("smt_proofs", JSON.stringify(newProofs));
         } else {
@@ -175,16 +184,17 @@ export const verifyMerkleProof = async (
           (data.results.validOffchain && data.results.validOnchain))
       ) {
         try {
-          const verifiable_credential = localStorage.getItem(
-            "verifiable_credential"
-          );
+          // Use the passed verifiable_credential argument
           if (!verifiable_credential) {
             throw new Error(
-              "[VC Verify ERR]: verifiable_credential not found in localStorage"
+              "[VC Verify ERR]: verifiable_credential not provided"
             );
           }
 
-          const parsedCredential = JSON.parse(verifiable_credential);
+          const parsedCredential =
+            typeof verifiable_credential === "string"
+              ? JSON.parse(verifiable_credential)
+              : verifiable_credential;
           if (
             !parsedCredential.credential ||
             !parsedCredential.credential.credentialSubject ||
@@ -231,6 +241,7 @@ export const verifyMerkleProof = async (
       if (data.smt_proofs) {
         // Retry only if not already retried
         if (!hasRetried) {
+          // Pass the new smt_proofs to the retry
           const result = await verifyMerkleProof(
             setIsLoadingTx,
             setCurrentStep,
@@ -239,16 +250,16 @@ export const verifyMerkleProof = async (
             navigate,
             wallet,
             agent,
+            data.smt_proofs, // Pass new proofs
+            verifiable_credential, // Pass VC again
+            verifiablePresentation, // Pass VP again (or null to regenerate)
             true // Set flag to true on retry
           );
           console.log("Update proofs available:", data.smt_proofs);
 
-          // Compare the recieved smt_proofs with the existing ones in localStorage
-          const existingProofs =
-            JSON.parse(localStorage.getItem("smt_proofs")) || [];
+          // Compare the received smt_proofs with the returned ones
           const newProofs = data.smt_proofs;
-
-          if (JSON.stringify(existingProofs) !== JSON.stringify(newProofs)) {
+          if (JSON.stringify(smt_proofs) !== JSON.stringify(newProofs)) {
             console.warn("SMT proofs do not match. Updating localStorage.");
             localStorage.setItem("smt_proofs", JSON.stringify(newProofs));
           } else {
@@ -349,4 +360,3 @@ export const signChallenge = async (wallet, challenge, navigate) => {
   }
 };
 
-// export const updateMetrics = async()-> {

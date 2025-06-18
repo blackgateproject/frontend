@@ -200,15 +200,38 @@ const TestDashboard = () => {
       const user = selectedUsers[i];
       console.log(`Verifying user ${i + 1}:`, user);
 
-      // Save this user's VC and SMT proofs to localStorage for verifyMerkleProof
-      if (user.verifiable_credential) {
-        localStorage.setItem(
-          "verifiable_credential",
-          JSON.stringify(user.verifiable_credential)
+      // Get VC, SMT proofs, and generate VP for this user
+      const vc = user.verifiable_credential;
+      const smtProofs = user.smt_proofs;
+      const wallet = user.wallet;
+
+      let vp = null;
+      try {
+        // If you have a VP stored per user, use it; otherwise generate it here
+        if (user.verifiable_presentation) {
+          vp = user.verifiable_presentation;
+        } else if (vc && wallet) {
+          vp = await performCreatePresentation(vc, wallet);
+        }
+      } catch (err) {
+        console.error("Failed to generate VP for user:", err);
+        setUsers((prevUsers) =>
+          prevUsers.map((u) => {
+            if (u.did === user.did) {
+              return {
+                ...u,
+                verification: {
+                  status: "failed",
+                  step: "VP Generation",
+                  error: err.message,
+                },
+              };
+            }
+            return u;
+          })
         );
-      }
-      if (user.smt_proofs) {
-        localStorage.setItem("smt_proofs", JSON.stringify(user.smt_proofs));
+        setFailedVerifications((prevCount) => prevCount + 1);
+        continue;
       }
 
       try {
@@ -218,8 +241,11 @@ const TestDashboard = () => {
           setErrorMessage,
           setIsErrorModalOpen,
           () => {}, // navigate, you can replace with your navigation logic
-          user.wallet,
+          wallet,
           agent,
+          smtProofs,
+          vc,
+          vp,
           false
         );
 
