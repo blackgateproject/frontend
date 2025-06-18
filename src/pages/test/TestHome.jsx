@@ -245,7 +245,6 @@ const TestDashboard = () => {
           agent,
           smtProofs,
           vc,
-          vp,
           false
         );
 
