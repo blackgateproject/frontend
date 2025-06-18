@@ -18,7 +18,9 @@ import UserDashboard from "./pages/user/UserDashboard";
 import UserHelp from "./pages/user/UserHelp";
 import UserProfile from "./pages/user/UserProfile";
 
-import TestDashbaord from "./pages/test/TestHome";
+import TestDashbaord from "./pages/test/TestParallel";
+import TestParallel from "./pages/test/TestSerial";
+import TestSerial from "./pages/test/TestSerial";
 
 function App() {
   return (
@@ -72,8 +74,9 @@ function App() {
         </Route>
 
         {/* Test Routes */}
-        <Route path="/test" element={<TestDashbaord role={"test"} />}>
-          <Route path="home" element={<TestDashbaord role={"test"} />} />
+        <Route path="/test">
+          <Route path="serial" element={<TestSerial role={"test"} />} />
+          <Route path="parallel" element={<TestParallel role={"test"} />} />
         </Route>
       </Routes>
     </Router>
