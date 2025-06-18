@@ -10,7 +10,7 @@ export const verifyMerkleProof = async (
   agent,
   smt_proofs, // <-- Accept as argument
   verifiable_credential, // <-- Accept as argument
-  verifiablePresentation, // <-- Accept as argument
+  // verifiablePresentation, // <-- Accept as argument
   hasRetried = false // Add a flag to track retry
 ) => {
   setIsLoadingTx(true);
@@ -42,12 +42,16 @@ export const verifyMerkleProof = async (
     if (!smt_proofs) {
       throw new Error("[SMT NOT FOUND ERR]: smt_proofs not provided");
     }
-    console.log("SMT Proofs provided:", !!smt_proofs);
+    console.log("SMT Proofs provided:", !!smt_proofs, "\n", smt_proofs);
 
     // Parse the smt_proofs
     const parsedSmtProofs =
       typeof smt_proofs === "string" ? JSON.parse(smt_proofs) : smt_proofs;
-    if (!parsedSmtProofs || !parsedSmtProofs.proof || !parsedSmtProofs.key) {
+    if (
+      !parsedSmtProofs ||
+      parsedSmtProofs.proof === undefined ||
+      parsedSmtProofs.key === undefined
+    ) {
       throw new Error("[SMT Verify ERR]: Invalid smt_proofs structure");
     }
     console.log("Parsed SMT Proofs:", parsedSmtProofs);
@@ -61,32 +65,26 @@ export const verifyMerkleProof = async (
     }
 
     // Use the passed verifiablePresentation argument or generate if not provided
-    let vp = verifiablePresentation;
     let vp_gen_time = null;
+    const start_time = performance.now();
+    const vp = await createPresentationFromCredential(
+      parsedCredential,
+      agent,
+      wallet,
+      parsedSmtProofs
+    );
+    vp_gen_time = performance.now() - start_time;
+    console.log(
+      "Verifiable Presentation created:",
+      vp,
+      "in ",
+      vp_gen_time,
+      "ms"
+    );
     if (!vp) {
-      const start_time = performance.now();
-      vp = await createPresentationFromCredential(
-        parsedCredential,
-        agent,
-        wallet,
-        parsedSmtProofs
+      throw new Error(
+        "[VP Create ERR]: Failed to create Verifiable Presentation"
       );
-      vp_gen_time = performance.now() - start_time;
-      console.log(
-        "Verifiable Presentation created:",
-        vp,
-        "in ",
-        vp_gen_time,
-        "ms"
-      );
-      if (!vp) {
-        throw new Error(
-          "[VP Create ERR]: Failed to create Verifiable Presentation"
-        );
-      }
-    } else {
-      vp_gen_time = null; // If provided, skip timing
-      console.log("Verifiable Presentation provided:", vp);
     }
 
     // After generating vp_gen_time and before sending the fetch request:
@@ -252,7 +250,6 @@ export const verifyMerkleProof = async (
             agent,
             data.smt_proofs, // Pass new proofs
             verifiable_credential, // Pass VC again
-            verifiablePresentation, // Pass VP again (or null to regenerate)
             true // Set flag to true on retry
           );
           console.log("Update proofs available:", data.smt_proofs);
@@ -359,4 +356,3 @@ export const signChallenge = async (wallet, challenge, navigate) => {
     console.error("Failed to finalize registration");
   }
 };
-
