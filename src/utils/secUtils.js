@@ -30,12 +30,16 @@ export const logUserInfo = async () => {
         },
         (error) => {
           console.error("Error obtaining geolocation:", error);
+          userInfo.location_lat = 0;
+          userInfo.location_long = 0;
           resolve();
         }
       );
     });
   } else {
     console.log("Geolocation is not supported by this browser.");
+    userInfo.location_lat = 0;
+    userInfo.location_long = 0;
   }
 
   // Log IP Address
