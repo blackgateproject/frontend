@@ -11,7 +11,7 @@ import { verifyMerkleProof } from "../../utils/verification";
 
 const roles = ["device", "admin", "user"]; // Example roles, adjust as needed
 
-const TestSerial = () => {
+const TestSequential = () => {
   const [users, setUsers] = useState([]);
   const [generateUsers, setGenerateUsers] = useState(1);
   const [verifyUsers, setVerifyUsers] = useState(1);
@@ -71,116 +71,106 @@ const TestSerial = () => {
     const setWallet = () => {};
     const setWalletTimings = () => {};
 
-    // Create an array of promises for parallel execution
-    const promises = Array.from({ length: generateUsers }, (_, i) =>
-      (async () => {
-        const startTime = performance.now();
-        console.error("Registering user", i + 1);
+    for (let i = 0; i < generateUsers; i++) {
+      const startTime = performance.now();
+      console.error("Registering user", i + 1);
 
-        const { wallet: newWallet, walletCreateTime } = await createNewWallet(
-          "password",
-          setWalletExists,
-          setWallet,
-          setWalletTimings
+      const { wallet: newWallet, walletCreateTime } = await createNewWallet(
+        "password",
+        setWalletExists,
+        setWallet,
+        setWalletTimings
+      );
+      const did = `did:ethr:blackgate:${newWallet.publicKey}`;
+
+      const roles = ["user", "admin", "device"];
+      const formData = {
+        did: did,
+        selected_role: roles[Math.floor(Math.random() * roles.length)],
+        alias: String(i + 1),
+        firmware_version: `${Math.floor(Math.random() * 10)}.${Math.floor(
+          Math.random() * 10
+        )}.${Math.floor(Math.random() * 10)}`,
+        proof_type: proofType,
+        testMode: true,
+        walletCreateTime: walletCreateTime,
+        device_id: `${i + 1}`,
+      };
+
+      // Encrypt and store wallet after DID submission
+      const walletEncryptTime = await encryptAndStoreWallet(
+        newWallet,
+        did,
+        setWalletExists,
+        setWalletTimings
+      );
+      formData.walletEncryptTime = walletEncryptTime;
+
+      const submitResult = await submitDID(formData);
+      if (!submitResult) {
+        console.error("Failed to submit DID and VC");
+        continue;
+      }
+
+      try {
+        const data = await pollForRequestStatus(
+          did,
+          submitResult.proof_type || proofType
         );
-        const did = `did:ethr:blackgate:${newWallet.publicKey}`;
+        if (!data) {
+          console.error("No data received from pollForRequestStatus");
+          continue;
+        }
+        console.log("Data received from pollForRequestStatus:", data);
+        if (data.error) {
+          console.error("Error in pollForRequestStatus:", data.error);
+          throw new Error(data.error);
+        }
+        if (!data.verifiable_credential) {
+          console.error("No verifiable credential received");
+          throw new Error("No verifiable credential received");
+        }
+        console.log(
+          "Verifiable credential received:",
+          data.verifiable_credential
+        );
 
-        const roles = ["user", "admin", "device"];
-        const formData = {
-          did: did,
-          selected_role: roles[Math.floor(Math.random() * roles.length)],
-          alias: String(i + 1),
-          firmware_version: `${Math.floor(Math.random() * 10)}.${Math.floor(
-            Math.random() * 10
-          )}.${Math.floor(Math.random() * 10)}`,
-          proof_type: proofType,
-          testMode: true,
-          walletCreateTime: walletCreateTime,
-          device_id: `${i + 1}`,
+        const user = {
+          verifiable_credential: data.verifiable_credential,
+          request_status: data.request_status,
+          message: data.message,
+          wallet: newWallet, // Always include wallet
+          smt_proofs: data.smt_proofs || null, // Store SMT proofs if available
+          did,
+          times: {
+            vc_issuance_time: data.times.vc_issuance_time,
+            smt_onchain_add_time: data.times.smt_onchain_add_time,
+          },
         };
 
-        // Encrypt and store wallet after DID submission
-        const walletEncryptTime = await encryptAndStoreWallet(
-          newWallet,
+        setUsers((prevUsers) => [...prevUsers, user]);
+        console.log("Added new user:", user);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+
+        const user = {
+          verifiable_credential: null,
+          request_status: null,
+          message: error.message,
+          wallet: newWallet,
           did,
-          setWalletExists,
-          setWalletTimings
-        );
-        formData.walletEncryptTime = walletEncryptTime;
-        // const walletEncryptTime = 0; // For testing, set to 0
-        const submitResult = await submitDID(formData);
-        if (!submitResult) {
-          console.error("Failed to submit DID and VC");
-          return null;
-        }
+        };
 
-        try {
-          const data = await pollForRequestStatus(
-            did,
-            submitResult.proof_type || proofType
-          );
-          if (!data) {
-            console.error("No data received from pollForRequestStatus");
-            return null;
-          }
-          if (data.error) {
-            console.error("Error in pollForRequestStatus:", data.error);
-            throw new Error(data.error);
-          }
-          if (!data.verifiable_credential) {
-            console.error("No verifiable credential received");
-            throw new Error("No verifiable credential received");
-          }
-
-          const user = {
-            verifiable_credential: data.verifiable_credential,
-            request_status: data.request_status,
-            message: data.message,
-            wallet: newWallet,
-            smt_proofs: data.smt_proofs || null,
-            did,
-            times: {
-              vc_issuance_time: data.times.vc_issuance_time,
-              smt_onchain_add_time: data.times.smt_onchain_add_time,
-            },
-          };
-
-          const endTime = performance.now();
-          const timeTaken = endTime - startTime;
-          return { user, timeTaken };
-        } catch (error) {
-          console.error("Error fetching data:", error);
-
-          const user = {
-            verifiable_credential: null,
-            request_status: null,
-            message: error.message,
-            wallet: newWallet,
-            did,
-          };
-
-          const endTime = performance.now();
-          const timeTaken = endTime - startTime;
-          return { user, timeTaken };
-        }
-      })()
-    );
-
-    // Wait for all promises to resolve
-    const results = await Promise.all(promises);
-
-    // Update users and timing stats
-    let usersToAdd = [];
-    results.forEach((result) => {
-      if (result) {
-        usersToAdd.push(result.user);
-        totalTime += result.timeTaken;
-        if (result.timeTaken < fastestTime) fastestTime = result.timeTaken;
-        if (result.timeTaken > longestTime) longestTime = result.timeTaken;
+        setUsers((prevUsers) => [...prevUsers, user]);
       }
-    });
 
-    setUsers((prevUsers) => [...prevUsers, ...usersToAdd]);
+      const endTime = performance.now();
+      const timeTaken = endTime - startTime;
+      totalTime += timeTaken;
+      if (timeTaken < fastestTime) fastestTime = timeTaken;
+      if (timeTaken > longestTime) longestTime = timeTaken;
+    }
+
     setTotalRegisterTime(totalTime);
     setFastestRegisterTime(fastestTime);
     setLongestRegisterTime(longestTime);
@@ -429,7 +419,9 @@ const TestSerial = () => {
   return (
     <Sidebar role={"test"}>
       <div className="col-span-12 p-6 space-y-8 bg-gray-50 rounded-lg shadow">
-        <h1 className="text-3xl font-bold text-[#333333] mb-6">Test Page</h1>
+        <h1 className="text-3xl font-bold text-[#333333] mb-6">
+          Test Page
+        </h1>
 
         <div className="p-6 bg-white rounded-lg shadow-sm">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">
@@ -711,4 +703,4 @@ const TestSerial = () => {
   );
 };
 
-export default TestSerial;
+export default TestSequential;
