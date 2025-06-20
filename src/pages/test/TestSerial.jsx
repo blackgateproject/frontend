@@ -107,7 +107,7 @@ const TestSerial = () => {
           setWalletTimings
         );
         formData.walletEncryptTime = walletEncryptTime;
-
+        // const walletEncryptTime = 0; // For testing, set to 0
         const submitResult = await submitDID(formData);
         if (!submitResult) {
           console.error("Failed to submit DID and VC");
