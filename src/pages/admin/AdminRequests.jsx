@@ -13,8 +13,7 @@ import Modal from "../../components/Modal";
 import Sidebar from "../../components/Sidebar";
 import { connectorURL } from "../../utils/readEnv";
 
-
-const AUTO_REFRESH_INTERVAL = 5000; // 5 seconds - adjust as needed
+const AUTO_REFRESH_INTERVAL = 10000; // 10 seconds - adjust as needed
 
 const Requests = () => {
   // Preprocess the data to generat
@@ -28,10 +27,15 @@ const Requests = () => {
   const [loading, setLoading] = useState(true);
   const [selected_role, setselected_role] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("pending");
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(false); // default to false
   const [confirmModal, setConfirmModal] = useState({
     open: false,
     type: "",
+    requestId: null,
+  });
+  // Add this new state for revoke modal
+  const [revokeModal, setRevokeModal] = useState({
+    open: false,
     requestId: null,
   });
   const [detailsModal, setDetailsModal] = useState({
@@ -43,6 +47,7 @@ const Requests = () => {
     message: "",
     type: "", // success, error
   });
+  const [selectedTab, setSelectedTab] = useState("all"); // new: all, pending, approved, rejected, revoked
 
   useEffect(() => {
     fetchrequests();
@@ -83,6 +88,7 @@ const Requests = () => {
           firmwareVersion: request.form_data.firmware_version,
           networkInfo: request.network_info,
           isVCSent: request.isVCSent,
+          isRevoked: request.isRevoked, // <-- FIXED: add this line
           verifiableCred: request.verifiable_cred,
           createdAt: new Date(request.created_at),
           updatedAt: request.updated_at ? new Date(request.updated_at) : null,
@@ -238,7 +244,21 @@ const Requests = () => {
   const filteredRequests = requests
     .filter((request) => {
       // Filter by search query
-      return request.did_str.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!request.did_str.toLowerCase().includes(searchQuery.toLowerCase()))
+        return false;
+      // Filter by role
+      if (selected_role !== "all" && request.role !== selected_role)
+        return false;
+      // Filter by status tab
+      if (selectedTab === "pending")
+        return request.status === "pending" && !request.isRevoked;
+      if (selectedTab === "approved")
+        return request.status === "approved" && !request.isRevoked;
+      if (selectedTab === "rejected")
+        return request.status === "rejected" && !request.isRevoked;
+      if (selectedTab === "revoked") return !!request.isRevoked;
+      // For "all" tab, show everything (including revoked)
+      return true;
     })
     .sort((a, b) => {
       // Sort by date
@@ -261,6 +281,79 @@ const Requests = () => {
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
+
+  // Add this handler for revoke
+  const handleRevoke = async (requestId) => {
+    setRevokeModal({ open: false, requestId: null });
+
+    // Find the request object by ID
+    const request = requests.find((r) => r.id === requestId);
+    if (!request) {
+      showNotification("Request not found.", "error");
+      return;
+    }
+
+    // Extract did_str
+    const did_str = request.did_str;
+
+    // Parse caller_role from verifiableCred.credentialSubject.selected_role
+    let caller_role = "admin"; // fallback
+    try {
+      if (
+        request.verifiableCred &&
+        request.verifiableCred.credentialSubject &&
+        request.verifiableCred.credentialSubject.selected_role
+      ) {
+        caller_role = request.verifiableCred.credentialSubject.selected_role;
+      }
+    } catch (e) {
+      // fallback to admin
+      caller_role = "admin";
+    }
+
+    // Prepare payload
+    const payload = {
+      did_str,
+      caller_role,
+    };
+
+    setLoading(true);
+    try {
+      const accessToken = sessionStorage.getItem("access_token") || "";
+      const response = await fetch(
+        `${connectorURL}/admin/v1/revoke/${did_str}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (response.status === 401) {
+        window.location.href = "/";
+        return;
+      }
+      const data = await response.json();
+      if (!response.ok) {
+        showNotification(data.error || "Failed to revoke request.", "error");
+        return;
+      }
+      showNotification(
+        data.message || "Request revoked successfully.",
+        "success"
+      );
+      await fetchrequests(true);
+    } catch (error) {
+      showNotification("Failed to revoke request. Please try again.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Add revoked to stats
+  const revokedCount = requests.filter((r) => r.isRevoked).length;
 
   return (
     <Sidebar role={selected_role === "all" ? "admin" : selected_role}>
@@ -320,6 +413,20 @@ const Requests = () => {
               : handleReject(confirmModal.requestId)
           }
           onClose={closeModal}
+        />
+      )}
+
+      {/* Revoke Confirmation Modal */}
+      {revokeModal.open && (
+        <Modal
+          id="revoke-modal"
+          icon={<XCircle className="size-8 text-red-500" />}
+          titleText="Confirm Revoke"
+          contentText="Are you sure you want to revoke this request? This action cannot be undone."
+          actionButtonText="Revoke"
+          actionButtonClass="bg-red-600 hover:bg-red-700 text-white"
+          onSubmit={() => handleRevoke(revokeModal.requestId)}
+          onClose={() => setRevokeModal({ open: false, requestId: null })}
         />
       )}
 
@@ -546,6 +653,7 @@ const Requests = () => {
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
+                <option value="rejected">Revoked</option>
               </select>
             </div>
 
@@ -594,8 +702,55 @@ const Requests = () => {
           </div>
         </div>
 
+        {/* Tabs for request status */}
+        <div className="flex gap-2 mb-6">
+          <button
+            className={`tab tab-bordered ${
+              selectedTab === "all" ? "tab-active" : ""
+            }`}
+            onClick={() => setSelectedTab("all")}
+          >
+            All
+          </button>
+          <button
+            className={`tab tab-bordered ${
+              selectedTab === "pending" ? "tab-active" : ""
+            }`}
+            onClick={() => setSelectedTab("pending")}
+          >
+            Pending
+          </button>
+          <button
+            className={`tab tab-bordered ${
+              selectedTab === "approved" ? "tab-active" : ""
+            }`}
+            onClick={() => setSelectedTab("approved")}
+          >
+            Approved
+          </button>
+          <button
+            className={`tab tab-bordered ${
+              selectedTab === "rejected" ? "tab-active" : ""
+            }`}
+            onClick={() => setSelectedTab("rejected")}
+          >
+            Rejected
+          </button>
+          <button
+            className={`tab tab-bordered ${
+              selectedTab === "revoked" ? "tab-active" : ""
+            }`}
+            onClick={() => setSelectedTab("revoked")}
+          >
+            Revoked
+            <span className="ml-2 badge badge-outline border-red-500 text-red-600">
+              {revokedCount}
+            </span>
+          </button>
+        </div>
+
         {/* Stats summary - optional */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           <div className="bg-base-100 rounded-2xl shadow-sm p-4">
             <div className="flex justify-between">
               <div>
@@ -660,6 +815,20 @@ const Requests = () => {
               </div>
             </div>
           </div>
+
+          <div className="bg-white border-2 border-red-500 rounded-2xl shadow-sm p-4">
+            <div className="flex justify-between">
+              <div>
+                <p className="text-sm text-red-500">Revoked</p>
+                <p className="text-2xl font-bold text-red-500">
+                  {revokedCount}
+                </p>
+              </div>
+              <div className="bg-red-100 h-12 w-12 rounded-full flex items-center justify-center">
+                <XCircle className="h-6 w-6 text-red-500" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Requests Section */}
@@ -677,7 +846,11 @@ const Requests = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
                 whileHover={{ scale: 1.005 }}
-                className="bg-base-100 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 p-6"
+                className={`rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 p-6 ${
+                  request.isRevoked
+                    ? "bg-white border-2 border-red-500"
+                    : "bg-base-100"
+                }`}
               >
                 {/* Request Header */}
                 <div className="flex flex-col md:flex-row justify-between md:items-center mb-4 pb-4 border-b border-gray-200">
@@ -712,6 +885,11 @@ const Requests = () => {
                     >
                       {request.status}
                     </div>
+                    {request.isRevoked && (
+                      <div className="badge border border-red-500 text-red-600 bg-white text-xs px-2 py-1 capitalize">
+                        Revoked
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -763,7 +941,7 @@ const Requests = () => {
                     View Details
                   </button>
 
-                  {request.status === "pending" && (
+                  {!request.isRevoked && request.status === "pending" && (
                     <>
                       <button
                         className="btn bg-primary/90 hover:bg-primary text-white rounded-xl shadow-sm hover:shadow transition-all duration-200"
@@ -779,14 +957,27 @@ const Requests = () => {
                       </button>
                     </>
                   )}
-
-                  {request.status === "approved" && (
-                    <span className="text-green-600 flex items-center">
-                      <CheckCircle className="h-5 w-5 mr-1" /> Approved
+                  {!request.isRevoked && request.status === "approved" && (
+                    <>
+                      <span className="text-green-600 flex items-center">
+                        <CheckCircle className="h-5 w-5 mr-1" /> Approved
+                      </span>
+                      <button
+                        className="btn bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-sm hover:shadow transition-all duration-200"
+                        onClick={() =>
+                          setRevokeModal({ open: true, requestId: request.id })
+                        }
+                      >
+                        Revoke
+                      </button>
+                    </>
+                  )}
+                  {request.isRevoked && (
+                    <span className="text-red-600 flex items-center font-semibold">
+                      <XCircle className="h-5 w-5 mr-1" /> Revoked
                     </span>
                   )}
-
-                  {request.status === "rejected" && (
+                  {!request.isRevoked && request.status === "rejected" && (
                     <span className="text-red-600 flex items-center">
                       <XCircle className="h-5 w-5 mr-1" /> Rejected
                     </span>
