@@ -22,14 +22,18 @@ export const encryptAndStoreWallet = async (
   setWalletTimings
 ) => {
   try {
-    const encryptStart = performance.now();
-    const encryptedWallet = await wallet.encrypt(walletPassword);
-    const walletEncryptTime = performance.now() - encryptStart;
+    // const encryptStart = performance.now();
+    // const encryptedWallet = await wallet.encrypt(walletPassword);
+    // const walletEncryptTime = performance.now() - encryptStart;
+    const walletEncryptTime = -1;
+    console.warn(
+      "Wallet encryption is disabled for now. Please enable it in the future."
+    );
     setWalletTimings((prev) => ({
       ...prev,
       walletEncryptTime,
     }));
-    localStorage.setItem("encryptedWallet", encryptedWallet);
+    localStorage.setItem("encryptedWallet", JSON.stringify(wallet));
     setWalletExists(true);
     console.info("Wallet Encrypt Time (walletEncryptTime):", walletEncryptTime);
     return walletEncryptTime;
@@ -48,6 +52,7 @@ export const createNewWallet = async (
   console.log("Creating new wallet with password:", walletPassword);
   const startTime = performance.now();
   const newWallet = ethers.Wallet.createRandom();
+  localStorage.setItem("eth_privatekey", newWallet.privateKey);
   const walletCreateTime = performance.now() - startTime;
 
   setWallet(newWallet);
@@ -71,10 +76,15 @@ export const loadWallet = async (
     try {
       console.log("Loading wallet with password:", walletPassword);
       setIsLoadingWallet(true);
-      const loadedWallet = await ethers.Wallet.fromEncryptedJson(
-        encryptedWallet,
-        walletPassword
-      );
+      // const loadedWallet = await ethers.Wallet.fromEncryptedJson(
+      //   encryptedWallet,
+      //   walletPassword
+      // );
+      const storedKey = localStorage.getItem("eth_privatekey");
+      if (!storedKey) {
+        throw new Error("No private key found in local storage.");
+      }
+      const loadedWallet = new ethers.Wallet(storedKey);
       setWallet(loadedWallet);
       console.log("Wallet loaded:", loadedWallet);
       setIsWalletLoaded(true);

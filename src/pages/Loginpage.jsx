@@ -175,6 +175,18 @@ const LoginPage = () => {
       setWalletPassword("");
       // Now call verifyMerkleProof with unlocked wallet
       console.warn("Wallet unlocked successfully:", unlockedWallet);
+
+      // verifyMerkleProof expects smt_proofs and verifiable_credential to be in localStorage
+      const smtProofs = localStorage.getItem("smt_proofs");
+      const verifiableCredential = localStorage.getItem(
+        "verifiable_credential"
+      );
+      if (!smtProofs || !verifiableCredential) {
+        setErrorMessage(
+          "SMT proofs or verifiable credential not found in local storage."
+        );
+        setIsErrorModalOpen(true);
+      }
       verifyMerkleProof(
         setIsLoadingTx,
         setCurrentStep,
@@ -182,7 +194,10 @@ const LoginPage = () => {
         setIsErrorModalOpen,
         navigate,
         unlockedWallet,
-        agent
+        agent,
+        smtProofs,
+        verifiableCredential,
+        false
       );
     } catch (error) {
       setWalletUnlockError(
