@@ -131,6 +131,28 @@ export const verifyMerkleProof = async (
       throw new Error("Invalid server response");
     }
 
+    // --- Revoked check ---
+    if (
+      (data && data.request_status === "revoked") ||
+      (data && data.error && data.error.toLowerCase().includes("revoked"))
+    ) {
+      setCurrentStep(
+        data.error ||
+          "This DID has been revoked and cannot be verified or used."
+      );
+      setErrorMessage(
+        data.error ||
+          "This DID has been revoked and cannot be verified or used."
+      );
+      setIsErrorModalOpen(true);
+      if (document.getElementById("error-modal")) {
+        document.getElementById("error-modal").showModal();
+      }
+      setIsLoadingTx(false);
+      return;
+    }
+    // --- End revoked check ---
+
     if (response.ok) {
       console.log("Got response", data);
 
