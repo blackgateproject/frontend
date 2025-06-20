@@ -177,13 +177,13 @@ const SignupForm = ({
         
         setFormData(mergedData);
 
-        // // Ensure wallet is encrypted & stored after sending to server
-        // await encryptAndStoreWallet(
-        //   newWallet,
-        //   walletPassword,
-        //   setWalletExists,
-        //   setWalletTimings
-        // );
+        // Ensure wallet is encrypted & stored after sending to server
+        await encryptAndStoreWallet(
+          newWallet,
+          walletPassword,
+          setWalletExists,
+          setWalletTimings
+        );
 
         setShowWalletPasswordModal(false);
       } catch (error) {
