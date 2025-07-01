@@ -7,7 +7,7 @@ import {
   encryptAndStoreWallet,
 } from "../../utils/contractInteractions";
 import { pollForRequestStatus, submitDID } from "../../utils/registrations";
-import { verifyMerkleProof } from "../../utils/verification";
+import { performUserVerification } from "../../utils/userVerification";
 
 const roles = ["device", "admin", "user"]; // Example roles, adjust as needed
 
@@ -188,132 +188,37 @@ const TestParallel = () => {
 
   const handleVerifySubmit = async (e) => {
     e.preventDefault();
-    console.log(`Verifying ${verifyUsers} users`);
 
-    setSuccessfulVerifications(0);
-    setFailedVerifications(0);
+    // Use the shared verification logic from userVerification.js
+    const veramoOperations = { performCreatePresentation };
+    const stateSetters = {
+      setSuccessfulVerifications,
+      setFailedVerifications,
+      setUsers,
+      setIsLoadingTx,
+      setCurrentStep,
+      setErrorMessage,
+      setIsErrorModalOpen,
+    };
 
-    let totalTime = 0;
-    let fastestTime = Infinity;
-    let longestTime = 0;
+    try {
+      const result = await performUserVerification(
+        users,
+        verifyUsers,
+        veramoOperations,
+        agent,
+        stateSetters
+      );
 
-    const usersToVerify = Math.min(verifyUsers, users.length);
-    const selectedUsers = [];
-
-    for (let i = 0; i < usersToVerify; i++) {
-      const randomIndex = Math.floor(Math.random() * users.length);
-      selectedUsers.push(users[randomIndex]);
+      // Update timing states with results from shared verification logic
+      setTotalVerifyTime(result.totalTime);
+      setFastestVerifyTime(result.fastestTime);
+      setLongestVerifyTime(result.longestTime);
+    } catch (error) {
+      console.error("Verification failed:", error);
+      setErrorMessage(error.message);
+      setIsErrorModalOpen(true);
     }
-
-    for (let i = 0; i < selectedUsers.length; i++) {
-      const startTime = performance.now();
-      const user = selectedUsers[i];
-      console.log(`Verifying user ${i + 1}:`, user);
-
-      // Get VC, SMT proofs, and generate VP for this user
-      const vc = user.verifiable_credential;
-      const smtProofs = user.smt_proofs;
-      const wallet = user.wallet;
-
-      let vp = null;
-      try {
-        // If you have a VP stored per user, use it; otherwise generate it here
-        if (user.verifiable_presentation) {
-          vp = user.verifiable_presentation;
-        } else if (vc && wallet) {
-          vp = await performCreatePresentation(vc, wallet);
-        }
-      } catch (err) {
-        console.error("Failed to generate VP for user:", err);
-        setUsers((prevUsers) =>
-          prevUsers.map((u) => {
-            if (u.did === user.did) {
-              return {
-                ...u,
-                verification: {
-                  status: "failed",
-                  step: "VP Generation",
-                  error: err.message,
-                },
-              };
-            }
-            return u;
-          })
-        );
-        setFailedVerifications((prevCount) => prevCount + 1);
-        continue;
-      }
-
-      try {
-        await verifyMerkleProof(
-          setIsLoadingTx,
-          setCurrentStep,
-          setErrorMessage,
-          setIsErrorModalOpen,
-          () => {}, // navigate, you can replace with your navigation logic
-          wallet,
-          agent,
-          smtProofs,
-          vc,
-          false
-        );
-
-        setUsers((prevUsers) =>
-          prevUsers.map((u) => {
-            if (u.did === user.did) {
-              return {
-                ...u,
-                verification: {
-                  status: "success",
-                  step: currentStep,
-                  error: null,
-                },
-              };
-            }
-            return u;
-          })
-        );
-        setSuccessfulVerifications((prevCount) => prevCount + 1);
-      } catch (error) {
-        setUsers((prevUsers) =>
-          prevUsers.map((u) => {
-            if (u.did === user.did) {
-              return {
-                ...u,
-                verification: {
-                  status: "failed",
-                  step: currentStep,
-                  error: errorMessage || error.message,
-                },
-              };
-            }
-            return u;
-          })
-        );
-        setFailedVerifications((prevCount) => prevCount + 1);
-      }
-
-      const endTime = performance.now();
-      const timeTaken = endTime - startTime;
-      totalTime += timeTaken;
-      if (timeTaken < fastestTime) fastestTime = timeTaken;
-      if (timeTaken > longestTime) longestTime = timeTaken;
-    }
-
-    setTotalVerifyTime(totalTime);
-    setFastestVerifyTime(fastestTime);
-    setLongestVerifyTime(longestTime);
-
-    // Log all users with their respective SMT proofs after verification
-    console.log(
-      "All users:",
-      users.map((u) => ({
-        did: u.did,
-        smt_proofs: u.smt_proofs,
-        alias: u.verifiable_credential?.credential?.credentialSubject?.alias,
-        verification: u.verification,
-      }))
-    );
   };
 
   const handleStartInterval = () => {
@@ -429,7 +334,9 @@ const TestParallel = () => {
   return (
     <Sidebar role={"test"}>
       <div className="col-span-12 p-6 space-y-8 bg-gray-50 rounded-lg shadow">
-        <h1 className="text-3xl font-bold text-[#333333] mb-6">Test Page (Parallel)</h1>
+        <h1 className="text-3xl font-bold text-[#333333] mb-6">
+          Test Page (Parallel)
+        </h1>
 
         <div className="p-6 bg-white rounded-lg shadow-sm">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">
